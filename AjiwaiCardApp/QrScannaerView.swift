@@ -1,0 +1,199 @@
+import SwiftUI
+import CodeScanner
+
+struct ScannerView: View {
+    @Binding var isPresentingScanner: Bool
+    @State private var scannedCode: String = ""
+    @State private var isScanning: Bool = false
+    @State private var sheetURL: String = ""
+    @State private var sheetID: String = ""
+    @StateObject private var spreadSheetManager = SpreadSheetManager()
+    @State private var selection: String = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "M月"
+        dateFormatter.locale = Locale(identifier: "ja_JP")
+        return dateFormatter.string(from: Date())
+    }()
+    @Binding var monthlyMenu: [String:[String]]
+    @Binding var monthlyColumnTitle: [String:String]
+    @Binding var monthlyColumnCaption: [String:String]
+    @State private var keyOfDate: [String] = []
+    @State private var valueOfDate: [[String]] = []
+    @State private var titleOfColumn: [String] = []
+    @State private var captionOfColumn: [String] = []
+    @State private var showQRscanResults:Bool = false
+    @State private var QRscanResults:Bool = false
+    
+    func fetchData() {
+        sheetID = extractSheetID(from: sheetURL)
+        Task {
+            do {
+                // Fetch keyOfDate
+                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "A2:A32")
+                keyOfDate = spreadSheetManager.spreadSheetResponse.values.flatMap { $0 }
+                
+                // Fetch valueOfDate
+                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "B2:G32")
+                valueOfDate = spreadSheetManager.spreadSheetResponse.values
+                
+                // Fetch titleOfColumn
+                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "H2:H32")
+                titleOfColumn = spreadSheetManager.spreadSheetResponse.values.flatMap { $0 }
+                
+                // Fetch captionOfColumn
+                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "I2:I32")
+                captionOfColumn = spreadSheetManager.spreadSheetResponse.values.flatMap { $0 }
+                
+                // Populate monthlyMenu dictionary
+                var tempMenuData: [String:[String]] = [:] // 変更: [String:[String]] 型に変更
+                for (index, key) in keyOfDate.enumerated() {
+                    if index < valueOfDate.count {
+                        tempMenuData[key] = valueOfDate[index] // 変更: 配列をそのまま代入
+                    }
+                }
+                self.monthlyMenu = tempMenuData
+                
+                // Populate monthlyColumnTitle dictionary
+                var tempTitleData: [String:String] = [:]
+                for (index, key) in keyOfDate.enumerated() {
+                    if index < titleOfColumn.count {
+                        tempTitleData[key] = titleOfColumn[index]
+                    }
+                }
+                self.monthlyColumnTitle = tempTitleData
+                
+                // Populate monthlyColumnCaption dictionary
+                var tempCaptionData: [String:String] = [:]
+                for (index, key) in keyOfDate.enumerated() {
+                    if index < captionOfColumn.count {
+                        tempCaptionData[key] = captionOfColumn[index]
+                    }
+                }
+                self.monthlyColumnCaption = tempCaptionData
+                
+                print("Success")
+                QRscanResults = true
+                showQRscanResults = true
+            } catch {
+                QRscanResults = false
+                showQRscanResults = true
+                print("Error: \(error)")
+            }
+        }
+    }
+    
+    func extractSheetID(from url: String) -> String {
+        // Regex to extract sheet ID from URL
+        let pattern = "spreadsheets/d/([a-zA-Z0-9-_]+)"
+        if let range = url.range(of: pattern, options: .regularExpression) {
+            let sheetID = url[range]
+            let components = sheetID.split(separator: "/")
+            if components.count > 2 {
+                return String(components[2])
+            }
+        }
+        return "Invalid URL"
+    }
+    
+    var body: some View {
+        GeometryReader { geometry in
+            let size = geometry.size
+            VStack {
+                HStack {
+                    Picker("", selection: $selection) {
+                        Text("1月").tag("1月")
+                        Text("2月").tag("2月")
+                        Text("3月").tag("3月")
+                        Text("4月").tag("4月")
+                        Text("5月").tag("5月")
+                        Text("6月").tag("6月")
+                        Text("7月").tag("7月")
+                        Text("8月").tag("8月")
+                        Text("9月").tag("9月")
+                        Text("10月").tag("10月")
+                        Text("11月").tag("11月")
+                        Text("12月").tag("12月")
+                    }
+                    .pickerStyle(.menu)
+                    .font(.title)
+                    .tint(Color.black)
+                    Text("のメニューとコラムを取得します")
+                        .font(.title2)
+                        .foregroundStyle(Color.black)
+                }
+                .padding()
+                .background {
+                    RoundedRectangle(cornerRadius: 15)
+                        .stroke(style: StrokeStyle())
+                }
+                ZStack {
+                    CodeScannerView(codeTypes: [.qr]) { result in
+                        if case let .success(scannedResult) = result {
+                            scannedCode = scannedResult.string
+                        }
+                    }
+                    .frame(width: size.width * 0.5, height: size.height * 0.5)
+                    .overlay {
+                        if isScanning {
+                            Text("スキャン中...")
+                                .font(.headline)
+                                .padding()
+                                .background(Color.black.opacity(0.7))
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                    }
+                }
+            }
+            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+            .alert(QRscanResults ? "読み取りに成功しました" : "読み取りに失敗しました", isPresented: $showQRscanResults) {
+                Button {
+                    showQRscanResults = false
+                    isPresentingScanner = false
+                } label: {
+                    Text("閉じる")
+                }
+            } message: {
+                if QRscanResults {
+                    VStack {
+                        Text("\(selection)のメニューとコラムが入力されました。")
+                    }
+                } else {
+                    VStack {
+                        Text("入力したい月が正しく選択されているか確認してください\nもしくはQRコードが正しいか確認してください")
+                    }
+                }
+            }
+        }
+        .onChange(of: scannedCode) { oldValue, newValue in
+            sheetURL = scannedCode
+            fetchData()
+        }
+        .onAppear {
+            isScanning = true
+        }
+        .onDisappear {
+            isScanning = false
+        }
+    }
+    
+    @ViewBuilder
+    func resultsAlert() -> some View {
+        
+    }
+}
+
+struct Column {
+    var title: String
+    var content: String
+    var isShown: Bool = false
+    init(title: String, content: String) {
+        self.title = title
+        self.content = content
+    }
+}
+
+#Preview {
+    SettingView()
+        .environmentObject(UserData())
+}
