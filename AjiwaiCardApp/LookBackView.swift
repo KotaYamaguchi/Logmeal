@@ -112,7 +112,7 @@ struct AjiwaiCardDataPreview: View {
                             ForEach(data.menu, id: \.self) { content in
                                 VStack(alignment: .leading, spacing: 0){
                                     Text("・" + content)
-                                        .font(.title2)
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
                                         .foregroundStyle(Color.black)
                                     Rectangle()
                                         .frame(width: 300, height: 1)
@@ -126,9 +126,11 @@ struct AjiwaiCardDataPreview: View {
                     showDetail = true
                 } label: {
                     Text("詳しく見る")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
                 }
             } else {
                 Text("データがありません")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
             }
             Spacer()
         }
@@ -208,7 +210,7 @@ struct AjiwaiCardDetailView: View {
     private var imageSection: some View {
         VStack {
             Text("今日の一枚")
-                .font(.headline)
+                .font(.custom("GenJyuuGothicX-Bold", size: 15))
                 .padding(.bottom, 5)
             AsyncImage(url: data.imagePath) { image in
                 image.resizable().aspectRatio(contentMode: .fit)
@@ -232,12 +234,13 @@ struct AjiwaiCardDetailView: View {
     private var menuSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("メニュー")
-                .font(.headline)
+                .font(.custom("GenJyuuGothicX-Bold", size: 15))
             ForEach($editedMenu.indices, id: \.self) { index in
                 HStack {
                     Image(systemName: "fork.knife")
                         .foregroundColor(.orange)
                     TextField("メニュー項目", text: $editedMenu[index])
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
                 }
             }
             .onDelete(perform: deleteMenuItem)
@@ -256,8 +259,9 @@ struct AjiwaiCardDetailView: View {
     private var commentSection: some View {
         VStack(alignment: .leading) {
             Text("感想")
-                .font(.headline)
+                .font(.custom("GenJyuuGothicX-Bold", size: 15))
             TextEditor(text: $editedLunchComments)
+                .font(.custom("GenJyuuGothicX-Bold", size: 17))
                 .frame(height: 100)
                 .padding(5)
                 .background(Color(UIColor.systemGray5))
@@ -271,7 +275,7 @@ struct AjiwaiCardDetailView: View {
     private var sensesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("五感")
-                .font(.headline)
+                .font(.custom("GenJyuuGothicX-Bold", size: 15))
             senseRow(icon: "eye.fill", title: "視覚", binding: $editedSight)
             senseRow(icon: "ear.fill", title: "聴覚", binding: $editedHearing)
             senseRow(icon: "nose.fill", title: "嗅覚", binding: $editedSmell)
@@ -289,8 +293,10 @@ struct AjiwaiCardDetailView: View {
                 .foregroundColor(.blue)
                 .frame(width:30,height: 30)
             Text(title)
+                .font(.custom("GenJyuuGothicX-Bold", size: 16))
                 .foregroundColor(.gray)
             TextField(title, text: binding)
+                .font(.custom("GenJyuuGothicX-Bold", size: 17))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
         }
     }
@@ -310,3 +316,4 @@ struct AjiwaiCardDetailView: View {
         try? context.save()
     }
 }
+

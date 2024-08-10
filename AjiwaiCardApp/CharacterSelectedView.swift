@@ -1,133 +1,200 @@
-//
-//  CharacterSelectedView.swift
-//  AjiwaiCardApp
-//
-//  Created by 山口昂大 on 2024/05/30.
-//
 import SwiftUI
 
 struct CharacterSelectView: View {
     @EnvironmentObject var user: UserData
     @State private var selectedCharacter: Profile? = nil
     @State private var isDetailViewPresented = false
-    @Binding var isSelectedCharacter:Bool
-    var animals = ["Dog", "Cat", "Rabbit"]
+    @Binding var isSelectedCharacter: Bool
+    @State private var focusedIndex: Int? = nil  // 初期値をnilに変更
+    @State private var hasBeenTapped = false  // 新しい状態変数を追加
+    
     var profiles = [
         Profile(charaName: "レーク", charaImage: "Dog", mainStatus: "犬とトマトのハーフ", subStatus: "朝ごはんがだいすき！"),
         Profile(charaName: "ラン", charaImage: "Rabbit", mainStatus: "ウサギとニンジンのハーフ", subStatus: "お昼ごはんがだいすき！"),
         Profile(charaName: "ティナ", charaImage: "Cat", mainStatus: "猫とナスビのハーフ", subStatus: "夜ごはんがだいすき！")
     ]
+    
     var body: some View {
-            GeometryReader { geometry in
-                let size = geometry.size
-                if !isDetailViewPresented{
-                    ZStack{
-                        VStack{
-                            Text("キャラクターを選んでね")
-                                .font(.system(size: 60))
-                                .bold()
-                                .foregroundStyle(.gray)
-                            HStack(spacing: size.width * 0.04) {
-                                ForEach(profiles) { profile in
-                                    Image("\(profile.charaImage)_normal_1")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 250)
-                                        .onTapGesture {
-                                            withAnimation {
-                                                isDetailViewPresented.toggle()
-                                            }
-                                            selectedCharacter = profile
-                                        }
-                                        
+        GeometryReader { geometry in
+            let size = geometry.size
+            if !isDetailViewPresented {
+                selectView(size: size)
+            } else {
+                detailView(size: size)
+            }
+        }
+    }
+    
+    @ViewBuilder func selectView(size: CGSize) -> some View {
+        ZStack {
+            Image("bg_AjiwaiCardView")
+                .resizable()
+                .ignoresSafeArea()
+                .frame(width: size.width, height: size.height)
+            
+            VStack {
+                Text("キャラクターを選んでね")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 50))
+                    .bold()
+                    .foregroundStyle(.gray)
+                
+                HStack(spacing: size.width * 0.04) {
+                    ForEach(profiles.indices, id: \.self) { index in
+                        CharacterView(profile: profiles[index], isFocused: focusedIndex == index, hasBeenTapped: hasBeenTapped, size: size)
+                            .onTapGesture {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    focusedIndex = index
+                                    hasBeenTapped = true
                                 }
                             }
+                    }
+                }
+                Button {
+                    if let focusedIndex = focusedIndex {
+                        selectedCharacter = profiles[focusedIndex]
+                        withAnimation {
+                            isDetailViewPresented.toggle()
                         }
-                        .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
-                        .background(){
-                            Image("bg_AjiwaiCardView")
+                    }
+                } label: {
+                    Image("bt_base")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width:200,height: 100)
+                        .overlay {
+                            Text("これにする")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                        }
+                }
+                .frame(width: size.width * 0.2)
+                .padding()
+                .padding(.top, 20)
+                .buttonStyle(PlainButtonStyle())
+                .disabled(focusedIndex == nil)  // フォーカスがない場合はボタンを無効化
+            }
+        }
+    }
+    
+    // CharacterView は個々のキャラクター表示を担当
+    struct CharacterView: View {
+          let profile: Profile
+          let isFocused: Bool
+          let hasBeenTapped: Bool
+          let size: CGSize
+          
+          var body: some View {
+              Image("\(profile.charaImage)_normal_1")
+                  .resizable()
+                  .scaledToFit()
+                  .frame(height: isFocused ? size.height * 0.3 : size.height * 0.2)
+                  .colorMultiply(isFocused || !hasBeenTapped ? .white : .gray)
+                  .offset(y: isFocused ? 0 : 20)
+                  .animation(.easeInOut(duration: 0.3), value: isFocused)
+          }
+      }
+    
+    @ViewBuilder func detailView(size:CGSize) -> some View{
+        if let character = selectedCharacter {
+            ZStack(alignment:.topLeading){
+                Button {
+                    withAnimation {
+                        isDetailViewPresented.toggle()
+                    }
+                } label: {
+                    Image("bt_back")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width:size.width*0.05)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.all)
+                .offset(x:30,y:15)
+                HStack{
+                    Spacer()
+                    if character.charaImage == "Cat" || character.charaImage == "Dog"{
+                        ZStack{
+                            Image("mt_groundCircle")
+                                .offset(y:110)
+                            Image("\(character.charaImage)_normal_1")
                                 .resizable()
-                                .ignoresSafeArea()
-                                .frame(width:geometry.size.width,height: geometry.size.height)
+                                .scaledToFit()
+                                .frame(height: size.height * 0.3)
+                                .background(){
+                                    
+                                }
+                        }
+                    }else{
+                        ZStack{
+                            Image("mt_groundCircle")
+                                .offset(y:150)
+                            Image("\(character.charaImage)_normal_1")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: size.height * 0.4)
                         }
                         
                     }
-                } else {
-                    if let character = selectedCharacter {
-                        ZStack(alignment:.topLeading){
-                            Button {
-                                isDetailViewPresented.toggle()
-                            } label: {
-                                Image("bt_back")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width:geometry.size.width*0.05)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .padding(.all)
-                            HStack{
-                                Spacer()
-                                if character.charaImage == "Cat" || character.charaImage == "Dog"{
-                                    Image("\(character.charaImage)_normal_1")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: size.height * 0.3)
-                                }else{
-                                    Image("\(character.charaImage)_normal_1")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: size.height * 0.4)
-                                }
-                                Spacer()
-                                VStack {
-                                    Image("bg_DetailScreen_text")
-                                        .resizable()
-                                        .frame(width: size.width * 0.4, height: size.width * 0.4)
-                                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                                        .animation(.spring, value: isDetailViewPresented)
-                                        .foregroundStyle(.bar)
-                                        .overlay {
-                                            if let character = selectedCharacter {
-                                                VStack {
-                                                    Text(character.mainStatus)
-                                                        .font(.title)
-                                                    Text(character.subStatus)
-                                                        .font(.callout)
-                                                }
-                                            }
-                                        }
-                                    Button {
-                                        if let character = selectedCharacter {
-                                            user.selectedCharactar = character.charaImage
-                                        }
-                                        isSelectedCharacter = true
-                                        print(user.selectedCharactar)
-                                    } label: {
-                                        Image("bt_done")
+                    
+                    Spacer()
+                    VStack {
+                        Image("bg_DetailScreen_text")
+                            .resizable()
+                            .frame(width: size.width * 0.4, height: size.width * 0.4)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .animation(.spring, value: isDetailViewPresented)
+                            .foregroundStyle(.bar)
+                            .overlay {
+                                if let character = selectedCharacter {
+                                    VStack {
+                                        Text(character.mainStatus)
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 30))
+                                        Text(character.subStatus)
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 25))
                                     }
-                                    .buttonStyle(PlainButtonStyle())
                                 }
-                                Spacer()
                             }
-                            .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
-                        }
-                        .background(){
-                            Image("bg_AjiwaiCardView")
+                        Button {
+                            if let character = selectedCharacter {
+                                user.selectedCharactar = character.charaImage
+                            }
+                            isSelectedCharacter = true
+                            print(user.selectedCharactar)
+                        } label: {
+                            Image("bt_base")
                                 .resizable()
-                                .ignoresSafeArea()
-                                .frame(width:geometry.size.width,height: geometry.size.height)
+                                .scaledToFit()
+                                .frame(width:size.width*0.2)
+                                .overlay{
+                                    Text("このキャラクターにする")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                }
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
+                    .padding(.horizontal,60)
+                }
+                .position(x:size.width*0.5,y:size.height*0.5)
+            }
+            .background(){
+                ZStack{
+                    Image("bg_AjiwaiCardView")
+                        .resizable()
+                        .ignoresSafeArea()
+                        .frame(width:size.width,height:size.height)
+                    Image("mt_border_selectView")
+                        .resizable()
+                        .ignoresSafeArea()
+                        .frame(width:size.width*0.96,height:size.height*0.99)
                 }
             }
-        //}
+        }
+        
     }
+
 }
 
 #Preview{
-    ChildHomeView()
+    ContentView()
         .environmentObject(UserData())
 }
-extension Animation {
-  static let easeOutExpo: Animation = .timingCurve(0.25, 0.8, 0.1, 1, duration: 0.5) // 秘伝のタレ
-}
+

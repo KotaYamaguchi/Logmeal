@@ -3,7 +3,6 @@ import SwiftUI
 struct FirstLoginView: View {
     @EnvironmentObject var user: UserData
     @State private var isSelectedCharacter: Bool = false
-    @State private var userName: String = ""
     @State private var showSelectGrade: Bool = false
     @State private var showFiiName: Bool = false
     @State private var grade: Int = 1
@@ -20,46 +19,47 @@ struct FirstLoginView: View {
                             showFiiName = true
                         }
                 } else {
-                Image("bg_AjiwaiCardView")
-                    .resizable()
-                    .onTapGesture {
-                        if showButtonCount == 2 {
-                            withAnimation {
-                                user.isLogined = true
+                    Image("bg_AjiwaiCardView")
+                        .resizable()
+                        .onTapGesture {
+                            if showButtonCount == 2 {
+                                withAnimation {
+                                    user.isLogined = true
+                                }
                             }
                         }
+                    Image("\(user.selectedCharactar)_normal_1")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 180)
+                        .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.75)
+                    Image("mt_callout")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 650)
+                        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.38)
+                    
+                    if showFiiName{
+                        fillUserName(size: geometry.size)
+                    }else if showSelectGrade{
+                        selectGrade(size: geometry.size)
+                    }else if isStart{
+                        gameStart(size: geometry.size)
                     }
-                Image("\(user.selectedCharactar)_normal_1")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 180)
-                    .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.75)
-                Image("mt_callout")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 650)
-                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.38)
-                
-                if showFiiName{
-                    fillUserName(size: geometry.size)
-                }else if showSelectGrade{
-                    selectGrade(size: geometry.size)
-                }else if isStart{
-                    gameStart(size: geometry.size)
                 }
             }
         }
     }
-}
-
-@ViewBuilder func fillUserName(size: CGSize) -> some View {
-    ZStack {
-        TypeWriterTextView("あなたの名前を教えてね", speed: 0.1,font:.title,onAnimationCompleted: {
-            print("アニメーションが終了しました")
+    
+    @ViewBuilder func fillUserName(size: CGSize) -> some View {
+        ZStack {
+            TypeWriterTextView("あなたの名前を教えてね", speed: 0.1,font:.custom("GenJyuuGothicX-Bold", size: 25),onAnimationCompleted: {
+                print("アニメーションが終了しました")
             })
-                .position(x: size.width * 0.5, y: size.height * 0.2)
+            .position(x: size.width * 0.5, y: size.height * 0.2)
             
-            TextField("", text: $userName)
+            TextField("", text: $user.name)
+                .font(.custom("GenJyuuGothicX-Bold", size: 17))
                 .padding(10)
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
@@ -78,9 +78,9 @@ struct FirstLoginView: View {
                     .font(.largeTitle)
                     .foregroundColor(.black)
                     .frame(width: 170, height: 80)
-                    .opacity(userName.isEmpty ? 0.5 : 1.0) // 使用不可時に薄く表示
+                    .opacity(user.name.isEmpty ? 0.5 : 1.0) // 使用不可時に薄く表示
             }
-            .disabled(userName.isEmpty)
+            .disabled(user.name.isEmpty)
             .position(x: size.width * 0.5, y: size.height * 0.8)
             .buttonStyle(PlainButtonStyle())
         }
@@ -88,12 +88,12 @@ struct FirstLoginView: View {
     
     @ViewBuilder func selectGrade(size: CGSize) -> some View {
         ZStack {
-            TypeWriterTextView("学年を選んでね！", speed: 0.1,font:.title,onAnimationCompleted: {
+            TypeWriterTextView("学年を選んでね！", speed: 0.1,font:.custom("GenJyuuGothicX-Bold", size: 25),onAnimationCompleted: {
                 print("アニメーションが終了しました")
                 showButtonCount = 1
             })
-                .padding()
-                .position(x: size.width * 0.5, y: size.height * 0.2)
+            .padding()
+            .position(x: size.width * 0.5, y: size.height * 0.2)
             Grid{
                 GridRow{
                     ForEach(1...3, id: \.self) { gradeNumber in
@@ -102,7 +102,7 @@ struct FirstLoginView: View {
                             grade = gradeNumber
                         }) {
                             Text("\(gradeNumber)年生")
-                                .font(.title)
+                                .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                 .foregroundColor(.white)
                                 .frame(width: 150, height: 60)
                                 .background(selectedGrade == gradeNumber ? Color.red : Color.gray.opacity(0.7))
@@ -118,7 +118,7 @@ struct FirstLoginView: View {
                             grade = gradeNumber
                         }) {
                             Text("\(gradeNumber)年生")
-                                .font(.title)
+                                .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                 .foregroundColor(.white)
                                 .frame(width: 150, height: 60)
                                 .background(selectedGrade == gradeNumber ? Color.red : Color.gray.opacity(0.7))
@@ -136,7 +136,7 @@ struct FirstLoginView: View {
                 withAnimation {
                     isStart = true
                 }
-               
+                
             }) {
                 Image("bt_done")
                     .font(.largeTitle)
@@ -157,13 +157,13 @@ struct FirstLoginView: View {
         ZStack{
             VStack(alignment:.leading){
                 if conversationCount == 0 {
-                    TypeWriterTextView("それじゃあゲームを始めるよ\n準備はいい？", speed: 0.1,font:.title,onAnimationCompleted: {
+                    TypeWriterTextView("それじゃあゲームを始めるよ\n準備はいい？", speed: 0.1,font:.custom("GenJyuuGothicX-Bold", size: 17),onAnimationCompleted: {
                         print("アニメーションが終了しました")
                         showButtonCount = 1
                     })
                     
                 }else if conversationCount == 1 {
-                    TypeWriterTextView("よし！これからよろしくね！", speed: 0.1,font:.title,onAnimationCompleted: {
+                    TypeWriterTextView("よし！これからよろしくね！", speed: 0.1,font:.custom("GenJyuuGothicX-Bold", size: 17),onAnimationCompleted: {
                         print("アニメーションが終了しました")
                         showButtonCount = 2
                     })
@@ -177,7 +177,7 @@ struct FirstLoginView: View {
                     showButtonCount = 0
                 }label: {
                     Text("もちろん！")
-                        .font(.title)
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
                         .background(){
                             ZStack{
                                 Rectangle()
@@ -197,6 +197,7 @@ struct FirstLoginView: View {
                 .position(x: size.width * 0.5, y: size.height * 0.8)
             }else if showButtonCount == 2 {
                 Text("画面をタップしてゲームを始めよう")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
                     .foregroundStyle(.gray)
                     .padding(.top, 30)
                     .position(x: size.width * 0.5, y: size.height * 0.8)
@@ -210,22 +211,6 @@ struct FirstLoginView: View {
     
 }
 
-struct ButtonToggleStyle: ToggleStyle {
-    var title: String
-    func makeBody(configuration: Configuration) -> some View {
-        Button(action: {
-            configuration.isOn.toggle()
-        }) {
-            Text(title)
-                .font(.title)
-                .foregroundColor(.white)
-                .frame(width: 200, height: 100)
-                .background(configuration.isOn ? Color.red : Color.blue)
-                .cornerRadius(20)
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
 
 #Preview {
     FirstLoginView()
@@ -238,9 +223,9 @@ struct TypeWriterTextView: View {
     private let font: Font
     private let textColor: Color
     private let onAnimationCompleted: () -> Void
-
+    
     @State private var textArray: String = ""
-
+    
     init(_ text: String, speed: TimeInterval = 0.1, font: Font = .body, textColor: Color = .primary, onAnimationCompleted: @escaping () -> Void) {
         self.text = text
         self.speed = speed
@@ -248,7 +233,7 @@ struct TypeWriterTextView: View {
         self.textColor = textColor
         self.onAnimationCompleted = onAnimationCompleted
     }
-
+    
     var body: some View {
         Text(textArray)
             .font(font)
@@ -257,7 +242,7 @@ struct TypeWriterTextView: View {
                 startAnimation()
             }
     }
-
+    
     private func startAnimation() {
         DispatchQueue.global().async {
             for character in text {

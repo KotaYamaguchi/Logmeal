@@ -1,7 +1,8 @@
 import SwiftUI
+import SwiftData
 
 struct ColumnListView: View {
-    @EnvironmentObject var user: UserData
+    @Query private var allColumn: [ColumnData]
     @State private var sortedDates: [String] = []
     @State private var selectedDate: String?
     @State private var searchText = ""
@@ -10,17 +11,15 @@ struct ColumnListView: View {
     @State private var scrollProxy: ScrollViewProxy?
     
     private func loadColumnData() {
-        user.monthlyColumnTitle = user.loadStringDictionary(forKey: "monthlyColumnTitle")
-        user.monthlyColumnCaption = user.loadStringDictionary(forKey: "monthlyColumnCaption")
         updateSortedDates()
     }
     
     private func updateSortedDates() {
-        var filteredDates = user.monthlyColumnTitle.keys.filter { date in
+        var filteredDates = allColumn.map { $0.columnDay }.filter { date in
             let lowercaseSearch = searchText.lowercased()
             return searchText.isEmpty ||
             normalizeJapanese(date).contains(normalizeJapanese(lowercaseSearch)) ||
-            normalizeJapanese(user.monthlyColumnTitle[date] ?? "").contains(normalizeJapanese(lowercaseSearch))
+            normalizeJapanese(allColumn.first(where: { $0.columnDay == date })?.title ?? "").contains(normalizeJapanese(lowercaseSearch))
         }
         
         if let selectedMonth = selectedMonth {
@@ -37,7 +36,7 @@ struct ColumnListView: View {
     }
     
     private var months: [String] {
-        let allDates = user.monthlyColumnTitle.keys
+        let allDates = allColumn.map { $0.columnDay }
         let months = Set(allDates.map { String($0.prefix(7)) })
         return Array(months).sorted(by: <)
     }
@@ -49,101 +48,100 @@ struct ColumnListView: View {
     }
     
     private func getClosestColumnId() -> String? {
-        let sortedDatesAscending = user.monthlyColumnTitle.keys.sorted(by: <)
+        let sortedDatesAscending = allColumn.map { $0.columnDay }.sorted(by: <)
         return sortedDatesAscending.first { $0 >= todayString }
     }
     
     var body: some View {
-            NavigationSplitView {
-                ZStack {
-                    // 背景を白に
-                    Color.white.edgesIgnoringSafeArea(.all)
-                    
-                    VStack(spacing: 16) {
-                        HStack {
-                            Picker("月を選択", selection: $selectedMonth) {
-                                Text("全て").tag(String?.none)
-                                ForEach(months, id: \.self) { month in
-                                    Text(formatMonth(month)).tag(String?.some(month))
-                                }
+        NavigationSplitView {
+            ZStack {
+                Color.white.edgesIgnoringSafeArea(.all)
+                
+                VStack(spacing: 16) {
+                    HStack {
+                        Picker("月を選択", selection: $selectedMonth) {
+                            Text("全て").tag(String?.none)
+                               
+                            ForEach(months, id: \.self) { month in
+                                Text(formatMonth(month)).tag(String?.some(month))
                             }
-                            .pickerStyle(MenuPickerStyle())
-                            .padding(8)
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(10)
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                sortAscending.toggle()
-                                updateSortedDates()
-                            }) {
-                                Image(systemName: sortAscending ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-                                    .foregroundColor(.blue)
-                                    .font(.title2)
-                            }
-                            
-                            Button("今日のコラム") {
-                                if let closestColumnId = getClosestColumnId() {
-                                    withAnimation {
-                                        scrollProxy?.scrollTo(closestColumnId, anchor: .top)
-                                    }
-                                }
-                            }
-                            .buttonStyle(CustomButtonStyle())
                         }
-                        .padding(.horizontal)
+                        .pickerStyle(MenuPickerStyle())
+                        .padding(8)
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(10)
                         
-                        ScrollViewReader { proxy in
-                            ScrollView {
-                                LazyVStack(spacing: 12) {
-                                    ForEach(sortedDates, id: \.self) { date in
-                                        Button(action: {
-                                            selectedDate = date
-                                        }) {
-                                            ColumnCard(date: date, title: user.monthlyColumnTitle[date] ?? "")
-                                        }
-
-                                        .id(date)
-                                       
-                                    }
+                        Spacer()
+                        
+                        Button(action: {
+                            sortAscending.toggle()
+                            updateSortedDates()
+                        }) {
+                            Image(systemName: sortAscending ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                                .foregroundColor(.blue)
+                                .font(.title2)
+                        }
+                        
+                        Button("今日のコラム") {
+                            if let closestColumnId = getClosestColumnId() {
+                                withAnimation {
+                                    scrollProxy?.scrollTo(closestColumnId, anchor: .top)
                                 }
-                                .padding(.horizontal)
                             }
-                            .onAppear {
-                                loadColumnData()
-                                scrollProxy = proxy
+                        }
+                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                        .buttonStyle(CustomButtonStyle())
+                    }
+                    .padding(.horizontal)
+                    
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: 12) {
+                                ForEach(sortedDates, id: \.self) { date in
+                                    Button(action: {
+                                        selectedDate = date
+                                    }) {
+                                        if let column = allColumn.first(where: { $0.columnDay == date }) {
+                                            ColumnCard(date: date, title: column.title)
+                                        }
+                                    }
+                                    .id(date)
+                                }
                             }
+                            .padding(.horizontal)
+                        }
+                        .onAppear {
+                            loadColumnData()
+                            scrollProxy = proxy
                         }
                     }
                 }
-                .navigationTitle("コラム一覧")
-                .onAppear {
-                    loadColumnData()
-                }
-                .onChange(of: searchText, { _, _ in
-                    updateSortedDates()
-                })
-                .onChange(of: selectedMonth, { _, _ in
-                    updateSortedDates()
-                })
-                
-                .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "検索...")
-                .disableAutocorrection(true)
-                .autocapitalization(.none)
-            } detail: {
-                if let selectedDate = selectedDate,
-                   let title = user.monthlyColumnTitle[selectedDate],
-                   let content = user.monthlyColumnCaption[selectedDate] {
-                    ColumnDetailView(title: title, content: content)
-                } else {
-                    Text("コラムを選択してください")
-                        .font(.title)
-                        .foregroundColor(.secondary)
-                }
+            }
+            .navigationTitle("コラム一覧")
+            
+            .onAppear {
+                loadColumnData()
+            }
+            .onChange(of: searchText) { _, _ in
+                updateSortedDates()
+            }
+            .onChange(of: selectedMonth) { _, _ in
+                updateSortedDates()
+            }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "検索...")
+            .disableAutocorrection(true)
+            .autocapitalization(.none)
+        } detail: {
+            if let selectedDate = selectedDate,
+               let column = allColumn.first(where: { $0.columnDay == selectedDate }) {
+                ColumnDetailView(title: column.title, content: column.caption)
+            } else {
+                Text("コラムを選択してください")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                    .foregroundColor(.secondary)
             }
         }
-
+    }
     
     private func formatMonth(_ month: String) -> String {
         let dateFormatter = DateFormatter()
@@ -165,10 +163,10 @@ struct ColumnCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(date)
-                .font(.caption)
+                .font(.custom("GenJyuuGothicX-Bold", size: 13))
                 .foregroundColor(.secondary)
             Text(title)
-                .font(.headline)
+                .font(.custom("GenJyuuGothicX-Bold", size: 17))
                 .lineLimit(2)
             HStack {
                 Spacer()
@@ -195,12 +193,12 @@ struct ColumnDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text(title)
-                    .font(.largeTitle)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 35))
                     .fontWeight(.bold)
                     .foregroundColor(.black)
                     .padding(.bottom, 10)
                 Text(content)
-                    .font(.body)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
                     .foregroundColor(.black)
                     .padding()
                     .background(Color.gray.opacity(0.1))
@@ -234,20 +232,15 @@ struct CustomButtonStyle: ButtonStyle {
 // Preview用のサンプルデータ
 struct ColumnListView_Previews: PreviewProvider {
     static var previews: some View {
-        let userData = UserData()
-        userData.monthlyColumnTitle = [
-            "2024-07-15": "夏の健康管理について",
-            "2024-07-10": "効果的な学習方法",
-            "2024-07-05": "環境にやさしい生活習慣"
-        ]
-        userData.monthlyColumnCaption = [
-            "2024-07-15": "夏の健康管理に関する詳細な内容...",
-            "2024-07-10": "効果的な学習方法についての詳細...",
-            "2024-07-05": "環境にやさしい生活習慣についての詳細..."
-        ]
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try! ModelContainer(for: ColumnData.self, configurations: config)
+        
+        for date in ["2024-07-15", "2024-07-10", "2024-07-05"] {
+            let column = ColumnData(columnDay: date, title: "サンプルタイトル \(date)", caption: "サンプル内容 \(date)")
+            container.mainContext.insert(column)
+        }
         
         return ColumnListView()
-            .environmentObject(userData)
+            .modelContainer(container)
     }
 }
-

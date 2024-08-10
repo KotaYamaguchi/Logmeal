@@ -1,7 +1,11 @@
 import SwiftUI
+import SwiftData
 import CodeScanner
 
 struct ScannerView: View {
+    @Environment(\.modelContext) private var context
+    @Query private var allColumn: [ColumnData]
+    @Query private var allMenu: [MenuData]
     @Binding var isPresentingScanner: Bool
     @State private var scannedCode: String = ""
     @State private var isScanning: Bool = false
@@ -14,15 +18,12 @@ struct ScannerView: View {
         dateFormatter.locale = Locale(identifier: "ja_JP")
         return dateFormatter.string(from: Date())
     }()
-    @Binding var monthlyMenu: [String:[String]]
-    @Binding var monthlyColumnTitle: [String:String]
-    @Binding var monthlyColumnCaption: [String:String]
     @State private var keyOfDate: [String] = []
     @State private var valueOfDate: [[String]] = []
     @State private var titleOfColumn: [String] = []
     @State private var captionOfColumn: [String] = []
-    @State private var showQRscanResults:Bool = false
-    @State private var QRscanResults:Bool = false
+    @State private var showQRscanResults: Bool = false
+    @State private var QRscanResults: Bool = false
     
     func fetchData() {
         sheetID = extractSheetID(from: sheetURL)
@@ -44,32 +45,21 @@ struct ScannerView: View {
                 try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "I2:I32")
                 captionOfColumn = spreadSheetManager.spreadSheetResponse.values.flatMap { $0 }
                 
-                // Populate monthlyMenu dictionary
-                var tempMenuData: [String:[String]] = [:] // 変更: [String:[String]] 型に変更
+                // Save MenuData
                 for (index, key) in keyOfDate.enumerated() {
                     if index < valueOfDate.count {
-                        tempMenuData[key] = valueOfDate[index] // 変更: 配列をそのまま代入
+                        let menuData = MenuData(day: key, menu: valueOfDate[index])
+                        context.insert(menuData)
                     }
                 }
-                self.monthlyMenu = tempMenuData
                 
-                // Populate monthlyColumnTitle dictionary
-                var tempTitleData: [String:String] = [:]
-                for (index, key) in keyOfDate.enumerated() {
-                    if index < titleOfColumn.count {
-                        tempTitleData[key] = titleOfColumn[index]
-                    }
+                // Save ColumnData
+                for index in 0..<min(keyOfDate.count, titleOfColumn.count, captionOfColumn.count) {
+                    let columnData = ColumnData(columnDay: keyOfDate[index], title: titleOfColumn[index], caption: captionOfColumn[index])
+                    context.insert(columnData)
                 }
-                self.monthlyColumnTitle = tempTitleData
                 
-                // Populate monthlyColumnCaption dictionary
-                var tempCaptionData: [String:String] = [:]
-                for (index, key) in keyOfDate.enumerated() {
-                    if index < captionOfColumn.count {
-                        tempCaptionData[key] = captionOfColumn[index]
-                    }
-                }
-                self.monthlyColumnCaption = tempCaptionData
+                try context.save()
                 
                 print("Success")
                 QRscanResults = true
@@ -101,24 +91,16 @@ struct ScannerView: View {
             VStack {
                 HStack {
                     Picker("", selection: $selection) {
-                        Text("1月").tag("1月")
-                        Text("2月").tag("2月")
-                        Text("3月").tag("3月")
-                        Text("4月").tag("4月")
-                        Text("5月").tag("5月")
-                        Text("6月").tag("6月")
-                        Text("7月").tag("7月")
-                        Text("8月").tag("8月")
-                        Text("9月").tag("9月")
-                        Text("10月").tag("10月")
-                        Text("11月").tag("11月")
-                        Text("12月").tag("12月")
+                        ForEach(1...12, id: \.self) { month in
+                            Text("\(month)月").tag("\(month)月")
+                            
+                        }
                     }
                     .pickerStyle(.menu)
                     .font(.title)
                     .tint(Color.black)
                     Text("のメニューとコラムを取得します")
-                        .font(.title2)
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
                         .foregroundStyle(Color.black)
                 }
                 .padding()
@@ -129,6 +111,7 @@ struct ScannerView: View {
                 ZStack {
                     CodeScannerView(codeTypes: [.qr]) { result in
                         if case let .success(scannedResult) = result {
+                            isScanning = false
                             scannedCode = scannedResult.string
                         }
                     }
@@ -136,7 +119,7 @@ struct ScannerView: View {
                     .overlay {
                         if isScanning {
                             Text("スキャン中...")
-                                .font(.headline)
+                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
                                 .padding()
                                 .background(Color.black.opacity(0.7))
                                 .foregroundColor(.white)
@@ -155,13 +138,9 @@ struct ScannerView: View {
                 }
             } message: {
                 if QRscanResults {
-                    VStack {
-                        Text("\(selection)のメニューとコラムが入力されました。")
-                    }
+                    Text("\(selection)のメニューとコラムが入力されました。")
                 } else {
-                    VStack {
-                        Text("入力したい月が正しく選択されているか確認してください\nもしくはQRコードが正しいか確認してください")
-                    }
+                    Text("入力したい月が正しく選択されているか確認してください\nもしくはQRコードが正しいか確認してください")
                 }
             }
         }
@@ -176,24 +155,9 @@ struct ScannerView: View {
             isScanning = false
         }
     }
-    
-    @ViewBuilder
-    func resultsAlert() -> some View {
-        
-    }
-}
-
-struct Column {
-    var title: String
-    var content: String
-    var isShown: Bool = false
-    init(title: String, content: String) {
-        self.title = title
-        self.content = content
-    }
 }
 
 #Preview {
-    SettingView()
-        .environmentObject(UserData())
+    ScannerView(isPresentingScanner: .constant(true))
+        .modelContainer(for: [ColumnData.self, MenuData.self], inMemory: true)
 }

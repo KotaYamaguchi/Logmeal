@@ -13,7 +13,14 @@ struct AjiwaiThirdView: View {
     @State private var scaleFlag:Bool = false
     @State private var buttondisable = true
     private let tapInterval: TimeInterval = 1.5 // 3秒間隔
-    
+    @State var gifData = NSDataAsset(name: "Rabbit1_animation_breath")?.data
+    @State var levelUpGifData = NSDataAsset(name: "animation_levelUp")?.data
+    @State var growthGifData = NSDataAsset(name: "animation_growthLight")?.data
+    @State var playGif = true
+    @State var playlevelupGif = false
+    @State var playgrowthGif = false
+    @State private var levelUped:Bool = false
+    @State private var growthed:Bool = false
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -31,23 +38,45 @@ struct AjiwaiThirdView: View {
                     .scaledToFit()
                     .frame(width: geometry.size.width*0.1)
                     .position(x: geometry.size.width * 0.06, y: geometry.size.height * 0.1)
-                HStack{
-                        Image("\(user.selectedCharactar)")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.7)
-                    
-
+               
+                if let gifData = gifData {
+                    GIFImage(data: gifData, playGif: $playGif) {
+                    //    print("GIF animation finished!")
+                        playGif = false
+                        growthed = user.growth()
+                    }
+                    .frame(width:geometry.size.width * 2)
+                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
                 }
-                .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.65)
-
+                if levelUped{
+                    if let gifData = levelUpGifData {
+                        GIFImage(data: gifData,loopCount: 1, playGif: $playlevelupGif) {
+                        //    print("GIF animation finished!")
+                            playGif = false
+                            growthed = user.growth()
+                        }
+                        .frame(width:geometry.size.width * 0.8)
+                        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.6)
+                        
+                    }
+                }
+                if growthed{
+                    if let gifData = growthGifData{
+                        GIFImage(data:gifData,loopCount:1, playGif: $playgrowthGif)
+                            .ignoresSafeArea()
+                            .frame(height: geometry.size.height*2.0)
+                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+                        
+                    }
+                }
+                
                 Image("mt_RewardView_callout_\(user.selectedCharactar)")
                     .resizable()
                     .frame(width: geometry.size.width*0.65,height: geometry.size.height*0.36)
                     .position(x:geometry.size.width*0.5,y:geometry.size.height*0.2)
                     .overlay{
                         VStack(alignment:.leading){
-                            TypeWriterTextView("10expを獲得！！\n今日もしっかり味わいカードが書けたよ！\n明日も書いてね！！", speed: 0.05,font:.system(size: 30),textColor: .black) {
+                            TypeWriterTextView("10expを獲得！！\n今日もしっかり味わいカードが書けたよ！\n明日も書いてね！！", speed: 0.05,font:.custom("GenJyuuGothicX-Bold", size: 17),textColor: .black) {
                                 buttondisable = false
                             }
                             
@@ -69,24 +98,45 @@ struct AjiwaiThirdView: View {
                 .position(x:geometry.size.width*0.5,y:geometry.size.height*0.9)
             }
             Button {
-                user.exp += 10
-                user.appearExp += 10
-                user.point += 100
-                user.checkLevel()
                 //pathの中身を全て削除して大元のビューに戻る
                 user.path.removeAll()
                 //ホームビューに行きたいので.homeを追加
                 user.path.append(.home)
             } label: {
                 Image("bt_backHome")
-                    .frame(width: 350, height: 100)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: geometry.size.width*0.15)
                     .shadow(radius: 10)
             }
-            .position(x:geometry.size.width*0.75,y:geometry.size.height*0.8)
+            .position(x:geometry.size.width*0.93,y:geometry.size.height*0.98)
             .buttonStyle(PlainButtonStyle())
             .disabled(buttondisable)
+            .onChange(of: growthed) { oldValue, newValue in
+                if newValue {  // 成長が確認された場合
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                        if user.growthStage == 3 {
+                            gifData = NSDataAsset(name: "\(user.selectedCharactar)_animation_applause")?.data
+                        } else if user.growthStage == 2 {
+                            gifData = NSDataAsset(name: "\(user.selectedCharactar)2_animation_breath")?.data
+                        }
+                        playGif = true  // GIFを再生
+                    }
+                }
+            }
 
             .onAppear {
+                //print(user.selectedCharactar)
+                levelUped = user.checkLevel()  // レベルアップのチェック
+                if levelUped {
+                    // レベルアップ時のGIF再生ロジック
+                    levelUped = true
+                }
+                growthed = user.growth()  // 成長のチェック
+                if growthed {
+                    // 成長時のGIF再生ロジック
+                    growthed = true
+                }
                 counter1 += 1
                 counter2 += 1
                 withAnimation {
@@ -99,6 +149,20 @@ struct AjiwaiThirdView: View {
                     }
                 }
             }
+
+            .onChange(of: user.exp) { oldValue, newValue in
+                levelUped = user.checkLevel()  // レベルアップのチェック
+                if levelUped {
+                    // レベルアップ時のGIF再生ロジック
+                    levelUped = true
+                }
+                growthed = user.growth()  // 成長のチェック
+                if growthed {
+                    // 成長時のGIF再生ロジック
+                    growthed = true
+                }
+            }
+
         }
     }
     

@@ -6,7 +6,8 @@ struct WritingAjiwaiCardView: View {
     // SwiftData
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
-    
+    @Query private var allColumn:[ColumnData]
+    @Query private var allmenu:[MenuData]
     // Environment
     @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
@@ -55,14 +56,24 @@ struct WritingAjiwaiCardView: View {
     
     // 次に行けるようになるフラグ
     @State private var toNext: Bool = true
-    private func filereMenu(){
-        let today = user.dateFormatter(date: saveDay)
-        if let todayMenu = monthlyMenu[today]{
-            menu = todayMenu
-        }else{
+    
+    private let lunchCommentMaxLength = 500
+    private let feelingTextMaxLength = 250
+    private let menuTextMaxLength = 30
+    
+    private func isSave() -> Bool {
+        return menu.isEmpty || lunchComent.isEmpty || feelingTexts.contains(where: { $0.isEmpty })
+    }
+    
+    private func filereMenu() {
+        let currentDate = dateFormatter(date: saveDay)
+        if let matchingMenu = allmenu.first(where: { $0.day == currentDate }) {
+            self.menu = matchingMenu.menu
+        } else {
             menu = []
         }
     }
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -104,10 +115,16 @@ struct WritingAjiwaiCardView: View {
                                 if fillMenuYourself {
                                     ScrollView {
                                         ForEach($menu.indices, id: \.self) { index in
-                                            TextField("メニュー項目を入力", text: $menu[index])
-                                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                                .padding(.vertical, 2)
-                                                .focused($focusedField, equals: index + 100) // 100以降の値をメニュー用に予約
+                                            TextFieldWithCounterWithBorder(text: Binding(
+                                                get: { menu[index] },
+                                                set: { newValue in
+                                                    if newValue.count <= menuTextMaxLength {
+                                                        menu[index] = newValue
+                                                    }
+                                                }
+                                            ), maxLength: menuTextMaxLength)
+                                            .padding(.vertical, 2)
+                                            .focused($focusedField, equals: index + 100) // 100以降の値をメニュー用に予約
                                         }
                                         Button(action: {
                                             menu.append("")
@@ -152,16 +169,37 @@ struct WritingAjiwaiCardView: View {
                         VStack {
                             Image("mt_AjiwaiCard")
                                 .overlay {
-                                    TextField("給食の感想を書こう！", text: $lunchComent, axis: .vertical)
+                                    VStack(alignment: .trailing) {
+                                        TextField("給食の感想を書こう！", text: Binding(
+                                            get: { lunchComent },
+                                            set: { newValue in
+                                                if newValue.count <= lunchCommentMaxLength {
+                                                    lunchComent = newValue
+                                                }
+                                            }
+                                        ), axis: .vertical)
                                         .frame(width: 400, height: 200)
                                         .focused($focusedField, equals: -1)
+                                        Text("\(lunchComent.count)/\(lunchCommentMaxLength)")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                            .padding(.trailing, 5)
+                                            .offset(y:-10)
+                                    }
                                 }
-                            VStack(spacing: 0) {
+                            VStack{
                                 ForEach(0..<feelings.count, id: \.self) { index in
-                                    TextField(feelings[index], text: $feelingTexts[index], axis: .vertical)
-                                        .feelingsTextFieldStyle(image: iconArray[index], underlineColor: colors[index])
-                                        .padding(10)
-                                        .focused($focusedField, equals: index)
+                                    TextFieldWithCounter(text: Binding(
+                                        get: { feelingTexts[index] },
+                                        set: { newValue in
+                                            if newValue.count <= feelingTextMaxLength {
+                                                feelingTexts[index] = newValue
+                                            }
+                                        }
+                                    ), maxLength: feelingTextMaxLength)
+                                    .feelingsTextFieldStyle(image: iconArray[index], underlineColor: colors[index])
+                                    .padding(.bottom)
+                                    .focused($focusedField, equals: index)
                                 }
                             }
                         }
@@ -181,7 +219,7 @@ struct WritingAjiwaiCardView: View {
                     Image("mt_DateBar")
                         .overlay {
                             Text(dateFormatter(date: saveDay))
-                                .font(.title)
+                                .font(.custom("GenJyuuGothicX-Bold", size: 28))
                                 .foregroundStyle(.white)
                         }
                 }
@@ -211,27 +249,44 @@ struct WritingAjiwaiCardView: View {
                     }
                     .frame(width: 400, height: 500)
                 }
-                
-                Button {
-                    showingSaveAlert = true
-                } label: {
-                    Text("保存する")
+                HStack {
+                    Button {
+                        showingSaveAlert = true
+                    } label: {
+                        Image("bt_base")
+                            .resizable()
+                            .frame(width: geometry.size.width * 0.1, height: geometry.size.height * 0.05)
+                            .opacity(isSave() ? 0.5 : 1.0)
+                            .overlay {
+                                Text("保存する")
+                            }
+                    }
+                    .disabled(isSave())
+                    .padding()
+                    
+                    Button {
+                        user.exp += 10
+                        user.appearExp += 10
+                        user.point += 100
+                        user.path.append(.reward)
+                    } label: {
+                        Image("bt_base")
+                            .resizable()
+                            .frame(width: geometry.size.width * 0.1, height: geometry.size.height * 0.05)
+                            .opacity(toNext ? 0.5 : 1.0)
+                            .overlay {
+                                Text("次へ")
+                                
+                            }
+                    }
+                    .disabled(toNext)
+                    .padding()
                 }
-                .disabled(menu.isEmpty || lunchComent.isEmpty || feelingTexts.contains(where: { $0.isEmpty }))
                 .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.95)
-                .padding()
-                
-                Button {
-                    user.path.append(.reward)
-                } label: {
-                    Text("次へ")
-                }
-                .disabled(toNext)
-                .position(x: geometry.size.width * 0.9, y: geometry.size.height * 0.95)
-                .padding()
             }
+            .font(.custom("GenJyuuGothicX-Bold", size: 17))
             .sheet(isPresented: $showQRscanner) {
-                ScannerView(isPresentingScanner: $showQRscanner, monthlyMenu: $monthlyMenu, monthlyColumnTitle: $monthlyColumnTitle, monthlyColumnCaption: $monthlyColumnCaption)
+                ScannerView(isPresentingScanner: $showQRscanner)
             }
             .onChange(of: selectedItem, { oldValue, newValue in
                 Task {
@@ -249,7 +304,7 @@ struct WritingAjiwaiCardView: View {
             .onChange(of: saveDay) { oldValue, newValue in
                 filereMenu()
             }
-            .onAppear(){
+            .onAppear {
                 filereMenu()
             }
         }
@@ -285,6 +340,7 @@ struct WritingAjiwaiCardView: View {
             }
         }
     }
+    
     func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         // ドキュメントファイルのパスを取得
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -299,6 +355,7 @@ struct WritingAjiwaiCardView: View {
         // ファイルURLを返す
         return fileURL
     }
+    
     private func add(lunchComments: String, sight: String, hearing: String, smell: String, taste: String, tacticle: String, menu: [String], imagePath: URL) {
         let newData = AjiwaiCardData(saveDay: saveDay, lunchComments: lunchComments, sight: sight, taste: taste, smell: smell, tactile: tacticle, hearing: hearing, imagePath: imagePath, menu: menu)
         context.insert(newData)
@@ -323,9 +380,41 @@ struct WritingAjiwaiCardView: View {
     }
 }
 
+struct TextFieldWithCounterWithBorder: View {
+    @Binding var text: String
+    let maxLength: Int
+    
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            TextField("メニューを入力...", text: $text)
+                .padding(.trailing, 40) // 右端にスペースを確保
+                .textFieldStyle(.roundedBorder)
+            Text("\(text.count)/\(maxLength)")
+                .font(.custom("GenJyuuGothicX-Bold", size: 12))
+                .foregroundColor(.gray)
+                .padding(.trailing, 5)
+        }
+    }
+}
+struct TextFieldWithCounter: View {
+    @Binding var text: String
+    let maxLength: Int
+    
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            TextField("", text: $text)
+                .padding(.trailing, 40) // 右端にスペースを確保
+            Text("\(text.count)/\(maxLength)")
+                .font(.custom("GenJyuuGothicX-Bold", size: 12))
+                .foregroundColor(.gray)
+                .padding(.trailing, 5)
+        }
+    }
+}
+
 #Preview {
     WritingAjiwaiCardView()
-        .modelContainer(for: AjiwaiCardData.self)
+        .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
         .environmentObject(UserData())
 }
 
@@ -363,4 +452,3 @@ func DeleteAll(modelContext: ModelContext) {
         fatalError(error.localizedDescription)
     }
 }
-

@@ -14,6 +14,15 @@ class ExportData {
         return paths[0]
     }
 
+    private func escapeForCSV(_ value: String) -> String {
+        var escapedValue = value
+        if escapedValue.contains(",") || escapedValue.contains("\"") || escapedValue.contains("\n") {
+            escapedValue = escapedValue.replacingOccurrences(of: "\"", with: "\"\"")
+            escapedValue = "\"\(escapedValue)\""
+        }
+        return escapedValue
+    }
+
     func createCSV(filename: String, datas: [AjiwaiCardData]) {
         let fileManager = FileManager.default
         guard let docURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
@@ -25,18 +34,24 @@ class ExportData {
             defer {
                 strm.close()
             }
-            
+
             let BOM = "\u{feff}"
-            
             strm.write(BOM, maxLength: 3)
             let header = "日付,献立,給食の感想,視覚,聴覚,嗅覚,味覚,触覚\r\n"
             var row = ""
             for content in datas {
-                let joinedContent = "\(dateFormat(date: content.saveDay)),\(content.menu.joined(separator: "/")),\(content.lunchComments),\(content.sight),\(content.hearing),\(content.smell),\(content.taste),\(content.tactile)\r\n"
+                let escapedMenu = escapeForCSV(content.menu.joined(separator: "/"))
+                let escapedComments = escapeForCSV(content.lunchComments)
+                let escapedSight = escapeForCSV(content.sight)
+                let escapedHearing = escapeForCSV(content.hearing)
+                let escapedSmell = escapeForCSV(content.smell)
+                let escapedTaste = escapeForCSV(content.taste)
+                let escapedTactile = escapeForCSV(content.tactile)
+                let joinedContent = "\(dateFormat(date: content.saveDay)),\(escapedMenu),\(escapedComments),\(escapedSight),\(escapedHearing),\(escapedSmell),\(escapedTaste),\(escapedTactile)\r\n"
                 row += joinedContent
             }
             let csv = header + row
-            
+
             if let data = csv.data(using: .utf8) {
                 data.withUnsafeBytes {
                     strm.write($0.bindMemory(to: UInt8.self).baseAddress!, maxLength: data.count)

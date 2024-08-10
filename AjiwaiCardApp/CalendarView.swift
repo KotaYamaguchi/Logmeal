@@ -99,14 +99,15 @@ struct CalendarView: View {
         VStack(spacing: 0) {
             HStack{
                 Text(yearString)
-                    .font(.headline)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
                 Text(monthString)
-                    .font(.largeTitle)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 30))
             }
             
             HStack(spacing: 0) {
                 ForEach(["日", "月", "火", "水", "木", "金", "土"], id: \.self) { day in
                     Text(day)
+                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                 }
@@ -209,6 +210,7 @@ struct DayView: View {
             VStack {
                 HStack {
                     Text(String(calendar.component(.day, from: date)))
+                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding([.top, .leading], 4)
                         .foregroundColor(isCurrentMonth ? .black : .gray)

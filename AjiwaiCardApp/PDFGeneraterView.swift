@@ -123,35 +123,42 @@ struct MultiPageAchievementView: View {
 
     func drawPage(data: AjiwaiCardData, in context: CGContext, rect: CGRect) {
         let titleFontSize: CGFloat = 16
-        let subtitleFontSize: CGFloat = 12
-        let bodyFontSize: CGFloat = 10
+        let subtitleFontSize: CGFloat = 14
+        let bodyFontSize: CGFloat = 12
 
         let titleFont = UIFont.systemFont(ofSize: titleFontSize, weight: .bold)
         let subtitleFont = UIFont.systemFont(ofSize: subtitleFontSize, weight: .semibold)
         let bodyFont = UIFont.systemFont(ofSize: bodyFontSize)
-
+        
         let leftMargin: CGFloat = 40
         let rightMargin: CGFloat = 40
+        let topMargin: CGFloat = 40
+        let bottomMargin: CGFloat = 40
         let contentWidth = rect.width - leftMargin - rightMargin
-
-        var currentY: CGFloat = 40
-
+        
+        var currentY: CGFloat = topMargin
+        
         // Draw title
         drawText(dateFormat(date: data.saveDay) + "の味わいカード", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 30), font: titleFont)
-        currentY += 40
-
-        // Draw menu and image
-        let menuTitleY = currentY
-        drawText("この日の献立", in: context, rect: CGRect(x: (rect.width - leftMargin - rightMargin) / 2.9, y: currentY, width: contentWidth / 2 - 20, height: 20), font: subtitleFont)
         currentY += 30
-
+        
+        // Draw user name
+        drawText(user.name, in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 20), font: subtitleFont)
+        currentY += 40
+        
+        // Draw menu title
+        let menuTitleY = currentY
+        drawText("この日の献立", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth / 2, height: 20), font: subtitleFont)
+        currentY += 30
+        
+        // Draw menu items
         for item in data.menu {
-            drawText(item, in: context, rect: CGRect(x: (rect.width - leftMargin - rightMargin) / 2.8, y: currentY, width: contentWidth / 2 - 40, height: 20), font: bodyFont)
+            drawText(item, in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth / 2 - 20, height: 20), font: bodyFont)
             currentY += 20
         }
-
+        
         // Add image next to the menu
-        let imageX = (rect.width - leftMargin - rightMargin) / 1.8
+        let imageX = rect.width / 2
         let imageY = menuTitleY
         if let image = UIImage(contentsOfFile: "\(data.imagePath.path)") {
             addImage(context: context, pageRect: rect, image: image, imageTop: imageY, imageLeft: imageX, width: fixedImageWidth, height: fixedImageHeight)
@@ -160,17 +167,21 @@ struct MultiPageAchievementView: View {
             addImage(context: context, pageRect: rect, image: placeholderImage, imageTop: imageY, imageLeft: imageX, width: fixedImageWidth, height: fixedImageHeight)
         }
 
-        currentY += 20
+        currentY = max(currentY, imageY + fixedImageHeight) + 20
 
-        // Draw impression
+        // Draw impression title
         drawText("給食の感想", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 20), font: subtitleFont)
         currentY += 30
-        drawText(data.lunchComments, in: context, rect: CGRect(x: leftMargin + 20, y: currentY, width: contentWidth - 20, height: 100), font: bodyFont)
+        
+        // Draw impression content
+        drawText(data.lunchComments, in: context, rect: CGRect(x: leftMargin + 20, y: currentY, width: contentWidth - 40, height: 100), font: bodyFont)
         currentY += 110
 
-        // Draw senses
+        // Draw senses title
         drawText("五感の感想", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 20), font: subtitleFont)
         currentY += 30
+        
+        // Draw senses content
         let senses = [
             ("味覚", data.taste),
             ("触覚", data.tactile),
@@ -179,7 +190,7 @@ struct MultiPageAchievementView: View {
             ("聴覚", data.hearing)
         ]
         for (sense, description) in senses {
-            drawText("\(sense): \(description)", in: context, rect: CGRect(x: leftMargin + 20, y: currentY, width: contentWidth - 20, height: 60), font: bodyFont)
+            drawText("\(sense): \(description)", in: context, rect: CGRect(x: leftMargin + 20, y: currentY, width: contentWidth - 40, height: 60), font: bodyFont)
             currentY += 70
         }
     }

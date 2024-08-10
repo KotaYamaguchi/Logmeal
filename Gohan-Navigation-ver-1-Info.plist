@@ -3,6 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>UIAppFonts</key>
-	<array/>
+	<array>
+		<string>GenJyuuGothicX-Bold.ttf</string>
+		<string>GenJyuuGothicX-Heavy.ttf</string>
+	</array>
 </dict>
 </plist>

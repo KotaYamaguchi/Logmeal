@@ -24,7 +24,7 @@ struct SettingView: View {
         ZStack {
             if isGenerating {
                 ProgressView("共有の準備中...")
-                    .font(.headline)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
                     .padding()
                     .background(Color.black.opacity(0.7))
                     .foregroundColor(.white)
@@ -37,6 +37,7 @@ struct SettingView: View {
             }
             VStack {
                 Text("設定画面")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 30))
                 Picker("キャラクターを選択", selection: $user.selectedCharactar) {
                     Text("いぬ").tag("Dog")
                     Text("ねこ").tag("Cat")
@@ -49,6 +50,7 @@ struct SettingView: View {
                     showQRscaner = true
                 } label: {
                     Text("1ヶ月分のメニューを入力する")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
                         .frame(width: 300, height: 50)
                         .background(Color.cyan)
                         .foregroundStyle(Color.white)
@@ -57,9 +59,9 @@ struct SettingView: View {
                 .buttonStyle(PlainButtonStyle())
                 Button {
                     previewPDF = true
-                    user.savedDatas = user.readSavedDatas() ?? [:]
                 } label: {
                     Text("味わいカードを先生に提出する")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
                         .frame(width: 300, height: 50)
                         .background(Color.cyan)
                         .foregroundStyle(Color.white)
@@ -74,6 +76,7 @@ struct SettingView: View {
                    }
                 } label: {
                     Text("CSVファイルで提出する")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
                         .frame(width: 300, height: 50)
                         .background(Color.cyan)
                         .foregroundStyle(Color.white)
@@ -86,16 +89,18 @@ struct SettingView: View {
                     user.path.removeLast()
                 } label: {
                     Text("タイトルに戻る")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
                         .frame(width: 300, height: 50)
-                        .background(Color.cyan)
-                        .foregroundStyle(Color.white)
+                        .background(Color.white)
+                        .foregroundStyle(Color.cyan)
                         .clipShape(RoundedRectangle(cornerRadius: 20))
+                        
                 }
                 .buttonStyle(PlainButtonStyle())
             }
         }
         .sheet(isPresented: $showQRscaner) {
-            ScannerView(isPresentingScanner: $showQRscaner, monthlyMenu: $monthlyMenu, monthlyColumnTitle: $monthlyColumnTitle, monthlyColumnCaption: $monthlyColumnCaption)
+            ScannerView(isPresentingScanner: $showQRscaner)
         }
         .fullScreenCover(isPresented: $previewPDF) {
             MultiPageAchievementView(previewPDF: $previewPDF)
@@ -105,28 +110,6 @@ struct SettingView: View {
                 ActivityViewController(activityItems: [csvURL])
             }
         })
-        
-        .onChange(of: [monthlyColumnTitle, monthlyColumnCaption]) { oldValue, newValue in
-            // QRからのデータを追加、同じ日付のものを追加したときは新しい方が優先される
-            saveForNow = user.loadStringDictionary(forKey: "monthlyColumnTitle")
-            saveForNow.merge(monthlyColumnTitle) { (current, new) in current }
-            user.monthlyColumnTitle = saveForNow
-            user.writeStringDictionary(user.monthlyColumnTitle, forKey: "monthlyColumnTitle")
-
-            saveForNow = user.loadStringDictionary(forKey: "monthlyColumnCaption")
-            saveForNow.merge(monthlyColumnCaption) { (current, new) in current }
-            user.monthlyColumnCaption = saveForNow
-            user.writeStringDictionary(user.monthlyColumnCaption, forKey: "monthlyColumnCaption")
-        }
-        .onChange(of: monthlyMenu) { oldValue, newValue in
-            saveForNowMenu = user.loadMonthlyMenu()
-            saveForNowMenu.merge(monthlyMenu) { (current, new) in current }
-            user.monthlyMenu = saveForNowMenu
-            user.saveMonthlyMenu()
-        }
-        .onAppear {
-            print(user.savedDatas)
-        }
     }
     
     @MainActor
@@ -135,7 +118,7 @@ struct SettingView: View {
         defer { isGenerating = false }
         
         let exportData = ExportData()
-        let filename = "export_\(Date().timeIntervalSince1970)"
+        let filename = "\(user.name)の味わいカード"
         let datas: [AjiwaiCardData] = allData // ここにデータを追加
         
         exportData.createCSV(filename: filename, datas: datas)

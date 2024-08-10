@@ -7,9 +7,10 @@
 
 import SwiftUI
 //画面遷移用の列挙型
-enum Homepath{
-    case home,ajiwaiCard,reward
-
+enum Homepath: Hashable {
+    case home
+    case ajiwaiCard(AjiwaiCardData?)
+    case reward
 }
 struct SavedData: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
@@ -48,18 +49,15 @@ struct SavedData: Identifiable, Codable, Equatable {
                    lhs.image == rhs.image
         }
 }
-struct Product:Identifiable{
-    let id = UUID()
-    let name:String
-    let price:Int
-    let img:String
-  
-    init(name: String, price: Int, img: String) {
-        self.name = name
-        self.price = price
-        self.img = img
-    }
+struct Product: Identifiable, Codable {
+    var id = UUID()
+    var name: String
+    var price: Int
+    var img: String
+    var isBought: Bool
 }
+
+
 struct Profile: Identifiable {
     var id = UUID()
     var charaName: String

@@ -1,10 +1,4 @@
-//
-//  ContentView.swift
-//  Gohan_Navigation_ver.1
-//
-//  Created by 山口昂大 on 2023/12/15.
-//
-//ellipsis,text.justify
+
 import SwiftUI
 import SwiftData
 struct ContentView: View {
@@ -57,7 +51,7 @@ struct ContentView: View {
                             showMenu = true
                         }label: {
                             Text("開発者用")
-                                .font(.title)
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
                                 
                         }.padding(.all)
                     
@@ -71,6 +65,7 @@ struct ContentView: View {
                             }
                     }else{
                         Text("画面をタップしてゲームを始めよう")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 20))
                             .foregroundStyle(.gray)
                             .padding(.top, 30)
                             .position(x: width * 0.5, y: height * 0.8)
@@ -98,6 +93,7 @@ struct ContentView: View {
                             showMenu.toggle()
                         }label: {
                             Text("開発用")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
                                 .frame(width: 300,height: 50)
                                 .background(Color.cyan)
                                 .foregroundStyle(Color.white)
@@ -107,6 +103,7 @@ struct ContentView: View {
                            
                         }label: {
                             Text("利用規約")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
                                 .frame(width: 300,height: 50)
                                 .background(Color.cyan)
                                 .foregroundStyle(Color.white)
@@ -119,6 +116,7 @@ struct ContentView: View {
                            
                         }label: {
                             Text("研究について")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
                                 .frame(width: 300,height: 50)
                                 .background(Color.cyan)
                                 .foregroundStyle(Color.white)
@@ -128,6 +126,7 @@ struct ContentView: View {
                            
                         }label: {
                             Text("設定")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
                                 .frame(width: 300,height: 50)
                                 .background(Color.cyan)
                                 .foregroundStyle(Color.white)
@@ -138,6 +137,11 @@ struct ContentView: View {
                         showMenu = false
                     }label: {
                         Text("戻る")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                            .frame(width: 300,height: 50)
+                            .background(Color.white)
+                            .foregroundStyle(Color.cyan)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
                 }
             }
@@ -154,6 +158,7 @@ struct ContentView: View {
                 UserDefaults.standard.removeObject(forKey: "isLogined")
             }label: {
                 Text("もう一度、初めてログイン画面にする")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
                     .frame(width: 350,height: 50)
                     .background(Color.cyan)
                     .foregroundStyle(Color.white)
@@ -165,6 +170,7 @@ struct ContentView: View {
                 UserDefaults.standard.removePersistentDomain(forName: appDomain!)
             }label: {
                 Text("全てのアプリデータを削除")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
                     .frame(width: 350,height: 50)
                     .background(Color.cyan)
                     .foregroundStyle(Color.white)
@@ -174,18 +180,21 @@ struct ContentView: View {
                 DeleteAll(modelContext: context)
             }label: {
                 Text("SwiftDataのデータをすべて削除")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
                     .frame(width: 350,height: 50)
                     .background(Color.cyan)
                     .foregroundStyle(Color.white)
                     .cornerRadius(20)
             }
             TextField("ファイル名を入力して下のボタンをタップ", text: $itemName)
+                .font(.custom("GenJyuuGothicX-Bold", size: 15))
                 .frame(width: 350)
                 .textFieldStyle(.roundedBorder)
             Button{
                 removeDocumentFile(itemName: itemName)
             }label: {
                 Text("DocumentFolderのデータ削除")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
                     .frame(width: 350,height: 50)
                     .background(Color.cyan)
                     .foregroundStyle(Color.white)
@@ -195,6 +204,11 @@ struct ContentView: View {
                 develop = false
             }label: {
                 Text("戻る")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                    .frame(width: 300,height: 50)
+                    .background(Color.white)
+                    .foregroundStyle(Color.cyan)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
             }
         }
     }

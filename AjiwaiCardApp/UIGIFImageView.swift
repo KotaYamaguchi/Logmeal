@@ -61,6 +61,7 @@ class UIGIFImageView: UIView,SwiftyGifDelegate {
                 if image.imageData != subview.gifImage?.imageData {
                     imageView = UIImageView(gifImage: image, loopCount: loopCount)
                     imageView.contentMode = .scaleAspectFit
+                    
                     imageView.delegate = self  // デリゲートを設定
                     subview.removeFromSuperview()
                 }
