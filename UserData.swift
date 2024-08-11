@@ -3,6 +3,7 @@ import SwiftUI
 class UserData:ObservableObject{
     @AppStorage("name") var name:String = ""
     @AppStorage("grade") var grade:Int = 1
+    @AppStorage("class") var yourClass:Int = 1
     @AppStorage("age") var age:Int = 6
     @AppStorage("isLogined") var isLogined = false
     @Published var isTeacher:Bool = false
@@ -53,7 +54,7 @@ class UserData:ObservableObject{
     @AppStorage("point") var point:Int = 0
     @Published var levelTable = [0,10,20,35,50,65,90,110,135,150,175,200,220,250,290,350]
     @Published var growthStage = 1
-    
+    @Published var gotEXP:Int = 0
     func checkLevel() -> Bool{
         var levelUped = false
         if exp <= levelTable.last!{

@@ -22,6 +22,7 @@ struct ChildHomeView: View {
     @State private var showCardDetail = false
     @State private var selectedCardData: AjiwaiCardData? = nil
     @State private var isLoading = false
+    @State private var showSettingView = false
     @State private var timer: Timer? = nil
     @State private var boughtProducts:[Product] = []
     private func startGifTimer() {
@@ -218,6 +219,7 @@ struct ChildHomeView: View {
                 FirstLoginView()
             }
         }
+        .ignoresSafeArea(.keyboard)
         .onChange(of: user.exp) { _, _ in
             _ = user.checkLevel()
             _ = user.growth()
@@ -342,15 +344,17 @@ struct ChildHomeView: View {
                     .position(x: size.width * 0.54, y: size.height * 0.52)
                 
                 VStack(spacing: 0) {
-                    NavigationLink {
-                        SettingView()
+                    Button{
+                       showSettingView = true
                     } label: {
                         Image("bt_gear")
                             .resizable()
                             .scaledToFit()
                             .frame(width: width * 0.8)
                     }
-                    
+                    .sheet(isPresented:$showSettingView){
+                        SettingView()
+                    }
                     Button {
                         if checkForTodayColumn() {
                             withAnimation {
@@ -389,7 +393,7 @@ struct ChildHomeView: View {
                         AjiwaiCardDetailView(selectedDate: Date(), data: data)
                             .navigationBarBackButtonHidden(true)
                     } else {
-                        WritingAjiwaiCardView()
+                        WritingAjiwaiCardView(saveDay: Date())
                             .navigationBarBackButtonHidden(true)
                     }
                 case .reward:

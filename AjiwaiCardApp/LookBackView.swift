@@ -7,11 +7,12 @@ struct LookBackView: View {
     @EnvironmentObject var user: UserData
     @State private var selectDate: Date = Date()
     @State private var showDetail: Bool = false
+    @State private var navigateToWritingView: Bool = false // 追加
     @Environment(\.dismiss) private var dismiss
     var filteredData: AjiwaiCardData? {
         allData.first { Calendar.current.isDate($0.saveDay, inSameDayAs: selectDate) }
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -21,15 +22,17 @@ struct LookBackView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Image("bt_back")
-                        .resizable()
-                        .frame(width: 50, height: 50)
+                   
+                        Image("bt_back")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                    
                 }
                 .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
                 CalendarDisplayView(selectedDate: $selectDate, allData: allData)
                     .frame(width: geometry.size.width * 0.85, height: geometry.size.height)
                     .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                AjiwaiCardDataPreview(selectedDate: selectDate, allData: allData, showDetail: $showDetail)
+                AjiwaiCardDataPreview(selectedDate: selectDate, allData: allData, showDetail: $showDetail, navigateToWritingView: $navigateToWritingView) // 修正
                     .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.5)
             }
             .fullScreenCover(isPresented: $showDetail) {
@@ -37,14 +40,12 @@ struct LookBackView: View {
                     AjiwaiCardDetailView(selectedDate: selectDate, data: data)
                 }
             }
+            .fullScreenCover(isPresented: $navigateToWritingView) { // 追加
+                WritingAjiwaiCardView(saveDay:selectDate,isFullScreen: true) // 書き込みビューに遷移
+                    .environmentObject(user)
+            }
         }
     }
-}
-
-#Preview {
-    LookBackView()
-        .environmentObject(UserData())
-        .modelContainer(for:AjiwaiCardData.self)
 }
 
 struct AjiwaiCardDataPreview: View {
@@ -55,6 +56,8 @@ struct AjiwaiCardDataPreview: View {
         allData.first { Calendar.current.isDate($0.saveDay, inSameDayAs: selectedDate) }
     }
     @Binding var showDetail: Bool
+    @Binding var navigateToWritingView: Bool // 追加
+    
     var body: some View {
         VStack{
             Spacer()
@@ -76,8 +79,6 @@ struct AjiwaiCardDataPreview: View {
                                 .frame(width: 650,height:400)
                         }
                         
-                        
-                        
                     case .failure(_):
                         ZStack{
                             Image("mt_No_Image")
@@ -88,7 +89,6 @@ struct AjiwaiCardDataPreview: View {
                                 .resizable()
                                 .frame(width: 650,height:400)
                         }
-                        
                         
                     @unknown default:
                         ZStack{
@@ -131,11 +131,22 @@ struct AjiwaiCardDataPreview: View {
             } else {
                 Text("データがありません")
                     .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                Button(action: {
+                    navigateToWritingView = true
+                }) {
+                    Text("この日のデータを記録する")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                        .frame(width: 250, height: 50)
+                        .background(Color.cyan)
+                        .foregroundStyle(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                }
             }
             Spacer()
         }
     }
 }
+
 
 
 import SwiftUI
@@ -317,3 +328,8 @@ struct AjiwaiCardDetailView: View {
     }
 }
 
+#Preview{
+    LookBackView()
+        .environmentObject(UserData())
+        .modelContainer(for: [AjiwaiCardData.self,MenuData.self,ColumnData.self])
+}

@@ -78,7 +78,7 @@ struct ContentView: View {
                         ChildHomeView()
                             .navigationBarBackButtonHidden(true)
                     case .ajiwaiCard:
-                        WritingAjiwaiCardView()
+                        WritingAjiwaiCardView(saveDay:Date())
                             .navigationBarBackButtonHidden(true)
                     case .reward:
                         AjiwaiThirdView()

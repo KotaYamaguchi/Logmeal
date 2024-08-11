@@ -245,7 +245,11 @@ struct ShopView: View {
     ShopView()
         .environmentObject(UserData())
 }
-
+#Preview {
+    ContentView()
+        .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
+        .environmentObject(UserData())
+}
 struct AlertView: View {
     @State var size: CGSize
     @Binding var showAlert: Bool

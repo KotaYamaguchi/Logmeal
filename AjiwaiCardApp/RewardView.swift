@@ -38,10 +38,10 @@ struct AjiwaiThirdView: View {
                     .scaledToFit()
                     .frame(width: geometry.size.width*0.1)
                     .position(x: geometry.size.width * 0.06, y: geometry.size.height * 0.1)
-               
+                
                 if let gifData = gifData {
                     GIFImage(data: gifData, playGif: $playGif) {
-                    //    print("GIF animation finished!")
+                        //    print("GIF animation finished!")
                         playGif = false
                         growthed = user.growth()
                     }
@@ -51,7 +51,7 @@ struct AjiwaiThirdView: View {
                 if levelUped{
                     if let gifData = levelUpGifData {
                         GIFImage(data: gifData,loopCount: 1, playGif: $playlevelupGif) {
-                        //    print("GIF animation finished!")
+                            //    print("GIF animation finished!")
                             playGif = false
                             growthed = user.growth()
                         }
@@ -76,7 +76,7 @@ struct AjiwaiThirdView: View {
                     .position(x:geometry.size.width*0.5,y:geometry.size.height*0.2)
                     .overlay{
                         VStack(alignment:.leading){
-                            TypeWriterTextView("10expを獲得！！\n今日もしっかり味わいカードが書けたよ！\n明日も書いてね！！", speed: 0.05,font:.custom("GenJyuuGothicX-Bold", size: 17),textColor: .black) {
+                            TypeWriterTextView("\(user.gotEXP)expを獲得！！\n今日もしっかり味わいカードが書けたよ！\n明日も書いてね！！", speed: 0.05,font:.custom("GenJyuuGothicX-Bold", size: 17),textColor: .black) {
                                 buttondisable = false
                             }
                             
@@ -93,7 +93,7 @@ struct AjiwaiThirdView: View {
                     Image("mt_cracker")
                         .scaleEffect(scaleFlag ? 0.2 : 1)
                         .confettiCannon(counter: $counter1, num: 50, confettiSize: 10, rainHeight: 100, fadesOut: true, openingAngle: Angle.degrees(90), closingAngle: Angle.degrees(180), radius: 800)
-
+                    
                 }
                 .position(x:geometry.size.width*0.5,y:geometry.size.height*0.9)
             }
@@ -124,9 +124,8 @@ struct AjiwaiThirdView: View {
                     }
                 }
             }
-
+            
             .onAppear {
-                //print(user.selectedCharactar)
                 levelUped = user.checkLevel()  // レベルアップのチェック
                 if levelUped {
                     // レベルアップ時のGIF再生ロジック
@@ -149,20 +148,19 @@ struct AjiwaiThirdView: View {
                     }
                 }
             }
-
+            
             .onChange(of: user.exp) { oldValue, newValue in
                 levelUped = user.checkLevel()  // レベルアップのチェック
                 if levelUped {
                     // レベルアップ時のGIF再生ロジック
                     levelUped = true
-                }
-                growthed = user.growth()  // 成長のチェック
-                if growthed {
-                    // 成長時のGIF再生ロジック
-                    growthed = true
+                    growthed = user.growth()  // 成長のチェック
+                    if growthed {
+                        // 成長時のGIF再生ロジック
+                        growthed = true
+                    }
                 }
             }
-
         }
     }
     
@@ -184,7 +182,7 @@ struct AjiwaiThirdView: View {
         }
     }
     //入力したデータを保存するメソッドをまとめたボタンビュー
-   
+    
     
 }//View
 

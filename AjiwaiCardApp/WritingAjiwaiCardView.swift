@@ -17,7 +17,7 @@ struct WritingAjiwaiCardView: View {
     @State var uiimage: UIImage?
     let placeholderImage = Image("mt_No_Image")
     @State private var menu: [String] = []
-    @State private var saveDay: Date = Date()
+    @State var saveDay: Date
     @State private var fillMenuYourself = false
     
     // テキストフィールド
@@ -61,6 +61,9 @@ struct WritingAjiwaiCardView: View {
     private let feelingTextMaxLength = 250
     private let menuTextMaxLength = 30
     
+    @State private var showCameraPicker = false  // カメラ表示フラグ
+    @State var isFullScreen:Bool = false
+    @State private var gotEXP = 0
     private func isSave() -> Bool {
         return menu.isEmpty || lunchComent.isEmpty || feelingTexts.contains(where: { $0.isEmpty })
     }
@@ -85,9 +88,16 @@ struct WritingAjiwaiCardView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Image("bt_back")
-                        .resizable()
-                        .frame(width: 50, height: 50)
+                    if isFullScreen{
+                        Image("bt_close")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                    }else{
+                        Image("bt_back")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                    }
+                   
                 }
                 .zIndex(5)
                 .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
@@ -106,8 +116,15 @@ struct WritingAjiwaiCardView: View {
                                         .resizable()
                                         .frame(width: 400, height: 300)
                                 }
-                                PhotosPicker(selection: $selectedItem) {
-                                    Text("写真を選ぶ")
+                                HStack{
+                                    PhotosPicker(selection: $selectedItem) {
+                                        Text("写真を選ぶ")
+                                    }
+                                    Button{
+                                        showCameraPicker = true
+                                    }label:{
+                                        Text("カメラで撮る")
+                                    }
                                 }
                                 Text("今日の献立")
                                     .padding()
@@ -265,7 +282,9 @@ struct WritingAjiwaiCardView: View {
                     .padding()
                     
                     Button {
-                        user.exp += 10
+                        gotEXP = Int.random(in: 10...20)
+                        user.exp += gotEXP
+                        user.gotEXP = gotEXP
                         user.appearExp += 10
                         user.point += 100
                         user.path.append(.reward)
@@ -284,7 +303,11 @@ struct WritingAjiwaiCardView: View {
                 }
                 .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.95)
             }
-            .font(.custom("GenJyuuGothicX-Bold", size: 17))
+            .font(.custom("GenJyuuGothicX-Bold", size: 15))
+            .fullScreenCover(isPresented: $showCameraPicker) {
+                ImagePicker(image: $uiimage, sourceType: .camera)
+                    .ignoresSafeArea()
+            }
             .sheet(isPresented: $showQRscanner) {
                 ScannerView(isPresentingScanner: $showQRscanner)
             }
@@ -413,7 +436,7 @@ struct TextFieldWithCounter: View {
 }
 
 #Preview {
-    WritingAjiwaiCardView()
+    WritingAjiwaiCardView(saveDay: Date())
         .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
         .environmentObject(UserData())
 }
@@ -451,4 +474,46 @@ func DeleteAll(modelContext: ModelContext) {
     } catch {
         fatalError(error.localizedDescription)
     }
+}
+
+
+import UIKit
+import SwiftUI
+
+struct ImagePicker: UIViewControllerRepresentable {
+    @Environment(\.presentationMode) var presentationMode
+    @Binding var image: UIImage?
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    
+    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        let parent: ImagePicker
+        
+        init(parent: ImagePicker) {
+            self.parent = parent
+        }
+        
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            if let uiImage = info[.originalImage] as? UIImage {
+                parent.image = uiImage
+            }
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.presentationMode.wrappedValue.dismiss()
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+    
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.delegate = context.coordinator
+        picker.sourceType = sourceType
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 }
