@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 
+
 struct ColumnListView: View {
     @Query private var allColumn: [ColumnData]
     @State private var sortedDates: [String] = []
@@ -86,6 +87,7 @@ struct ColumnListView: View {
                             if let closestColumnId = getClosestColumnId() {
                                 withAnimation {
                                     scrollProxy?.scrollTo(closestColumnId, anchor: .top)
+                                    selectedDate = closestColumnId  // 今日のコラムを選択状態にする
                                 }
                             }
                         }
@@ -155,6 +157,7 @@ struct ColumnListView: View {
         return month
     }
 }
+
 
 struct ColumnCard: View {
     let date: String

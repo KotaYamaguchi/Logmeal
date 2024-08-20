@@ -69,18 +69,25 @@ struct FirstLoginView: View {
                 .position(x: size.width * 0.5, y: size.height * 0.3)
             
             Button(action: {
+                if user.name.isEmpty{
+                    user.name = "ななし"
+                }
                 showFillName = false
                 withAnimation {
                     showClassPicker = true
                 }
             }) {
-                Image("bt_done")
-                    .font(.largeTitle)
-                    .foregroundColor(.black)
-                    .frame(width: 170, height: 80)
-                    .opacity(user.name.isEmpty ? 0.5 : 1.0)
+                Image("bt_base")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width:200,height: 100)
+                    .overlay {
+                        Text("決定!")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                            .foregroundStyle(Color.buttonColor)
+                    }
             }
-            .disabled(user.name.isEmpty)
+//            .disabled(user.name.isEmpty)
             .position(x: size.width * 0.5, y: size.height * 0.8)
             .buttonStyle(PlainButtonStyle())
         }
@@ -94,7 +101,7 @@ struct FirstLoginView: View {
             .position(x: size.width * 0.5, y: size.height * 0.2)
             
             VStack(spacing: 20) {
-                TextField("学年", text: $selectedGrade)
+                TextField("学年：3年生なら 3 と入力してね", text: $selectedGrade)
                     .font(.custom("GenJyuuGothicX-Bold", size: 17))
                     .padding(10)
                     .background(Color(.systemGray6))
@@ -102,7 +109,7 @@ struct FirstLoginView: View {
                     .padding(.horizontal)
                     .frame(width: size.width * 0.4)
                 
-                TextField("クラス", text: $selectedClass)
+                TextField("クラス：1組なら 1 と入力してね", text: $selectedClass)
                     .font(.custom("GenJyuuGothicX-Bold", size: 17))
                     .padding(10)
                     .background(Color(.systemGray6))
@@ -122,10 +129,15 @@ struct FirstLoginView: View {
                     }
                 }
             }) {
-                Image("bt_done")
-                    .font(.largeTitle)
-                    .foregroundColor(.black)
-                    .frame(width: 170, height: 80)
+                Image("bt_base")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width:200,height: 100)
+                    .overlay {
+                        Text("決定！")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                            .foregroundStyle(Color.buttonColor)
+                    }
                     .opacity(selectedGrade.isEmpty || selectedClass.isEmpty ? 0.5 : 1.0)
             }
             .disabled(selectedGrade.isEmpty || selectedClass.isEmpty)
@@ -157,21 +169,14 @@ struct FirstLoginView: View {
                     conversationCount = 1
                     showButtonCount = 0
                 } label: {
-                    Text("もちろん！")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                        .background() {
-                            ZStack {
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(width: 210, height: 110)
-                                    .background(Color(red: 0.85, green: 0.85, blue: 0.85))
-                                    .cornerRadius(20)
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(width: 200, height: 100)
-                                    .background(Color(red: 0.99, green: 0.99, blue: 0.99))
-                                    .cornerRadius(20)
-                            }
+                    Image("bt_base")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width:200,height: 100)
+                        .overlay {
+                            Text("もちろん!")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                .foregroundStyle(Color.buttonColor)
                         }
                 }
                 .padding(.top, 30)

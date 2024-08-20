@@ -62,8 +62,9 @@ struct CharacterSelectView: View {
                         .scaledToFit()
                         .frame(width:200,height: 100)
                         .overlay {
-                            Text("これにする")
+                            Text("これにする!")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                .foregroundStyle(Color.buttonColor)
                         }
                 }
                 .frame(width: size.width * 0.2)
@@ -165,8 +166,9 @@ struct CharacterSelectView: View {
                                 .scaledToFit()
                                 .frame(width:size.width*0.2)
                                 .overlay{
-                                    Text("このキャラクターにする")
+                                    Text("このキャラクターにする!")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                        .foregroundStyle(Color.buttonColor)
                                 }
                         }
                         .buttonStyle(PlainButtonStyle())

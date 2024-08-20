@@ -1,192 +1,142 @@
 import SwiftUI
 import ConfettiSwiftUI
 
-struct AjiwaiThirdView: View {
+struct RewardView: View {
     @EnvironmentObject var user: UserData
-    var menuList: [String] = []
-    @State var escapeDailyData: [String] = []
-    @State var escapeEventsDate: [String] = []
-    @State var escapeSavedData: [String: SavedData] = [:]
-    @State private var counter1: Int = 0
-    @State private var counter2: Int = 0
-    @State private var lastTapTime: Date = Date.distantPast
-    @State private var scaleFlag:Bool = false
-    @State private var buttondisable = true
-    private let tapInterval: TimeInterval = 1.5 // 3秒間隔
-    @State var gifData = NSDataAsset(name: "Rabbit1_animation_breath")?.data
-    @State var levelUpGifData = NSDataAsset(name: "animation_levelUp")?.data
-    @State var growthGifData = NSDataAsset(name: "animation_growthLight")?.data
-    @State var playGif = true
-    @State var playlevelupGif = false
-    @State var playgrowthGif = false
-    @State private var levelUped:Bool = false
-    @State private var growthed:Bool = false
+    @State private var showBaseLevelUpView = false
+    @State private var showBaseAnimationView = false
+    @State private var showNormalCharacterView = false
+    @State private var showTextCompleted = false
+    @State private var scaleFlag = false
+    @State private var counter = 0
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Image("bg_RewardView")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                Image("mt_Border_RewardView")
-                    .resizable()
-                    .frame(width: geometry.size.width*0.97,height: geometry.size.height*0.97)
-                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                Image("mt_vegetables")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: geometry.size.width*0.1)
-                    .position(x: geometry.size.width * 0.06, y: geometry.size.height * 0.1)
-                
-                if let gifData = gifData {
-                    GIFImage(data: gifData, playGif: $playGif) {
-                        //    print("GIF animation finished!")
-                        playGif = false
-                        growthed = user.growth()
-                    }
-                    .frame(width:geometry.size.width * 2)
-                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+                backgroundView(geometry: geometry)
+                if user.isDataSaved {
+                    animationView(geometry: geometry)
                 }
-                if levelUped{
-                    if let gifData = levelUpGifData {
-                        GIFImage(data: gifData,loopCount: 1, playGif: $playlevelupGif) {
-                            //    print("GIF animation finished!")
-                            playGif = false
-                            growthed = user.growth()
-                        }
-                        .frame(width:geometry.size.width * 0.8)
-                        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.6)
-                        
-                    }
-                }
-                if growthed{
-                    if let gifData = growthGifData{
-                        GIFImage(data:gifData,loopCount:1, playGif: $playgrowthGif)
-                            .ignoresSafeArea()
-                            .frame(height: geometry.size.height*2.0)
-                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                        
-                    }
-                }
-                
-                Image("mt_RewardView_callout_\(user.selectedCharactar)")
-                    .resizable()
-                    .frame(width: geometry.size.width*0.65,height: geometry.size.height*0.36)
-                    .position(x:geometry.size.width*0.5,y:geometry.size.height*0.2)
-                    .overlay{
-                        VStack(alignment:.leading){
-                            TypeWriterTextView("\(user.gotEXP)expを獲得！！\n今日もしっかり味わいカードが書けたよ！\n明日も書いてね！！", speed: 0.05,font:.custom("GenJyuuGothicX-Bold", size: 17),textColor: .black) {
-                                buttondisable = false
-                            }
-                            
-                        }
-                        .position(x:geometry.size.width*0.5,y:geometry.size.height*0.2)
-                    }
-                HStack{
-                    Image("mt_cracker")
-                        .scaleEffect(scaleFlag ? 0.2 : 1)
-                        .rotationEffect(.degrees(60))
-                        .confettiCannon(counter: $counter2, num: 50, confettiSize: 10, rainHeight: 100, fadesOut: true, openingAngle: Angle.degrees(0), closingAngle: Angle.degrees(90), radius: 800)
-                    Spacer()
-                        .frame(width: geometry.size.width*0.75)
-                    Image("mt_cracker")
-                        .scaleEffect(scaleFlag ? 0.2 : 1)
-                        .confettiCannon(counter: $counter1, num: 50, confettiSize: 10, rainHeight: 100, fadesOut: true, openingAngle: Angle.degrees(90), closingAngle: Angle.degrees(180), radius: 800)
-                    
-                }
-                .position(x:geometry.size.width*0.5,y:geometry.size.height*0.9)
-            }
-            Button {
-                //pathの中身を全て削除して大元のビューに戻る
-                user.path.removeAll()
-                //ホームビューに行きたいので.homeを追加
-                user.path.append(.home)
-            } label: {
-                Image("bt_backHome")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: geometry.size.width*0.15)
-                    .shadow(radius: 10)
-            }
-            .position(x:geometry.size.width*0.93,y:geometry.size.height*0.98)
-            .buttonStyle(PlainButtonStyle())
-            .disabled(buttondisable)
-            .onChange(of: growthed) { oldValue, newValue in
-                if newValue {  // 成長が確認された場合
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                        if user.growthStage == 3 {
-                            gifData = NSDataAsset(name: "\(user.selectedCharactar)_animation_applause")?.data
-                        } else if user.growthStage == 2 {
-                            gifData = NSDataAsset(name: "\(user.selectedCharactar)2_animation_breath")?.data
-                        }
-                        playGif = true  // GIFを再生
-                    }
-                }
-            }
-            
-            .onAppear {
-                levelUped = user.checkLevel()  // レベルアップのチェック
-                if levelUped {
-                    // レベルアップ時のGIF再生ロジック
-                    levelUped = true
-                }
-                growthed = user.growth()  // 成長のチェック
-                if growthed {
-                    // 成長時のGIF再生ロジック
-                    growthed = true
-                }
-                counter1 += 1
-                counter2 += 1
-                withAnimation {
-                    scaleFlag = true
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    withAnimation(.spring()) {
-                        scaleFlag = false
-                    }
-                }
-            }
-            
-            .onChange(of: user.exp) { oldValue, newValue in
-                levelUped = user.checkLevel()  // レベルアップのチェック
-                if levelUped {
-                    // レベルアップ時のGIF再生ロジック
-                    levelUped = true
-                    growthed = user.growth()  // 成長のチェック
-                    if growthed {
-                        // 成長時のGIF再生ロジック
-                        growthed = true
-                    }
-                }
+                confettiView(geometry: geometry)
+                navigationButton(geometry: geometry)
             }
         }
     }
+    private func getFirstGifName() -> String {
+        switch user.growthStage {
+        case 2:
+            return "\(user.selectedCharactar)1_animation_breath"
+        case 3:
+            return "\(user.selectedCharactar)2_animation_breath"
+        default:
+            return "\(user.selectedCharactar)\(user.growthStage)_animation_breath"
+        }
+    }
     
-    private func handleTap() {
-        withAnimation {
-            scaleFlag.toggle()
+    private func getSecondGifName() -> String {
+        switch user.growthStage {
+        case 2:
+            return "\(user.selectedCharactar)2_animation_breath"
+        case 3:
+            return "\(user.selectedCharactar)3_animation_breath"
+        default:
+            return "\(user.selectedCharactar)\(user.growthStage)_animation_breath"
+        }
+    }
+    
+    private func handleOnAppear() {
+        counter += 1
+        let levelUp = user.checkLevel()
+        let growth = user.growth()
+        
+        if growth {
+            showBaseAnimationView = true
+        } else if levelUp {
+            showBaseLevelUpView = true
+        } else {
+            showNormalCharacterView = true
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-            withAnimation(.spring()) {
-                scaleFlag = false
-            }
-        }
-        let currentTime = Date()
-        if currentTime.timeIntervalSince(lastTapTime) >= tapInterval {
-            counter1 += 1
-            counter2 += 1
-            lastTapTime = currentTime
+        // TypeWriterTextView の表示が終わった後の処理
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            showTextCompleted = true
         }
     }
-    //入力したデータを保存するメソッドをまとめたボタンビュー
+    private func animationView(geometry: GeometryProxy) -> some View{
+        ZStack{
+            if showBaseAnimationView {
+                BaseAnimationView(
+                    firstGifName: getFirstGifName(),
+                    secondGifName: getSecondGifName(),
+                    text1: "おや、\(user.selectedCharactar)のようすが…",
+                    text2: "おめでとう！\(user.selectedCharactar)が進化したよ！",
+                    useBackGroundColor: true
+                )
+            } else if showBaseLevelUpView {
+                BaseLevelUpView(
+                    characterGifName: "\(user.selectedCharactar)\(user.growthStage)_animation_breath",
+                    text: "\(user.selectedCharactar)がレベルアップしたよ！",
+                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharactar)",
+                    useBackGroundColor: false
+                )
+            } else if showNormalCharacterView {
+                NormalCharacterView(
+                    characterGifName: "\(user.selectedCharactar)\(user.growthStage)_animation_breath",
+                    text: "\(user.selectedCharactar)は元気にしています！",
+                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharactar)",
+                    useBackGroundColor: false
+                )
+            }
+        }
+    }
+    private func backgroundView(geometry: GeometryProxy) -> some View {
+        ZStack {
+            Image("bg_RewardView")
+                .resizable()
+                .scaledToFill()
+                .frame(width: geometry.size.width, height: geometry.size.height)
+                .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+        }
+    }
+    private func navigationButton(geometry: GeometryProxy) -> some View {
+        Button {
+            user.isDataSaved = false // フラグをリセット
+            user.path.removeAll()
+            user.path.append(.home)
+        } label: {
+            Image("bt_backHome")
+                .resizable()
+                .scaledToFit()
+                .frame(width: geometry.size.width * 0.15)
+                .shadow(radius: 10)
+        }
+        .position(x: geometry.size.width * 0.93, y: geometry.size.height * 0.98)
+        .buttonStyle(PlainButtonStyle())
+    }
     
-    
-}//View
+    private func confettiView(geometry: GeometryProxy) -> some View {
+        HStack {
+            confettiCannonView(imageName: "mt_cracker", scaleFlag: $scaleFlag, counter: $counter, rotation: .degrees(60), openingAngle: .degrees(0), closingAngle: .degrees(90))
+            Spacer().frame(width: geometry.size.width * 0.75)
+            confettiCannonView(imageName: "mt_cracker", scaleFlag: $scaleFlag, counter: $counter, rotation: .zero, openingAngle: .degrees(90), closingAngle: .degrees(180))
+        }
+        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.9)
+    }
 
-#Preview{
-    AjiwaiThirdView()
+    private func confettiCannonView(imageName: String, scaleFlag: Binding<Bool>, counter: Binding<Int>, rotation: Angle, openingAngle: Angle, closingAngle: Angle) -> some View {
+        Image(imageName)
+            .scaleEffect(scaleFlag.wrappedValue ? 0.2 : 1)
+            .rotationEffect(rotation)
+            .confettiCannon(counter: counter, num: 50, confettiSize: 10, rainHeight: 100, fadesOut: true, openingAngle: openingAngle, closingAngle: closingAngle, radius: 800)
+    }
+
+}
+
+#Preview {
+    RewardView()
         .environmentObject(UserData())
 }
+
+
+
+
+

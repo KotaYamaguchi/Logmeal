@@ -8,6 +8,7 @@ struct AjiwaiCardApp: App {
             LaunchScreen()
                 .environmentObject(user)
                 .modelContainer(for:[AjiwaiCardData.self,ColumnData.self,MenuData.self])
+                
         }
     }
 }

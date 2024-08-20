@@ -8,21 +8,20 @@ struct WritingAjiwaiCardView: View {
     @Query private var allData: [AjiwaiCardData]
     @Query private var allColumn:[ColumnData]
     @Query private var allmenu:[MenuData]
+    
     // Environment
     @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
-    
+    //Image
+    let placeholderImage = UIImage(named:"mt_No_Image")
+    @State private var menu: [String] = []
     // 味わいカード
     @State private var lunchComent: String = ""
     @State var uiimage: UIImage?
-    let placeholderImage = Image("mt_No_Image")
-    @State private var menu: [String] = []
     @State var saveDay: Date
     @State private var fillMenuYourself = false
-    
-    // テキストフィールド
+    // 五感テキストフィールド
     @State private var feelingTexts = ["", "", "", "", ""]
-    
     // テキストフィールドスタイル
     @State private var feelings = ["視覚", "聴覚", "嗅覚", "味覚", "触覚"]
     private let iconArray = ["mt_Eye_icon", "mt_Ear_icon", "mt_Nose_icon", "mt_Tongue_icon", "mt_Hand_Icon"]
@@ -34,36 +33,395 @@ struct WritingAjiwaiCardView: View {
         Color(red: 196/255, green: 160/255, blue: 193/255)
     ]
     
-    // デートピッカー
+    // その他の状態管理
     @State private var showDatePicker: Bool = false
-    
-    // QRコードを使用
     @State var showQRscanner: Bool = false
     @State var monthlyMenu: [String:[String]] = [:]
     @State var monthlyColumnTitle: [String:String] = [:]
     @State var monthlyColumnCaption: [String:String] = [:]
-    
-    // ImagePicker
     @State var showImagePicker: Bool = false
     @State var selectedItem: PhotosPickerItem?
-    
-    // キーボド表示時にビューをオフセットする
     @State private var keyboardHeight: CGFloat = 0
     @FocusState private var focusedField: Int?
-    
-    // 保存確認アラート
     @State private var showingSaveAlert = false
-    
-    // 次に行けるようになるフラグ
     @State private var toNext: Bool = true
+    @State private var showCameraPicker = false
+    @State private var showingCameraView = false
+    @State var isFullScreen: Bool = false
+    @State private var gotEXP = 0
+    @State private var isSaving = false
+    @State private var showSaveSuccess = false
     
     private let lunchCommentMaxLength = 500
     private let feelingTextMaxLength = 250
     private let menuTextMaxLength = 30
     
-    @State private var showCameraPicker = false  // カメラ表示フラグ
-    @State var isFullScreen:Bool = false
-    @State private var gotEXP = 0
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                backgroundView(geometry: geometry)
+                
+                contentView(geometry: geometry)
+                
+                dateBar(geometry: geometry)
+                
+                customDatePicker(geometry: geometry)
+                
+                dismissView(geometry: geometry)
+                
+                if isSaving {
+                    savingOverlayView()
+                }
+                if showingCameraView{
+                    showingCameraOverlayview()
+                }
+            }
+            .font(.custom("GenJyuuGothicX-Bold", size: 15))
+            .fullScreenCover(isPresented: $showCameraPicker) {
+                ImagePicker(image: $uiimage, sourceType: .camera)
+                    .ignoresSafeArea()
+                    .onAppear(){
+                        showingCameraView = false
+                    }
+            }
+            .sheet(isPresented: $showQRscanner) {
+                ScannerView(isPresentingScanner: $showQRscanner)
+                    .onDisappear(){
+                        filereMenu()
+                    }
+            }
+            .alert(isPresented: $showingSaveAlert) {
+                saveConfirmationAlert()
+            }
+            .onChange(of: selectedItem) { oldValue, newValue in
+                handleSelectedItemChange(newValue: newValue)
+            }
+            .onChange(of: monthlyMenu) { oldValue, newValue in
+                filereMenu()
+            }
+            .onChange(of: saveDay) { oldValue, newValue in
+                filereMenu()
+            }
+            .onAppear(perform: onAppear)
+        }
+        .ignoresSafeArea(.keyboard)
+        .alert("保存が完了しました", isPresented: $showSaveSuccess) {
+            Button("OK", role: .cancel) {
+                gotEXP = Int.random(in: 10...20)
+                user.exp += gotEXP
+                user.gotEXP = gotEXP
+                user.appearExp += 10
+                user.point += 100
+                if isFullScreen {
+                    dismiss()
+                } else {
+                    user.path.append(.reward)
+                }
+            }
+        }
+    }
+    
+    // MARK: - View Components
+    
+    private func backgroundView(geometry: GeometryProxy) -> some View {
+        Image("bg_AjiwaiCardView")
+            .resizable()
+            .ignoresSafeArea()
+            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+    }
+    private func dismissView(geometry: GeometryProxy) -> some View{
+        Button {
+            dismiss()
+        } label: {
+            if isFullScreen{
+                Image("bt_close")
+                    .resizable()
+                    .frame(width: 50, height: 50)
+            }else{
+                Image("bt_back")
+                    .resizable()
+                    .frame(width: 50, height: 50)
+            }
+            
+        }
+        .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
+
+    }
+    private func showingCameraOverlayview() -> some View{
+        ZStack{
+            Color.gray.opacity(0.5)
+                .ignoresSafeArea()
+            
+            ProgressView("カメラを起動中...")
+                .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                .padding()
+                .background(Color.black.opacity(0.7))
+                .tint(.white)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+
+        }
+    }
+    private func savingOverlayView() -> some View {
+        ZStack {
+            Color.gray.opacity(0.5)
+                .ignoresSafeArea()
+            
+            ProgressView("保存中...")
+                .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                .padding()
+                .background(Color.black.opacity(0.7))
+                .tint(.white)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+        }
+    }
+    
+    private func contentView(geometry: GeometryProxy) -> some View {
+        ScrollView {
+            HStack {
+                Spacer()
+                VStack {
+                    imageSelectionView()
+                    menuInputView()
+                    Spacer()
+                }
+                .frame(width: 400, height: 600)
+                .background {
+                    Image("bg_MenuList")
+                }
+                Spacer()
+                commentsAndFeelingsView(geometry: geometry)
+                Spacer()
+            }
+        }
+        .offset(y: focusedField != nil && focusedField! >= 0 ? -keyboardHeight : 0)
+        .frame(width: geometry.size.width, height: geometry.size.height)
+    }
+    
+    private func imageSelectionView() -> some View {
+        VStack {
+            Group {
+                if let uiimage = self.uiimage {
+                    Image(uiImage: uiimage)
+                        .resizable()
+                        .frame(width: 400, height: 300)
+                } else {
+                    Image(uiImage: placeholderImage!)
+                        .resizable()
+                        .frame(width: 400, height: 300)
+                }
+                HStack {
+                    PhotosPicker(selection: $selectedItem) {
+                        Text("写真を選ぶ")
+                    }
+                    Button {
+                        showCameraPicker = true
+                        showingCameraView = true
+                    } label: {
+                        Text("カメラで撮る")
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+
+    private func menuInputView() -> some View {
+        VStack {
+            Text("今日の献立")
+                .padding()
+            
+            if fillMenuYourself {
+                menuTextFieldsView()
+            } else {
+                menuSelectionButtons()
+            }
+        }
+    }
+    
+    private func menuTextFieldsView() -> some View {
+        ScrollView {
+            VStack(alignment:.leading){
+            ForEach($menu.indices, id: \.self) { index in
+                TextFieldWithCounterWithBorder(text: Binding(
+                    get: { menu[index] },
+                    set: { newValue in
+                        if newValue.count <= menuTextMaxLength {
+                            menu[index] = newValue
+                        }
+                    }
+                ), maxLength: menuTextMaxLength)
+                .padding(.vertical, 2)
+                .focused($focusedField, equals: index + 100)
+            }
+        }
+            Button(action: {
+                menu.append("")
+            }) {
+                Text("メニュー項目を追加")
+            }
+            Button {
+                fillMenuYourself = false
+            } label: {
+                Text("閉じる")
+            }
+        }
+    }
+    
+    private func menuSelectionButtons() -> some View {
+        VStack {
+            if !menu.isEmpty {
+                ForEach(menu, id: \.self) { content in
+                    Text(content)
+                }
+            } else {
+                VStack {
+                    Button {
+                        showQRscanner = true
+                    } label: {
+                        Text("QRコードから入力する")
+                    }
+                    Button {
+                        fillMenuYourself = true
+                    } label: {
+                        Text("自分で入力する")
+                    }
+                }
+            }
+        }
+    }
+    
+    private func commentsAndFeelingsView(geometry: GeometryProxy) -> some View {
+        VStack {
+            Image("mt_AjiwaiCard")
+                .overlay {
+                    VStack(alignment: .trailing) {
+                        TextField("給食の感想を書こう！", text: Binding(
+                            get: { lunchComent },
+                            set: { newValue in
+                                if newValue.count <= lunchCommentMaxLength {
+                                    lunchComent = newValue
+                                }
+                            }
+                        ), axis: .vertical)
+                        .frame(width: 400, height: 200)
+                        .focused($focusedField, equals: -1)
+                        Text("\(lunchComent.count)/\(lunchCommentMaxLength)")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .padding(.trailing, 5)
+                            .offset(y: -10)
+                    }
+                }
+            feelingsTextFields()
+        }
+        .frame(width: 400, height: geometry.size.height)
+    }
+    
+    private func feelingsTextFields() -> some View {
+        VStack {
+            ForEach(0..<feelings.count, id: \.self) { index in
+                TextFieldWithCounter(text: Binding(
+                    get: { feelingTexts[index] },
+                    set: { newValue in
+                        if newValue.count <= feelingTextMaxLength {
+                            feelingTexts[index] = newValue
+                        }
+                    }
+                ), maxLength: feelingTextMaxLength)
+                .feelingsTextFieldStyle(image: iconArray[index], underlineColor: colors[index])
+                .padding(.bottom)
+                .focused($focusedField, equals: index)
+            }
+            actionButtons()
+        }
+    }
+    private func dateBar(geometry: GeometryProxy) -> some View{
+        Button{
+            withAnimation {
+                showDatePicker = true
+            }
+        }label: {
+            Image("mt_DateBar")
+                .overlay{
+                    Text(dateFormatter(date: saveDay))
+                        .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                        .foregroundStyle(.white)
+                }
+        }
+        
+        .position(x:geometry.size.width*0.9,y:geometry.size.height*0.04)
+    }
+    private func customDatePicker(geometry: GeometryProxy) -> some View{
+        ZStack{
+            if showDatePicker {
+                Color.gray
+                    .opacity(0.5)
+                    .ignoresSafeArea()
+                VStack {
+                    Spacer()
+                    ZStack(alignment: .bottom) {
+                        DatePicker("", selection: $saveDay, displayedComponents: [.date])
+                            .datePickerStyle(.graphical)
+                            .environment(\.locale, Locale(identifier: "ja_JP"))
+                            .frame(width: 400, height: 500)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                        Button {
+                            withAnimation {
+                                showDatePicker = false
+                            }
+                        } label: {
+                            Text("閉じる")
+                        }
+                        .padding(.bottom, 25)
+                    }
+                    Spacer()
+                }
+                .frame(width: 400, height: 500)
+            }
+        }
+    }
+    private func actionButtons() -> some View {
+        HStack {
+            saveButton()
+        }
+    }
+    
+    private func saveButton() -> some View {
+        Button {
+            showingSaveAlert = true
+        } label: {
+            Image("bt_base")
+                .resizable()
+                .scaledToFit()
+                .frame(height:50)
+                .opacity(isSave() ? 0.5 : 1.0)
+                .overlay {
+                    HStack{
+                        Image(systemName: "")
+                        Text("保存する")
+                            .foregroundStyle(Color.buttonColor)
+                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                    }
+                }
+        }
+        .disabled(isSave())
+        .padding()
+    }
+    
+    private func saveConfirmationAlert() -> Alert {
+        Alert(
+            title: Text("保存の確認"),
+            message: Text("味わいカードを保存しますか？"),
+            primaryButton: .cancel(Text("キャンセル")),
+            secondaryButton: .default(Text("保存"), action: saveData)
+        )
+    }
+    
+    // MARK: - Functions
+    
     private func isSave() -> Bool {
         return menu.isEmpty || lunchComent.isEmpty || feelingTexts.contains(where: { $0.isEmpty })
     }
@@ -77,305 +435,55 @@ struct WritingAjiwaiCardView: View {
         }
     }
     
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                Image("bg_AjiwaiCardView")
-                    .resizable()
-                    .ignoresSafeArea()
-                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+    private func saveData() {
+        isSaving = true
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            let imageToSave: UIImage
+            
+            if let uiimage = self.uiimage {
+                imageToSave = uiimage
+            } else if let placeholderUIImage = placeholderImage {
+                imageToSave = placeholderUIImage
+            } else {
+                print("画像の保存に失敗しました")
+                DispatchQueue.main.async {
+                    isSaving = false
+                    showSaveSuccess = false
+                }
+                return
+            }
+
+            let filePath = getDocumentPath(saveData: imageToSave, fileName: dateFormatter(date: saveDay))
+            add(lunchComments: self.lunchComent, sight: self.feelingTexts[0], hearing: self.feelingTexts[1], smell: self.feelingTexts[2], taste: self.feelingTexts[3], tacticle: self.feelingTexts[4], menu: self.menu, imagePath: filePath)
+            toNext = false
+
+            DispatchQueue.main.async {
+                isSaving = false
+                showSaveSuccess = true
                 
-                Button {
+                // データ保存フラグをtrueに設定
+                user.isDataSaved = true
+
+                // LookBackViewへ戻る
+                if isFullScreen {
                     dismiss()
-                } label: {
-                    if isFullScreen{
-                        Image("bt_close")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                    }else{
-                        Image("bt_back")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                    }
-                   
-                }
-                .zIndex(5)
-                .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
-                
-                ScrollView {
-                    HStack {
-                        Spacer()
-                        VStack {
-                            Group {
-                                if let uiimage = self.uiimage {
-                                    Image(uiImage: uiimage)
-                                        .resizable()
-                                        .frame(width: 400, height: 300)
-                                } else {
-                                    placeholderImage
-                                        .resizable()
-                                        .frame(width: 400, height: 300)
-                                }
-                                HStack{
-                                    PhotosPicker(selection: $selectedItem) {
-                                        Text("写真を選ぶ")
-                                    }
-                                    Button{
-                                        showCameraPicker = true
-                                    }label:{
-                                        Text("カメラで撮る")
-                                    }
-                                }
-                                Text("今日の献立")
-                                    .padding()
-                                
-                                if fillMenuYourself {
-                                    ScrollView {
-                                        ForEach($menu.indices, id: \.self) { index in
-                                            TextFieldWithCounterWithBorder(text: Binding(
-                                                get: { menu[index] },
-                                                set: { newValue in
-                                                    if newValue.count <= menuTextMaxLength {
-                                                        menu[index] = newValue
-                                                    }
-                                                }
-                                            ), maxLength: menuTextMaxLength)
-                                            .padding(.vertical, 2)
-                                            .focused($focusedField, equals: index + 100) // 100以降の値をメニュー用に予約
-                                        }
-                                        Button(action: {
-                                            menu.append("")
-                                        }) {
-                                            Text("メニュー項目を追加")
-                                        }
-                                        Button {
-                                            fillMenuYourself = false
-                                        } label: {
-                                            Text("閉じる")
-                                        }
-                                    }
-                                } else {
-                                    if !menu.isEmpty {
-                                        ForEach(menu, id: \.self) { content in
-                                            Text(content)
-                                        }
-                                    } else {
-                                        VStack {
-                                            Button {
-                                                showQRscanner = true
-                                            } label: {
-                                                Text("QRコードから入力する")
-                                            }
-                                            Button {
-                                                fillMenuYourself = true
-                                            } label: {
-                                                Text("自分で入力する")
-                                            }
-                                        }
-                                    }
-                                }
-                                Spacer()
-                            }
-                            .offset(y: 10)
-                        }
-                        .frame(width: 400, height: 600)
-                        .background {
-                            Image("bg_MenuList")
-                        }
-                        Spacer()
-                        VStack {
-                            Image("mt_AjiwaiCard")
-                                .overlay {
-                                    VStack(alignment: .trailing) {
-                                        TextField("給食の感想を書こう！", text: Binding(
-                                            get: { lunchComent },
-                                            set: { newValue in
-                                                if newValue.count <= lunchCommentMaxLength {
-                                                    lunchComent = newValue
-                                                }
-                                            }
-                                        ), axis: .vertical)
-                                        .frame(width: 400, height: 200)
-                                        .focused($focusedField, equals: -1)
-                                        Text("\(lunchComent.count)/\(lunchCommentMaxLength)")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                            .padding(.trailing, 5)
-                                            .offset(y:-10)
-                                    }
-                                }
-                            VStack{
-                                ForEach(0..<feelings.count, id: \.self) { index in
-                                    TextFieldWithCounter(text: Binding(
-                                        get: { feelingTexts[index] },
-                                        set: { newValue in
-                                            if newValue.count <= feelingTextMaxLength {
-                                                feelingTexts[index] = newValue
-                                            }
-                                        }
-                                    ), maxLength: feelingTextMaxLength)
-                                    .feelingsTextFieldStyle(image: iconArray[index], underlineColor: colors[index])
-                                    .padding(.bottom)
-                                    .focused($focusedField, equals: index)
-                                }
-                            }
-                        }
-                        .frame(width: 400, height: geometry.size.height)
-                        
-                        Spacer()
-                    }
-                }
-                .offset(y: focusedField != nil && focusedField! >= 0 ? -keyboardHeight : 0)
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                
-                Button {
-                    withAnimation {
-                        showDatePicker = true
-                    }
-                } label: {
-                    Image("mt_DateBar")
-                        .overlay {
-                            Text(dateFormatter(date: saveDay))
-                                .font(.custom("GenJyuuGothicX-Bold", size: 28))
-                                .foregroundStyle(.white)
-                        }
-                }
-                .position(x: geometry.size.width * 0.9, y: geometry.size.height * 0.05)
-                
-                if showDatePicker {
-                    Color.gray
-                        .opacity(0.5)
-                        .ignoresSafeArea()
-                    VStack {
-                        ZStack(alignment: .bottom) {
-                            DatePicker("", selection: $saveDay, displayedComponents: [.date])
-                                .datePickerStyle(.graphical)
-                                .environment(\.locale, Locale(identifier: "ja_JP"))
-                                .frame(width: 400, height: 500)
-                                .background(Color.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 20))
-                            Button {
-                                withAnimation {
-                                    showDatePicker = false
-                                }
-                            } label: {
-                                Text("閉じる")
-                            }
-                            .padding(.bottom, 25)
-                        }
-                    }
-                    .frame(width: 400, height: 500)
-                }
-                HStack {
-                    Button {
-                        showingSaveAlert = true
-                    } label: {
-                        Image("bt_base")
-                            .resizable()
-                            .frame(width: geometry.size.width * 0.1, height: geometry.size.height * 0.05)
-                            .opacity(isSave() ? 0.5 : 1.0)
-                            .overlay {
-                                Text("保存する")
-                            }
-                    }
-                    .disabled(isSave())
-                    .padding()
-                    
-                    Button {
-                        gotEXP = Int.random(in: 10...20)
-                        user.exp += gotEXP
-                        user.gotEXP = gotEXP
-                        user.appearExp += 10
-                        user.point += 100
-                        user.path.append(.reward)
-                    } label: {
-                        Image("bt_base")
-                            .resizable()
-                            .frame(width: geometry.size.width * 0.1, height: geometry.size.height * 0.05)
-                            .opacity(toNext ? 0.5 : 1.0)
-                            .overlay {
-                                Text("次へ")
-                                
-                            }
-                    }
-                    .disabled(toNext)
-                    .padding()
-                }
-                .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.95)
-            }
-            .font(.custom("GenJyuuGothicX-Bold", size: 15))
-            .fullScreenCover(isPresented: $showCameraPicker) {
-                ImagePicker(image: $uiimage, sourceType: .camera)
-                    .ignoresSafeArea()
-            }
-            .sheet(isPresented: $showQRscanner) {
-                ScannerView(isPresentingScanner: $showQRscanner)
-            }
-            .onChange(of: selectedItem, { oldValue, newValue in
-                Task {
-                    // 選択アイテムをDataに変換(nilで処理終了)
-                    guard let data = try? await newValue?.loadTransferable(type: Data.self) else { return }
-                    // DataをUIImageに変換(nilで処理終了)
-                    guard let uiImage = UIImage(data: data) else { return }
-                    // UIImage型プロパティに保存
-                    self.uiimage = uiImage
-                }
-            })
-            .onChange(of: monthlyMenu) { oldValue, newValue in
-                filereMenu()
-            }
-            .onChange(of: saveDay) { oldValue, newValue in
-                filereMenu()
-            }
-            .onAppear {
-                filereMenu()
-            }
-        }
-        .ignoresSafeArea(.keyboard)
-        .alert("保存の確認", isPresented: $showingSaveAlert) {
-            Button("キャンセル", role: .cancel) { }
-            Button("保存") {
-                if let uiimage = self.uiimage {
-                    let filePath = getDocumentPath(saveData: uiimage, fileName: dateFormatter(date: saveDay))
-                    add(lunchComments: self.lunchComent, sight: self.feelingTexts[0], hearing: self.feelingTexts[1], smell: self.feelingTexts[2], taste: self.feelingTexts[3], tacticle: self.feelingTexts[4], menu: self.menu, imagePath: filePath)
-                    toNext = false
                 } else {
-                    // 画像保存が失敗した場合のエラーハンドリング
-                    print("画像の保存に失敗しました")
-                }
-            }
-        } message: {
-            Text("味わいカードを保存しますか？")
-        }
-        .onAppear {
-            NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
-                if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-                    let keyboardRectangle = keyboardFrame.cgRectValue
-                    withAnimation {
-                        keyboardHeight = keyboardRectangle.height - 100.0
-                    }
-                }
-            }
-            NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
-                withAnimation {
-                    keyboardHeight = 0
+                    user.path.append(.reward)
                 }
             }
         }
     }
-    
-    func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
-        // ドキュメントファイルのパスを取得
+
+
+    private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        // ファイルネームを付け加えてURLを作成
         let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
-        // JPEGデータに変換してドキュメントファイルに保存
         do {
             try saveData.jpegData(compressionQuality: 0.25)?.write(to: fileURL)
         } catch {
             print("画像の保存に失敗しました: \(error)")
         }
-        // ファイルURLを返す
         return fileURL
     }
     
@@ -389,11 +497,6 @@ struct WritingAjiwaiCardView: View {
         }
     }
     
-    private func delete(item: AjiwaiCardData) {
-        context.delete(item)
-    }
-    
-    // 日付をStringに変換する
     private func dateFormatter(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -401,7 +504,32 @@ struct WritingAjiwaiCardView: View {
         formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: date)
     }
+    private func handleSelectedItemChange(newValue: PhotosPickerItem?) {
+           Task {
+               guard let data = try? await newValue?.loadTransferable(type: Data.self) else { return }
+               guard let uiImage = UIImage(data: data) else { return }
+               self.uiimage = uiImage
+           }
+       }
+    private func onAppear() {
+        filereMenu()
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
+            if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+                let keyboardRectangle = keyboardFrame.cgRectValue
+                withAnimation {
+                    keyboardHeight = keyboardRectangle.height - 100.0
+                }
+            }
+        }
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
+            withAnimation {
+                keyboardHeight = 0
+            }
+        }
+    }
 }
+
+// MARK: - Helper Views
 
 struct TextFieldWithCounterWithBorder: View {
     @Binding var text: String
@@ -410,7 +538,7 @@ struct TextFieldWithCounterWithBorder: View {
     var body: some View {
         ZStack(alignment: .trailing) {
             TextField("メニューを入力...", text: $text)
-                .padding(.trailing, 40) // 右端にスペースを確保
+                .padding(.trailing, 40)
                 .textFieldStyle(.roundedBorder)
             Text("\(text.count)/\(maxLength)")
                 .font(.custom("GenJyuuGothicX-Bold", size: 12))
@@ -419,14 +547,15 @@ struct TextFieldWithCounterWithBorder: View {
         }
     }
 }
+
 struct TextFieldWithCounter: View {
     @Binding var text: String
     let maxLength: Int
     
     var body: some View {
         ZStack(alignment: .trailing) {
-            TextField("", text: $text)
-                .padding(.trailing, 40) // 右端にスペースを確保
+            TextField("", text: $text,axis: .vertical)
+                .padding(.trailing, 40)
             Text("\(text.count)/\(maxLength)")
                 .font(.custom("GenJyuuGothicX-Bold", size: 12))
                 .foregroundColor(.gray)
@@ -435,11 +564,20 @@ struct TextFieldWithCounter: View {
     }
 }
 
+// MARK: - Preview
+
 #Preview {
     WritingAjiwaiCardView(saveDay: Date())
         .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
         .environmentObject(UserData())
 }
+#Preview {
+    ChildHomeView()
+        .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
+        .environmentObject(UserData())
+}
+
+// MARK: - Custom Modifiers
 
 struct FeelingsTextFieldStyle: ViewModifier {
     var image: String
@@ -461,6 +599,7 @@ struct FeelingsTextFieldStyle: ViewModifier {
         }
     }
 }
+
 extension View {
     func feelingsTextFieldStyle(image: String, underlineColor: Color) -> some View {
         self.modifier(FeelingsTextFieldStyle(image: image, underlineColor: underlineColor))
@@ -470,12 +609,10 @@ extension View {
 func DeleteAll(modelContext: ModelContext) {
     do {
         try modelContext.delete(model: AjiwaiCardData.self)
-        print(AjiwaiCardData.self)
     } catch {
         fatalError(error.localizedDescription)
     }
 }
-
 
 import UIKit
 import SwiftUI

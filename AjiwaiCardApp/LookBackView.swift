@@ -7,48 +7,131 @@ struct LookBackView: View {
     @EnvironmentObject var user: UserData
     @State private var selectDate: Date = Date()
     @State private var showDetail: Bool = false
-    @State private var navigateToWritingView: Bool = false // 追加
+    @State private var navigateToWritingView: Bool = false
     @Environment(\.dismiss) private var dismiss
+    @State private var showBaseLevelUpView = false
+    @State private var showBaseAnimationView = false
+    @State private var showNormalCharacterView = false
+    @State private var showTextCompleted = false
+    @State var fromAjiwaiCard:Bool = true
     var filteredData: AjiwaiCardData? {
         allData.first { Calendar.current.isDate($0.saveDay, inSameDayAs: selectDate) }
     }
-
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Image("bg_AjiwaiCardView")
+                Image("bg_calenderView_\(user.selectedCharactar)")
                     .resizable()
                     .ignoresSafeArea()
+                
                 Button {
                     dismiss()
                 } label: {
-                   
-                        Image("bt_back")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                    
+                    Image("bt_back")
+                        .resizable()
+                        .frame(width: 50, height: 50)
                 }
                 .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
+                
                 CalendarDisplayView(selectedDate: $selectDate, allData: allData)
                     .frame(width: geometry.size.width * 0.85, height: geometry.size.height)
                     .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                AjiwaiCardDataPreview(selectedDate: selectDate, allData: allData, showDetail: $showDetail, navigateToWritingView: $navigateToWritingView) // 修正
+                
+                AjiwaiCardDataPreview(selectedDate: selectDate, allData: allData, showDetail: $showDetail, navigateToWritingView: $navigateToWritingView)
                     .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.5)
+                
+                if user.isDataSaved {
+                    animationView(geometry: geometry)
+                        .onTapGesture {
+                            user.isDataSaved = false // フラグをリセット
+                        }
+                }
             }
             .fullScreenCover(isPresented: $showDetail) {
                 if let data = filteredData {
                     AjiwaiCardDetailView(selectedDate: selectDate, data: data)
                 }
             }
-            .fullScreenCover(isPresented: $navigateToWritingView) { // 追加
-                WritingAjiwaiCardView(saveDay:selectDate,isFullScreen: true) // 書き込みビューに遷移
-                    .environmentObject(user)
+            .fullScreenCover(isPresented: $navigateToWritingView) {
+                WritingAjiwaiCardView(saveDay: selectDate, isFullScreen: true)
+                    .onDisappear(){
+                        handleOnDisAppear()
+                    }
             }
+        }
+    }
+
+    private func animationView(geometry: GeometryProxy) -> some View{
+        ZStack{
+            if showBaseAnimationView {
+                BaseAnimationView(
+                    firstGifName: getFirstGifName(),
+                    secondGifName: getSecondGifName(),
+                    text1: "おや、\(user.selectedCharactar)のようすが…",
+                    text2: "おめでとう！\(user.selectedCharactar)が進化したよ！",
+                    useBackGroundColor: true
+                )
+            } else if showBaseLevelUpView {
+                BaseLevelUpView(
+                    characterGifName: "\(user.selectedCharactar)\(user.growthStage)_animation_breath",
+                    text: "\(user.selectedCharactar)がレベルアップしたよ！",
+                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharactar)",
+                    useBackGroundColor: true
+                )
+            } else if showNormalCharacterView {
+                NormalCharacterView(
+                    characterGifName: "\(user.selectedCharactar)\(user.growthStage)_animation_breath",
+                    text: "\(user.selectedCharactar)は元気にしています！",
+                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharactar)",
+                    useBackGroundColor: true
+                )
+            }
+        }
+    }
+    private func handleOnDisAppear() {
+        let levelUp = user.checkLevel()
+        let growth = user.growth()
+        
+        if growth {
+            showBaseAnimationView = true
+        } else if levelUp {
+            showBaseLevelUpView = true
+        } else {
+            showNormalCharacterView = true
+        }
+        
+        // TypeWriterTextView の表示が終わった後の処理
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            showTextCompleted = true
+        }
+    }
+    private func getFirstGifName() -> String {
+        switch user.growthStage {
+        case 2:
+            return "\(user.selectedCharactar)1_animation_breath"
+        case 3:
+            return "\(user.selectedCharactar)2_animation_breath"
+        default:
+            return "\(user.selectedCharactar)\(user.growthStage)_animation_breath"
+        }
+    }
+    
+    private func getSecondGifName() -> String {
+        switch user.growthStage {
+        case 2:
+            return "\(user.selectedCharactar)2_animation_breath"
+        case 3:
+            return "\(user.selectedCharactar)3_animation_breath"
+        default:
+            return "\(user.selectedCharactar)\(user.growthStage)_animation_breath"
         }
     }
 }
 
+
 struct AjiwaiCardDataPreview: View {
+    @EnvironmentObject var user:UserData
     let selectedDate: Date
     let allData: [AjiwaiCardData]
     
@@ -74,7 +157,7 @@ struct AjiwaiCardDataPreview: View {
                                 .resizable()
                                 .frame(width: 400,height:300)
                                 .offset(y:-40)
-                            Image("mt_calenderView_imageFrame_Cat")
+                            Image("mt_calenderView_imageFrame_\(user.selectedCharactar)")
                                 .resizable()
                                 .frame(width: 650,height:400)
                         }
@@ -85,7 +168,7 @@ struct AjiwaiCardDataPreview: View {
                                 .resizable()
                                 .frame(width: 400,height:300)
                                 .offset(y:-40)
-                            Image("mt_calenderView_imageFrame_Cat")
+                            Image("mt_calenderView_imageFrame_\(user.selectedCharactar)")
                                 .resizable()
                                 .frame(width: 650,height:400)
                         }
@@ -96,7 +179,7 @@ struct AjiwaiCardDataPreview: View {
                                 .resizable()
                                 .frame(width: 400,height:300)
                                 .offset(y:-40)
-                            Image("mt_calenderView_imageFrame_Cat")
+                            Image("mt_calenderView_imageFrame_\(user.selectedCharactar)")
                                 .resizable()
                                 .frame(width: 650,height:400)
                         }
@@ -165,7 +248,7 @@ struct AjiwaiCardDetailView: View {
     @State private var editedHearing: String
     @State private var editedMenu: [String]
     @State private var showingSaveAlert = false
-
+    
     init(selectedDate: Date, data: AjiwaiCardData) {
         self.selectedDate = selectedDate
         self.data = data
@@ -177,7 +260,7 @@ struct AjiwaiCardDetailView: View {
         _editedHearing = State(initialValue: data.hearing)
         _editedMenu = State(initialValue: data.menu)
     }
-
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -226,11 +309,11 @@ struct AjiwaiCardDetailView: View {
             AsyncImage(url: data.imagePath) { image in
                 image.resizable().aspectRatio(contentMode: .fit)
             } placeholder: {
-                    Image("mt_No_Image")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height:400)
-                   
+                Image("mt_No_Image")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height:400)
+                
                 
             }
             .frame(height: 400)
@@ -311,11 +394,11 @@ struct AjiwaiCardDetailView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
         }
     }
-
+    
     private func deleteMenuItem(at offsets: IndexSet) {
         editedMenu.remove(atOffsets: offsets)
     }
-
+    
     private func saveChanges() {
         data.lunchComments = editedLunchComments
         data.sight = editedSight
@@ -330,6 +413,11 @@ struct AjiwaiCardDetailView: View {
 
 #Preview{
     LookBackView()
+        .environmentObject(UserData())
+        .modelContainer(for: [AjiwaiCardData.self,MenuData.self,ColumnData.self])
+}
+#Preview{
+    ChildHomeView()
         .environmentObject(UserData())
         .modelContainer(for: [AjiwaiCardData.self,MenuData.self,ColumnData.self])
 }

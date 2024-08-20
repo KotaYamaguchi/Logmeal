@@ -5,8 +5,10 @@ class UserData:ObservableObject{
     @AppStorage("grade") var grade:Int = 1
     @AppStorage("class") var yourClass:Int = 1
     @AppStorage("age") var age:Int = 6
-    @AppStorage("isLogined") var isLogined = false
+    @AppStorage("isLogined") var isLogined:Bool = false
     @Published var isTeacher:Bool = false
+    
+    @Published var isDataSaved: Bool = false
     //ナビゲーション管理用変数
     @Published var path: [Homepath] = []
     //カレンダーのイベント配列
@@ -52,33 +54,38 @@ class UserData:ObservableObject{
     @AppStorage("exp") var exp:Int = 0
     @AppStorage("appearExp") var appearExp:Int = 0
     @AppStorage("point") var point:Int = 0
-    @Published var levelTable = [0,10,20,35,50,65,90,110,135,150,175,200,220,250,290,350]
-    @Published var growthStage = 1
+    @Published var levelTable = [0,10,20,30,50,70,90,110,130,150,170,200,220,250,290,350]
+    @AppStorage("growthStage") var growthStage = 1
     @Published var gotEXP:Int = 0
-    func checkLevel() -> Bool{
+
+    func checkLevel() -> Bool {
         var levelUped = false
-        if exp <= levelTable.last!{
-            if exp >= levelTable[level+1]{
-                level += 1
-                appearExp = 0
-                levelUped = true
-                print(level)
-            }
-            return levelUped
+        
+        while level + 1 < levelTable.count && exp >= levelTable[level + 1] {
+            level += 1
+            levelUped = true
         }
         
         return levelUped
     }
+
     func growth() -> Bool{
         var growthed = false
-        if level >= 12{
+        if level == 12{
             growthStage = 3
             growthed = true
-        }else if level >= 5{
+        }else if level == 5{
             growthStage = 2
             growthed = true
         }
         return growthed
+    }
+    func setGrowthStage(){
+        if level >= 12{
+            growthStage = 3
+        }else if level >= 5{
+            growthStage = 2
+        }
     }
     
 }

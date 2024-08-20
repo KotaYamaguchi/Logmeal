@@ -10,33 +10,33 @@ struct SettingView: View {
     @State private var showShareSheet = false
     @State private var isGenerating = false
     @State private var showActionSheet = false
-    
+    @State private var showDatePicker = false
+    @State private var selectedFileType: FileType = .pdf
+
+    @State private var startDate: Date = Date()
+    @State private var endDate: Date = Date()
+
+    enum FileType {
+        case pdf, csv
+    }
+
     var body: some View {
         NavigationStack{
             ZStack {
-                if isGenerating {
-                    ProgressView("共有の準備中...")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                        .padding()
-                        .background(Color.black.opacity(0.7))
-                        .tint(.white)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .zIndex(10.0)
-                    Color.gray.opacity(0.5)
-                        .ignoresSafeArea()
-                        .zIndex(9.0)
-                }
+                Image("bg_AjiwaiCardView")
+                    .resizable()
+                    .ignoresSafeArea()
+                    .saturation(0.0)
                 VStack(spacing: 20) {
                     Text("設定画面")
                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
                         .padding(.top, 20)
                     Picker("キャラクターを選択", selection: $user.selectedCharactar) {
-                                       Text("いぬ").tag("Dog")
-                                       Text("ねこ").tag("Cat")
-                                       Text("うさぎ").tag("Rabbit")
-                                   }
-                                   .frame(width: 300, height: 50)
+                        Text("いぬ").tag("Dog")
+                        Text("ねこ").tag("Cat")
+                        Text("うさぎ").tag("Rabbit")
+                    }
+                    .frame(width: 300, height: 50)
                     NavigationLink{
                         ProfileEditView()
                     } label: {
@@ -71,16 +71,12 @@ struct SettingView: View {
                     .actionSheet(isPresented: $showActionSheet) {
                         ActionSheet(title: Text("共有方法を選択してください"), buttons: [
                             .default(Text("PDFで共有")) {
-                                isGenerating = true
-                                Task {
-                                    await generateAndSharePDF()
-                                }
+                                selectedFileType = .pdf
+                                showDatePicker = true
                             },
                             .default(Text("CSVで共有")) {
-                                isGenerating = true
-                                Task {
-                                    await generateAndShareCSV()
-                                }
+                                selectedFileType = .csv
+                                showDatePicker = true
                             },
                             .cancel()
                         ])
@@ -97,6 +93,17 @@ struct SettingView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
                 }
+                if isGenerating {
+                    ProgressView("共有の準備中...")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                        .padding()
+                        .background(Color.black.opacity(0.7))
+                        .tint(.white)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    Color.gray.opacity(0.5)
+                        .ignoresSafeArea()
+                }
             }
             .sheet(isPresented: $showQRscaner) {
                 ScannerView(isPresentingScanner: $showQRscaner)
@@ -104,40 +111,96 @@ struct SettingView: View {
             .sheet(isPresented: $showShareSheet) {
                 if let url = pdfURL {
                     ShareSheet(activityItems: [url])
+                        .onAppear(){
+                            isGenerating = false
+                        }
                 }
+            }
+            .sheet(isPresented: $showDatePicker) {
+                VStack{
+                    HStack{
+                        VStack{
+                            Text("この日から")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                            DatePicker("開始日", selection: $startDate, displayedComponents: .date)
+                                .datePickerStyle(GraphicalDatePickerStyle())
+                                .padding()
+                        }
+                        Divider()
+                            .frame(height: 400)
+                        VStack{
+                            Text("この日まで")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                            DatePicker("終了日", selection: $endDate, displayedComponents: .date)
+                                .datePickerStyle(GraphicalDatePickerStyle())
+                                .padding()
+                        }
+                    }
+                    Button("データを共有する") {
+                        showDatePicker = false
+                        isGenerating = true
+                        Task {
+                            await generateAndShareFile()
+                        }
+                    }
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                    .frame(width: 220, height: 50)
+                    .background(Color.cyan)
+                    .foregroundStyle(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+
+                    Button("キャンセル") {
+                        showDatePicker = false
+                    }
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                    .frame(width: 220, height: 50)
+                    .background(Color.gray)
+                    .foregroundStyle(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                }
+                
             }
         }
     }
-    
     @MainActor
-    func generateAndSharePDF() async {
-        let pdfGenerator = MultiPagePDFGenerator(allData: allData, userName: user.name,userGrade: user.grade,userClass: user.yourClass)
-        let pdfPath = await pdfGenerator.generatePDF()
-        
-        await MainActor.run {
-            self.pdfURL = pdfPath
-            self.isGenerating = false
-            self.showShareSheet = true
+    func generateAndShareFile() async {
+        // startDateとendDateの日付部分のみを抽出して比較
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: startDate)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate))!
+
+        let filteredData = allData
+            .filter { $0.saveDay >= startOfDay && $0.saveDay < endOfDay }
+            .sorted(by: { $0.saveDay < $1.saveDay })
+
+        switch selectedFileType {
+        case .pdf:
+            let pdfGenerator = MultiPagePDFGenerator(allData: filteredData, userName: user.name, userGrade: user.grade, userClass: user.yourClass)
+            let pdfPath = await pdfGenerator.generatePDF()
+
+            await MainActor.run {
+                self.pdfURL = pdfPath
+                self.isGenerating = false
+                self.showShareSheet = true
+            }
+
+        case .csv:
+            let exportData = ExportData()
+            let filename = "\(user.name)の味わいカード"
+            exportData.createCSV(filename: filename, datas: filteredData)
+
+            let documentsPath = exportData.getDocumentsDirectory()
+            let csvPath = documentsPath.appendingPathComponent("\(filename).csv")
+
+            await MainActor.run {
+                self.pdfURL = csvPath
+                self.isGenerating = false
+                self.showShareSheet = true
+            }
         }
     }
-    
-    @MainActor
-    func generateAndShareCSV() async {
-        defer { isGenerating = false }
-        
-        let exportData = ExportData()
-        let filename = "\(user.name)の味わいカード"
-        let datas: [AjiwaiCardData] = allData
-        
-        exportData.createCSV(filename: filename, datas: datas)
-        
-        let documentsPath = exportData.getDocumentsDirectory()
-        let csvPath = documentsPath.appendingPathComponent("\(filename).csv")
-        
-        self.pdfURL = csvPath
-        self.showShareSheet = true
-    }
 }
+
 
 
 
@@ -210,7 +273,7 @@ struct ProfileEditView: View {
             infoRow(icon: "book.fill", title: "クラス") {
                 Picker("クラス", selection: $editedClass) {
                     ForEach(1..<25) { Class in
-                        Text("\(Class)年生").tag(Class)
+                        Text("\(Class)").tag(Class)
                     }
                 }
                 .pickerStyle(MenuPickerStyle())

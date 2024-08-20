@@ -43,8 +43,7 @@ struct ContentView: View {
                         
                         .onTapGesture {
                             if !develop{
-                                
-                                user.path.append(.home)
+                                    user.path.append(.home)
                             }
                         }
                         Button{
@@ -78,10 +77,10 @@ struct ContentView: View {
                         ChildHomeView()
                             .navigationBarBackButtonHidden(true)
                     case .ajiwaiCard:
-                        WritingAjiwaiCardView(saveDay:Date())
+                        WritingAjiwaiCardView(saveDay:Date.now)
                             .navigationBarBackButtonHidden(true)
                     case .reward:
-                        AjiwaiThirdView()
+                        RewardView()
                             .navigationBarBackButtonHidden(true)
                     }
                 }

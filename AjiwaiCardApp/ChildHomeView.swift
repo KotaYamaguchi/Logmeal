@@ -2,27 +2,29 @@ import SwiftUI
 import SwiftData
 
 struct ChildHomeView: View {
-    @EnvironmentObject var user: UserData
+    @EnvironmentObject var user:UserData
     @Environment(\.modelContext) private var context
-    @Query private var allColumn: [ColumnData]
-    @Query private var allData: [AjiwaiCardData]
-    @State var isShowShareSheet: Bool = false
-    @State var progressValue: CGFloat = 0.1
-    @State var width: CGFloat = 300
-    @State var showColumn = false
-    @State var gifData = NSDataAsset(name: "")?.data
-    @State var gifArray = []
-    @State var playGif = true
-    @State private var hasUnreadColumn = false
-    @State private var position = CGPoint(x: 500, y: 550)
-    @State private var offset = 0.0
-    @State private var isDrag = false
-    @State private var showNoColumnAlert = false
-    @State private var showCardAlert = false
-    @State private var showCardDetail = false
+    @Query private var allColumn:[ColumnData]
+    @Query private var allData:[AjiwaiCardData]
+    @State var isShowShareSheet:Bool = false
+    @State var progressValue:CGFloat = 0.1
+    @State var width:CGFloat = 300
+    @State var showColumn:Bool = false
+    @State var gifData:Data? = NSDataAsset(name: "")?.data
+    @State var gifArray:[String] = []
+    @State var playGif:Bool = true
+    @State private var hasUnreadColumn:Bool = false
+    @State private var gifPosition:CGPoint = CGPoint(x: 500, y: 550)
+    @State private var gifOffset:Double = 0.0
+    @State private var gifWidth:CGFloat = 0.0
+    @State private var gifHeight:CGFloat = 0.0
+    @State private var isDrag:Bool = false
+    @State private var showNoColumnAlert:Bool = false
+    @State private var showCardAlert:Bool = false
+    @State private var showCardDetail:Bool = false
     @State private var selectedCardData: AjiwaiCardData? = nil
-    @State private var isLoading = false
-    @State private var showSettingView = false
+    @State private var isLoading:Bool = false
+    @State private var showSettingView:Bool = false
     @State private var timer: Timer? = nil
     @State private var boughtProducts:[Product] = []
     private func startGifTimer() {
@@ -134,32 +136,63 @@ struct ChildHomeView: View {
             .onChanged { value in
                 isDrag = true
                 playGif = false
-                gifData = NSDataAsset(name: "\(user.selectedCharactar)_Drag")?.data
-                position = value.location
-                offset = 0.0
+                gifData = NSDataAsset(name: "\(user.selectedCharactar)\(user.growthStage)_Drag")?.data
+                gifWidth = 200.0
+                gifHeight = 200.0
+
+                // 遅延アニメーションで位置を更新
+                withAnimation(.easeOut(duration: 0.2)) {
+                    gifPosition = value.location
+                }
             }
-            .onEnded { _ in
-                changeGifData()
-                if position.y < 400 {
+            .onEnded { value in
+                let velocity = value.predictedEndLocation - value.location
+
+                // オブジェクトが飛んでいくアニメーションを実行
+                withAnimation(.easeOut(duration: 0.5)) {
+                    gifPosition.x += velocity.x * 0.5
+                    gifPosition.y += velocity.y * 0.5
+                }
+                
+                // 画面サイズの外に行きそうな場合に跳ね返す
+                let screenWidth = UIScreen.main.bounds.width
+                let screenHeight = UIScreen.main.bounds.height
+                let gifHalfWidth = gifWidth / 2
+                let gifHalfHeight = gifHeight / 2
+                
+                if gifPosition.x - gifHalfWidth < 0 {
+                    gifPosition.x = gifHalfWidth
+                } else if gifPosition.x + gifHalfWidth > screenWidth {
+                    gifPosition.x = screenWidth - gifHalfWidth
+                }
+                
+                if gifPosition.y - gifHalfHeight < 0 {
+                    gifPosition.y = gifHalfHeight
+                } else if gifPosition.y + gifHalfHeight > screenHeight {
+                    gifPosition.y = screenHeight - gifHalfHeight
+                }
+                
+                // gifPosition.yが一定以上なら指定のY座標(例: 550)まで落とす
+                if gifPosition.y <= 400 { // ここで条件を指定
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        withAnimation(.easeIn(duration: 0.5)) {
-                            position.y = 550
+                        withAnimation(.easeIn(duration: 0.7)) {
+                            gifPosition.y = 550
                         }
                     }
-                } else {
-                    position.y += offset
                 }
-                offset = 0.0
+                
+                gifWidth = 200.0
+                gifHeight = 200.0
                 isDrag = false
-                print(position) // 400
+                changeGifData()
             }
     }
-    
+
     var doubleTapGesture: some Gesture {
         TapGesture(count: 2)
             .onEnded {
                 
-                position = CGPoint(x: 500, y: 550)
+                gifPosition = CGPoint(x: 500, y: 550)
                 
             }
     }
@@ -186,6 +219,29 @@ struct ChildHomeView: View {
                         .frame(width: 700, height: 500)
                         .position(showColumn ? CGPoint(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5) : CGPoint(x: geometry.size.width * 0.5, y: geometry.size.height * 2))
                 }
+                .ignoresSafeArea(.keyboard)
+                .onChange(of: user.exp) { _, _ in
+                    _ = user.growth()
+                    changeGifData()
+                }
+                .onChange(of: user.selectedCharactar) { _, _ in
+                    changeGifData()
+                }
+                .onAppear {
+                    user.setGrowthStage()
+                    gifWidth =  200
+                    gifHeight = 200
+                    changeGifData()
+                    checkForUnreadColumn()
+                    startGifTimer()
+                    self.boughtProducts = user.loadProducts(key: "boughtItem")
+                    print(user.selectedCharactar)
+                    print(user.growthStage)
+                }
+                .onDisappear {
+                    timer?.invalidate() // ビューが消えた時にタイマーを無効化する
+                }
+                
                 .alert("コラムがありません", isPresented: $showNoColumnAlert) {
                     Button("OK") {}
                 } message: {
@@ -198,6 +254,9 @@ struct ChildHomeView: View {
                             selectedCardData = data
                             isLoading = true
                             showCardDetail = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                isLoading = false
+                            }
                         }
                     }
                 }
@@ -205,13 +264,11 @@ struct ChildHomeView: View {
                     if let data = selectedCardData {
                         if isLoading {
                             ProgressView() // ローディング中に表示
-                                .onAppear {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                        isLoading = false // ローディング終了
-                                    }
-                                }
                         } else {
                             AjiwaiCardDetailView(selectedDate: Date(), data: data)
+                                .onAppear(){
+                                    isLoading = false
+                                }
                         }
                     }
                 }
@@ -219,25 +276,6 @@ struct ChildHomeView: View {
                 FirstLoginView()
             }
         }
-        .ignoresSafeArea(.keyboard)
-        .onChange(of: user.exp) { _, _ in
-            _ = user.checkLevel()
-            _ = user.growth()
-            changeGifData()
-        }
-        .onChange(of: user.selectedCharactar) { _, _ in
-            changeGifData()
-        }
-        .onAppear {
-            changeGifData()
-            checkForUnreadColumn()
-            startGifTimer()
-            self.boughtProducts = user.loadProducts(key: "boughtItem")
-        }
-        .onDisappear {
-            timer?.invalidate() // ビューが消えた時にタイマーを無効化する
-        }
-        
     }
     
     @ViewBuilder func imageView(size: CGSize) -> some View {
@@ -245,7 +283,7 @@ struct ChildHomeView: View {
             .resizable()
             .scaledToFit()
             .frame(width: size.width * 0.1)
-            .position(position)
+            .position(gifPosition)
             .gesture(dragGesture)
     }
     
@@ -255,11 +293,11 @@ struct ChildHomeView: View {
                 print("GIF animation finished!")
                 self.gifData = NSDataAsset(name: gifArray.randomElement()! as! NSDataAssetName)?.data
             }
-            .frame(width: size.width * 0.3, height: size.height * 0.4)
+            .frame(width: gifWidth,height: gifHeight)
             .onTapGesture {
                 self.gifData = NSDataAsset(name: gifArray.randomElement()! as! NSDataAssetName)?.data
             }
-            .position(position)
+            .position(gifPosition)
             .gesture(dragGesture)
         }
     }
@@ -271,7 +309,8 @@ struct ChildHomeView: View {
                     .resizable()
                     .frame(width: size.width)
                     .ignoresSafeArea(.all)
-                gifView(size: size, gif: gifData)
+              
+                
                 NavigationLink {
                     ShopView()
                         .navigationBarBackButtonHidden(true)
@@ -284,7 +323,7 @@ struct ChildHomeView: View {
                 .buttonStyle(PlainButtonStyle())
                 .frame(width: size.width * 0.0884, height: size.height * 0.2333)
                 .position(x: size.width * 0.67, y: size.height * 0.72)
-                .disabled(user.growthStage < 3)
+              //  .disabled(user.growthStage < 3)
                 
                 NavigationLink {
                     CharacterView()
@@ -300,7 +339,7 @@ struct ChildHomeView: View {
                 .position(x: size.width * 0.735, y: size.height * 0.60)
                 
                 NavigationLink {
-                    LookBackView()
+                    LookBackView(fromAjiwaiCard:false)
                         .navigationBarBackButtonHidden(true)
                 } label: {
                     Image("bt_HomeVIew_\(user.selectedCharactar)_4")
@@ -382,6 +421,8 @@ struct ChildHomeView: View {
                 .frame(width: size.width * 0.08)
                 .position(x: size.width * 0.92, y: size.height * 0.067)
                 .buttonStyle(PlainButtonStyle())
+                
+                gifView(size: size, gif: gifData)
             }
             .navigationDestination(for: Homepath.self) { value in
                 switch value {
@@ -397,7 +438,7 @@ struct ChildHomeView: View {
                             .navigationBarBackButtonHidden(true)
                     }
                 case .reward:
-                    AjiwaiThirdView()
+                    RewardView()
                         .navigationBarBackButtonHidden(true)
                 }
             }
@@ -411,5 +452,14 @@ struct ChildHomeView_Previews: PreviewProvider {
         ChildHomeView()
             .environmentObject(user)
             .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
+    }
+}
+extension CGPoint {
+    static func +(lhs: CGPoint, rhs: CGPoint) -> CGPoint {
+        return CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+    }
+    
+    static func -(lhs: CGPoint, rhs: CGPoint) -> CGPoint {
+        return CGPoint(x: lhs.x - rhs.x, y: lhs.y - rhs.y)
     }
 }

@@ -24,7 +24,7 @@ struct ScannerView: View {
     @State private var captionOfColumn: [String] = []
     @State private var showQRscanResults: Bool = false
     @State private var QRscanResults: Bool = false
-    
+    @State private var isReady:Bool = true
     func fetchData() {
         sheetID = extractSheetID(from: sheetURL)
         Task {
@@ -88,59 +88,66 @@ struct ScannerView: View {
     var body: some View {
         GeometryReader { geometry in
             let size = geometry.size
-            VStack {
-                HStack {
-                    Picker("", selection: $selection) {
-                        ForEach(1...12, id: \.self) { month in
-                            Text("\(month)月").tag("\(month)月")
-                            
+            ZStack{
+                VStack {
+                    HStack {
+                        Picker("", selection: $selection) {
+                            ForEach(1...12, id: \.self) { month in
+                                Text("\(month)月").tag("\(month)月")
+                                
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .font(.title)
+                        .tint(Color.black)
+                        Text("のメニューとコラムを取得します")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                            .foregroundStyle(Color.black)
+                    }
+                    .padding()
+                    .background {
+                        RoundedRectangle(cornerRadius: 15)
+                            .stroke(style: StrokeStyle())
+                    }
+                    ZStack {
+                        CodeScannerView(codeTypes: [.qr],showViewfinder:true) { result in
+                            if case let .success(scannedResult) = result {
+                                isScanning = false
+                                scannedCode = scannedResult.string
+                            }
+                        }
+                        .frame(width: size.width * 0.5, height: size.height * 0.5)
+                        .overlay {
+                            if isReady{
+                                Color.black
+                                    .ignoresSafeArea()
+                            }else{
+                                if isScanning {
+                                    Text("スキャン中...")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                                        .padding()
+                                        .background(Color.black.opacity(0.7))
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                }
+                            }
                         }
                     }
-                    .pickerStyle(.menu)
-                    .font(.title)
-                    .tint(Color.black)
-                    Text("のメニューとコラムを取得します")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                        .foregroundStyle(Color.black)
                 }
-                .padding()
-                .background {
-                    RoundedRectangle(cornerRadius: 15)
-                        .stroke(style: StrokeStyle())
-                }
-                ZStack {
-                    CodeScannerView(codeTypes: [.qr]) { result in
-                        if case let .success(scannedResult) = result {
-                            isScanning = false
-                            scannedCode = scannedResult.string
-                        }
+                .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+                .alert(QRscanResults ? "読み取りに成功しました" : "読み取りに失敗しました", isPresented: $showQRscanResults) {
+                    Button {
+                        showQRscanResults = false
+                        isPresentingScanner = false
+                    } label: {
+                        Text("閉じる")
                     }
-                    .frame(width: size.width * 0.5, height: size.height * 0.5)
-                    .overlay {
-                        if isScanning {
-                            Text("スキャン中...")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                                .padding()
-                                .background(Color.black.opacity(0.7))
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
+                } message: {
+                    if QRscanResults {
+                        Text("\(selection)のメニューとコラムが入力されました。")
+                    } else {
+                        Text("入力したい月が正しく選択されているか確認してください\nもしくはQRコードが正しいか確認してください")
                     }
-                }
-            }
-            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-            .alert(QRscanResults ? "読み取りに成功しました" : "読み取りに失敗しました", isPresented: $showQRscanResults) {
-                Button {
-                    showQRscanResults = false
-                    isPresentingScanner = false
-                } label: {
-                    Text("閉じる")
-                }
-            } message: {
-                if QRscanResults {
-                    Text("\(selection)のメニューとコラムが入力されました。")
-                } else {
-                    Text("入力したい月が正しく選択されているか確認してください\nもしくはQRコードが正しいか確認してください")
                 }
             }
         }
@@ -150,6 +157,9 @@ struct ScannerView: View {
         }
         .onAppear {
             isScanning = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isReady = false
+            }
         }
         .onDisappear {
             isScanning = false

@@ -20,12 +20,18 @@ struct CalendarDisplayView: View {
                     .position(x: width * 0.25, y: height * 0.5)
                     .padding(.horizontal)
                 Button(action: todayMonth) {
-                    Image(systemName: "calendar")
-                        .font(.system(size: 24))
+                    Image("bt_base")
+                        .resizable()
+                       // .scaledToFit()
+                        .overlay{
+                            Text("今日")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .foregroundStyle(Color.buttonColor)
+                        }
                 }
-              //  .buttonStyle(PlainButtonStyle())
-                .padding(.top, 10)
-                .position(x:width*0.36,y:height*0.18)
+                .buttonStyle(PlainButtonStyle())
+                .frame(width:120,height: 45)
+                .position(x:width*0.4,y:height*0.18)
             
                 VStack {
                     Button(action: previousMonth) {
@@ -159,25 +165,25 @@ struct CalendarView: View {
     private var backgroundMainColor: Color {
         switch user.selectedCharactar {
         case "Dog":
-            return mainColors[2]
-        case "Cat":
             return mainColors[1]
-        case "Rabbit":
+        case "Cat":
             return mainColors[0]
-        default:
+        case "Rabbit":
             return mainColors[2]
+        default:
+            return mainColors[0]
         }
     }
     private var backgroundSubColor: Color {
         switch user.selectedCharactar {
         case "Dog":
-            return subColors[2]
-        case "Cat":
             return subColors[1]
-        case "Rabbit":
+        case "Cat":
             return subColors[0]
-        default:
+        case "Rabbit":
             return subColors[2]
+        default:
+            return subColors[0]
         }
     }
     
@@ -202,8 +208,20 @@ struct DayView: View {
     @Binding var selectedDate: Date
     let width: CGFloat
     let allData: [AjiwaiCardData]
-    
     private let calendar = Calendar(identifier: .gregorian)
+    
+    private var fillColor:Color {
+        switch user.selectedCharactar{
+        case "Dog":
+            return .red
+        case "Cat":
+            return .purple
+        case "Rabbit":
+            return .orange
+        default:
+            return .purple
+        }
+    }
     
     var body: some View {
         if let date = date {
@@ -230,9 +248,9 @@ struct DayView: View {
             .background(
                 Group {
                     if calendar.isDate(date, inSameDayAs: selectedDate) {
-                        Color.orange.opacity(0.3)
+                        fillColor.opacity(0.3)
                     } else if calendar.isDate(date, inSameDayAs: Date()) {
-                        Color.red.opacity(0.3)
+                        Color.cyan.opacity(0.3)
                     } else {
                         Color.white
                     }

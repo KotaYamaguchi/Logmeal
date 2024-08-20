@@ -27,24 +27,25 @@
 		924FB1092C5E842B00BB3391 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 924FB1082C5E842B00BB3391 /* Assets.xcassets */; };
 		924FB10B2C5E84B800BB3391 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 924FB10A2C5E84B800BB3391 /* Preview Assets.xcassets */; };
 		924FB10D2C5FA1E400BB3391 /* ExportData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924FB10C2C5FA1E400BB3391 /* ExportData.swift */; };
-		924FB1112C6073F200BB3391 /* GenJyuuGothicX-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 924FB1102C6073F200BB3391 /* GenJyuuGothicX-Bold.ttf */; };
-		924FB1132C60741B00BB3391 /* SIL_Open_Font_License_1.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 924FB1122C60741B00BB3391 /* SIL_Open_Font_License_1.1.txt */; };
-		924FB1152C60742900BB3391 /* LICENSE_J in Resources */ = {isa = PBXBuildFile; fileRef = 924FB1142C60742900BB3391 /* LICENSE_J */; };
 		924FB11C2C687BF000BB3391 /* se_negative.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 924FB1192C687BEF00BB3391 /* se_negative.mp3 */; };
 		924FB11D2C687BF000BB3391 /* bgm_normal_times.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 924FB11A2C687BEF00BB3391 /* bgm_normal_times.mp3 */; };
 		924FB11E2C687BF000BB3391 /* se_positive.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 924FB11B2C687BF000BB3391 /* se_positive.mp3 */; };
+		924FB1212C6C783400BB3391 /* CharacterAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924FB1202C6C783400BB3391 /* CharacterAnimationView.swift */; };
 		9252C2DD2C3C3F6300EB26FD /* ColumnListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9252C2DC2C3C3F6300EB26FD /* ColumnListView.swift */; };
 		9252F4182C2BAFD000A6A345 /* ColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9252F4172C2BAFCF00A6A345 /* ColumnView.swift */; };
 		92615B032B68BEBC0072AC98 /* RewardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92615B002B68BEBC0072AC98 /* RewardView.swift */; };
 		92615B072B68C1F10072AC98 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92615B062B68C1F10072AC98 /* UserData.swift */; };
 		9281D8382C1ABBB600263877 /* GoogleSheetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9281D8372C1ABBB600263877 /* GoogleSheetAPI.swift */; };
 		928E02AC2BA56B8D002BF51F /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 928E02AB2BA56B8D002BF51F /* FSCalendar */; };
-		92A2A0CA2C0C5C73005C4998 /* PDFGeneraterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A2A0C92C0C5C73005C4998 /* PDFGeneraterView.swift */; };
+		92A2A0CA2C0C5C73005C4998 /* PDFGenerater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A2A0C92C0C5C73005C4998 /* PDFGenerater.swift */; };
 		92BE0D662B2BFCF200CA50A8 /* AjiwaiCardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BE0D652B2BFCF200CA50A8 /* AjiwaiCardApp.swift */; };
 		92BE0D682B2BFCF200CA50A8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BE0D672B2BFCF200CA50A8 /* ContentView.swift */; };
 		92DB8B052BEB4BBA001D3A1E /* CharacterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92DB8B042BEB4BBA001D3A1E /* CharacterView.swift */; };
 		92DB8B2A2BF1E4DD001D3A1E /* SwiftyGif in Frameworks */ = {isa = PBXBuildFile; productRef = 92DB8B292BF1E4DD001D3A1E /* SwiftyGif */; };
 		92DB8B322BF227B3001D3A1E /* ShareSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92DB8B312BF227B3001D3A1E /* ShareSheetView.swift */; };
+		92EE828A2C74C1AD00080109 /* README_GenJyuu.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92EE82882C74C1AD00080109 /* README_GenJyuu.txt */; };
+		92EE828B2C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92EE82892C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt */; };
+		92EE828D2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 92EE828C2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,24 +67,24 @@
 		924FB1082C5E842B00BB3391 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		924FB10A2C5E84B800BB3391 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		924FB10C2C5FA1E400BB3391 /* ExportData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportData.swift; sourceTree = "<group>"; };
-		924FB1102C6073F200BB3391 /* GenJyuuGothicX-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "GenJyuuGothicX-Bold.ttf"; path = "../../Downloads/genjyuugothic-x-20150607/GenJyuuGothicX-Bold.ttf"; sourceTree = "<group>"; };
-		924FB1122C60741B00BB3391 /* SIL_Open_Font_License_1.1.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SIL_Open_Font_License_1.1.txt; sourceTree = "<group>"; };
-		924FB1142C60742900BB3391 /* LICENSE_J */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE_J; sourceTree = "<group>"; };
-		924FB1162C60744D00BB3391 /* GenJyuuGothicX-Heavy.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GenJyuuGothicX-Heavy.ttf"; sourceTree = "<group>"; };
 		924FB1192C687BEF00BB3391 /* se_negative.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_negative.mp3; sourceTree = "<group>"; };
 		924FB11A2C687BEF00BB3391 /* bgm_normal_times.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bgm_normal_times.mp3; sourceTree = "<group>"; };
 		924FB11B2C687BF000BB3391 /* se_positive.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_positive.mp3; sourceTree = "<group>"; };
+		924FB1202C6C783400BB3391 /* CharacterAnimationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterAnimationView.swift; sourceTree = "<group>"; };
 		9252C2DC2C3C3F6300EB26FD /* ColumnListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColumnListView.swift; sourceTree = "<group>"; };
 		9252F4172C2BAFCF00A6A345 /* ColumnView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ColumnView.swift; path = ../ColumnView.swift; sourceTree = "<group>"; };
 		92615B002B68BEBC0072AC98 /* RewardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RewardView.swift; sourceTree = "<group>"; };
 		92615B062B68C1F10072AC98 /* UserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
 		9281D8372C1ABBB600263877 /* GoogleSheetAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSheetAPI.swift; sourceTree = "<group>"; };
-		92A2A0C92C0C5C73005C4998 /* PDFGeneraterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFGeneraterView.swift; sourceTree = "<group>"; };
+		92A2A0C92C0C5C73005C4998 /* PDFGenerater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFGenerater.swift; sourceTree = "<group>"; };
 		92BE0D622B2BFCF200CA50A8 /* AjiwaiCardApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AjiwaiCardApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92BE0D652B2BFCF200CA50A8 /* AjiwaiCardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AjiwaiCardApp.swift; sourceTree = "<group>"; };
 		92BE0D672B2BFCF200CA50A8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		92DB8B042BEB4BBA001D3A1E /* CharacterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterView.swift; sourceTree = "<group>"; };
 		92DB8B312BF227B3001D3A1E /* ShareSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ShareSheetView.swift; path = ../ShareSheetView.swift; sourceTree = "<group>"; };
+		92EE82882C74C1AD00080109 /* README_GenJyuu.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README_GenJyuu.txt; sourceTree = "<group>"; };
+		92EE82892C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SIL_Open_Font_License_1.1.txt; sourceTree = "<group>"; };
+		92EE828C2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GenJyuuGothicX-Bold.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,17 +109,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		924FB10E2C6073CF00BB3391 /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				924FB1102C6073F200BB3391 /* GenJyuuGothicX-Bold.ttf */,
-				924FB1162C60744D00BB3391 /* GenJyuuGothicX-Heavy.ttf */,
-				924FB1122C60741B00BB3391 /* SIL_Open_Font_License_1.1.txt */,
-				924FB1142C60742900BB3391 /* LICENSE_J */,
-			);
-			path = Fonts;
-			sourceTree = "<group>";
-		};
 		924FB11F2C687BF400BB3391 /* Soundes */ = {
 			isa = PBXGroup;
 			children = (
@@ -132,19 +122,22 @@
 		92BE0D592B2BFCF200CA50A8 = {
 			isa = PBXGroup;
 			children = (
-				92BE0D652B2BFCF200CA50A8 /* AjiwaiCardApp.swift */,
-				92BE0D672B2BFCF200CA50A8 /* ContentView.swift */,
-				924FB10C2C5FA1E400BB3391 /* ExportData.swift */,
-				9241FED02BA884CE004E507B /* Extensions.swift */,
+				92EE82882C74C1AD00080109 /* README_GenJyuu.txt */,
+				92EE82892C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt */,
+				92EE828C2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf */,
 				9281D8372C1ABBB600263877 /* GoogleSheetAPI.swift */,
 				924FB0B62C51EEA000BB3391 /* SoundManager.swift */,
 				9241FED22BA9D123004E507B /* Structs.swift */,
 				92615B062B68C1F10072AC98 /* UserData.swift */,
+				92BE0D652B2BFCF200CA50A8 /* AjiwaiCardApp.swift */,
+				92BE0D672B2BFCF200CA50A8 /* ContentView.swift */,
+				924FB10C2C5FA1E400BB3391 /* ExportData.swift */,
+				9241FED02BA884CE004E507B /* Extensions.swift */,
+				92A2A0C92C0C5C73005C4998 /* PDFGenerater.swift */,
 				92BE0D642B2BFCF200CA50A8 /* AjiwaiCardApp */,
-				924FB11F2C687BF400BB3391 /* Soundes */,
-				924FB10E2C6073CF00BB3391 /* Fonts */,
 				92123F3D2C36F70B00B2C25C /* Frameworks */,
 				92BE0D632B2BFCF200CA50A8 /* Products */,
+				924FB11F2C687BF400BB3391 /* Soundes */,
 			);
 			sourceTree = "<group>";
 		};
@@ -159,7 +152,10 @@
 		92BE0D642B2BFCF200CA50A8 /* AjiwaiCardApp */ = {
 			isa = PBXGroup;
 			children = (
+				92BE0D6B2B2BFCF300CA50A8 /* Preview Content */,
+				924FB1082C5E842B00BB3391 /* Assets.xcassets */,
 				924FB0C02C5E835D00BB3391 /* CalendarView.swift */,
+				924FB1202C6C783400BB3391 /* CharacterAnimationView.swift */,
 				924FB1022C5E840F00BB3391 /* CharacterSelectedView.swift */,
 				92DB8B042BEB4BBA001D3A1E /* CharacterView.swift */,
 				924FB0EE2C5E83D400BB3391 /* ChildHomeView.swift */,
@@ -168,7 +164,6 @@
 				924FB0FC2C5E840200BB3391 /* FirstLoginView.swift */,
 				924FB0B42C510C2900BB3391 /* LaunchScreen.swift */,
 				924FB0E82C5E839A00BB3391 /* LookBackView.swift */,
-				92A2A0C92C0C5C73005C4998 /* PDFGeneraterView.swift */,
 				924FB0F82C5E83F400BB3391 /* QrScannaerView.swift */,
 				92615B002B68BEBC0072AC98 /* RewardView.swift */,
 				924FB0F62C5E83EF00BB3391 /* SettingView.swift */,
@@ -177,8 +172,6 @@
 				924FB1042C5E841600BB3391 /* StatusBarVIew.swift */,
 				924FB0F22C5E83E400BB3391 /* UIGIFImageView.swift */,
 				924FB0EA2C5E83AF00BB3391 /* WritingAjiwaiCardView.swift */,
-				924FB1082C5E842B00BB3391 /* Assets.xcassets */,
-				92BE0D6B2B2BFCF300CA50A8 /* Preview Content */,
 			);
 			path = AjiwaiCardApp;
 			sourceTree = "<group>";
@@ -263,13 +256,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92EE828A2C74C1AD00080109 /* README_GenJyuu.txt in Resources */,
+				92EE828B2C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt in Resources */,
 				924FB10B2C5E84B800BB3391 /* Preview Assets.xcassets in Resources */,
 				924FB11C2C687BF000BB3391 /* se_negative.mp3 in Resources */,
-				924FB1112C6073F200BB3391 /* GenJyuuGothicX-Bold.ttf in Resources */,
 				924FB11D2C687BF000BB3391 /* bgm_normal_times.mp3 in Resources */,
 				924FB1092C5E842B00BB3391 /* Assets.xcassets in Resources */,
-				924FB1132C60741B00BB3391 /* SIL_Open_Font_License_1.1.txt in Resources */,
-				924FB1152C60742900BB3391 /* LICENSE_J in Resources */,
+				92EE828D2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf in Resources */,
 				924FB11E2C687BF000BB3391 /* se_positive.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -293,7 +286,7 @@
 				924FB0E92C5E839A00BB3391 /* LookBackView.swift in Sources */,
 				924FB10D2C5FA1E400BB3391 /* ExportData.swift in Sources */,
 				92BE0D682B2BFCF200CA50A8 /* ContentView.swift in Sources */,
-				92A2A0CA2C0C5C73005C4998 /* PDFGeneraterView.swift in Sources */,
+				92A2A0CA2C0C5C73005C4998 /* PDFGenerater.swift in Sources */,
 				9281D8382C1ABBB600263877 /* GoogleSheetAPI.swift in Sources */,
 				924FB0D62C5E835D00BB3391 /* CalendarView.swift in Sources */,
 				9241FED12BA884CE004E507B /* Extensions.swift in Sources */,
@@ -306,6 +299,7 @@
 				92DB8B052BEB4BBA001D3A1E /* CharacterView.swift in Sources */,
 				924FB0B72C51EEA000BB3391 /* SoundManager.swift in Sources */,
 				92BE0D662B2BFCF200CA50A8 /* AjiwaiCardApp.swift in Sources */,
+				924FB1212C6C783400BB3391 /* CharacterAnimationView.swift in Sources */,
 				924FB1032C5E840F00BB3391 /* CharacterSelectedView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -452,12 +446,13 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.kotaYamaguchi.Gohan-Navigation-ver-1";
+				PRODUCT_BUNDLE_IDENTIFIER = com.kotaYamaguchi.Logmeal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -488,12 +483,13 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.kotaYamaguchi.Gohan-Navigation-ver-1";
+				PRODUCT_BUNDLE_IDENTIFIER = com.kotaYamaguchi.Logmeal;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;

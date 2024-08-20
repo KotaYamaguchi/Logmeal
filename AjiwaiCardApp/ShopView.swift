@@ -36,7 +36,6 @@ struct ShopView: View {
                             .frame(height: 50)
                     }
                     .padding()
-                    .zIndex(2.0)
                     .buttonStyle(PlainButtonStyle())
                     .disabled(buying)
                 }
@@ -49,14 +48,14 @@ struct ShopView: View {
                     GIFImage(data: gifData, playGif: $playGif) {
                         print("GIF animation finished!")
                     }
-                    .frame(width: geometry.size.width)
+                    .frame(width: geometry.size.width*0.4)
                     .onTapGesture {
                         playGif = true
                     }
-                    .position(x: geometry.size.width * 0.25, y: geometry.size.height * 0.38)
+                    .position(x: geometry.size.width * 0.25, y: geometry.size.height * 0.5)
                 } else {
                     Text("右側から商品を選んでね")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
                         .position(x: geometry.size.width * 0.25, y: geometry.size.height * 0.5)
                 }
                 
@@ -143,7 +142,6 @@ struct ShopView: View {
                         .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
                         .scaleEffect(showAlert ? 1.0 : 0.0)
                 }
-                .zIndex(3.0)
                 
                 if showPurchaseMessage {
                     Text("購入しました！\nホーム画面でのキャラクターの動きが変化したよ！")
