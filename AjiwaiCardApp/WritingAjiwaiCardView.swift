@@ -6,39 +6,43 @@ struct WritingAjiwaiCardView: View {
     // SwiftData
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
-    @Query private var allColumn:[ColumnData]
-    @Query private var allmenu:[MenuData]
+    @Query private var allColumn: [ColumnData]
+    @Query private var allmenu: [MenuData]
     
     // Environment
     @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
-    //Image
-    let placeholderImage = UIImage(named:"mt_No_Image")
+    
+    // Image
+    let placeholderImage = UIImage(named: "mt_No_Image")
     @State private var menu: [String] = []
+    
     // 味わいカード
     @State private var lunchComent: String = ""
     @State var uiimage: UIImage?
     @State var saveDay: Date
     @State private var fillMenuYourself = false
+    
     // 五感テキストフィールド
     @State private var feelingTexts = ["", "", "", "", ""]
+    
     // テキストフィールドスタイル
     @State private var feelings = ["視覚", "聴覚", "嗅覚", "味覚", "触覚"]
     private let iconArray = ["mt_Eye_icon", "mt_Ear_icon", "mt_Nose_icon", "mt_Tongue_icon", "mt_Hand_Icon"]
     private let colors: [Color] = [
-        Color(red: 240/255, green: 145/255, blue: 144/255),
-        Color(red: 243/255, green: 179/255, blue: 67/255),
-        Color(red: 105/255, green: 192/255, blue: 160/255),
-        Color(red: 139/255, green: 194/255, blue: 222/255),
-        Color(red: 196/255, green: 160/255, blue: 193/255)
+        Color(red: 240 / 255, green: 145 / 255, blue: 144 / 255),
+        Color(red: 243 / 255, green: 179 / 255, blue: 67 / 255),
+        Color(red: 105 / 255, green: 192 / 255, blue: 160 / 255),
+        Color(red: 139 / 255, green: 194 / 255, blue: 222 / 255),
+        Color(red: 196 / 255, green: 160 / 255, blue: 193 / 255)
     ]
     
     // その他の状態管理
     @State private var showDatePicker: Bool = false
     @State var showQRscanner: Bool = false
-    @State var monthlyMenu: [String:[String]] = [:]
-    @State var monthlyColumnTitle: [String:String] = [:]
-    @State var monthlyColumnCaption: [String:String] = [:]
+    @State var monthlyMenu: [String: [String]] = [:]
+    @State var monthlyColumnTitle: [String: String] = [:]
+    @State var monthlyColumnCaption: [String: String] = [:]
     @State var showImagePicker: Bool = false
     @State var selectedItem: PhotosPickerItem?
     @State private var keyboardHeight: CGFloat = 0
@@ -60,9 +64,14 @@ struct WritingAjiwaiCardView: View {
         GeometryReader { geometry in
             ZStack {
                 backgroundView(geometry: geometry)
+                    .onTapGesture {
+                        focusedField = nil
+                    }
                 
                 contentView(geometry: geometry)
-                
+                    .onTapGesture {
+                        focusedField = nil
+                    }
                 dateBar(geometry: geometry)
                 
                 customDatePicker(geometry: geometry)
@@ -72,7 +81,7 @@ struct WritingAjiwaiCardView: View {
                 if isSaving {
                     savingOverlayView()
                 }
-                if showingCameraView{
+                if showingCameraView {
                     showingCameraOverlayview()
                 }
             }
@@ -80,13 +89,13 @@ struct WritingAjiwaiCardView: View {
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiimage, sourceType: .camera)
                     .ignoresSafeArea()
-                    .onAppear(){
+                    .onAppear() {
                         showingCameraView = false
                     }
             }
             .sheet(isPresented: $showQRscanner) {
                 ScannerView(isPresentingScanner: $showQRscanner)
-                    .onDisappear(){
+                    .onDisappear() {
                         filereMenu()
                     }
             }
@@ -129,26 +138,26 @@ struct WritingAjiwaiCardView: View {
             .ignoresSafeArea()
             .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
     }
-    private func dismissView(geometry: GeometryProxy) -> some View{
+
+    private func dismissView(geometry: GeometryProxy) -> some View {
         Button {
             dismiss()
         } label: {
-            if isFullScreen{
+            if isFullScreen {
                 Image("bt_close")
                     .resizable()
                     .frame(width: 50, height: 50)
-            }else{
+            } else {
                 Image("bt_back")
                     .resizable()
                     .frame(width: 50, height: 50)
             }
-            
         }
         .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
-
     }
-    private func showingCameraOverlayview() -> some View{
-        ZStack{
+
+    private func showingCameraOverlayview() -> some View {
+        ZStack {
             Color.gray.opacity(0.5)
                 .ignoresSafeArea()
             
@@ -159,9 +168,9 @@ struct WritingAjiwaiCardView: View {
                 .tint(.white)
                 .foregroundColor(.white)
                 .cornerRadius(10)
-
         }
     }
+
     private func savingOverlayView() -> some View {
         ZStack {
             Color.gray.opacity(0.5)
@@ -178,13 +187,14 @@ struct WritingAjiwaiCardView: View {
     }
     
     private func contentView(geometry: GeometryProxy) -> some View {
-        ScrollView {
             HStack {
                 Spacer()
-                VStack {
-                    imageSelectionView()
-                    menuInputView()
-                    Spacer()
+                ScrollView{
+                    VStack {
+                        imageSelectionView()
+                        menuInputView()
+                        Spacer()
+                    }
                 }
                 .frame(width: 400, height: 600)
                 .background {
@@ -192,9 +202,13 @@ struct WritingAjiwaiCardView: View {
                 }
                 Spacer()
                 commentsAndFeelingsView(geometry: geometry)
+                    .onTapGesture {
+                        // タップ時にテキストフィールドのフォーカスを外す
+                        focusedField = nil
+                    }
                 Spacer()
             }
-        }
+        
         .offset(y: focusedField != nil && focusedField! >= 0 ? -keyboardHeight : 0)
         .frame(width: geometry.size.width, height: geometry.size.height)
     }
@@ -205,21 +219,21 @@ struct WritingAjiwaiCardView: View {
                 if let uiimage = self.uiimage {
                     Image(uiImage: uiimage)
                         .resizable()
-                        .frame(width: 400, height: 300)
+                        .frame(width: 340, height: 255)
                 } else {
                     Image(uiImage: placeholderImage!)
                         .resizable()
-                        .frame(width: 400, height: 300)
+                        .frame(width: 340, height: 255)
                 }
                 HStack {
                     PhotosPicker(selection: $selectedItem) {
-                        Text("写真を選ぶ")
+                        Label("写真を選ぶ", systemImage: "photo")
                     }
                     Button {
                         showCameraPicker = true
                         showingCameraView = true
                     } label: {
-                        Text("カメラで撮る")
+                        Label("カメラで撮る", systemImage: "camera")
                     }
                 }
             }
@@ -242,26 +256,29 @@ struct WritingAjiwaiCardView: View {
     
     private func menuTextFieldsView() -> some View {
         ScrollView {
-            VStack(alignment:.leading){
-            ForEach($menu.indices, id: \.self) { index in
-                TextFieldWithCounterWithBorder(text: Binding(
-                    get: { menu[index] },
-                    set: { newValue in
-                        if newValue.count <= menuTextMaxLength {
-                            menu[index] = newValue
+            VStack(alignment: .leading) {
+                ForEach($menu.indices, id: \.self) { index in
+                    TextFieldWithCounterWithBorder(text: Binding(
+                        get: { menu[index] },
+                        set: { newValue in
+                            if newValue.count <= menuTextMaxLength {
+                                menu[index] = newValue
+                            }
                         }
-                    }
-                ), maxLength: menuTextMaxLength)
-                .padding(.vertical, 2)
-                .focused($focusedField, equals: index + 100)
+                    ), maxLength: menuTextMaxLength)
+                    .padding(.vertical, 2)
+                    .focused($focusedField, equals: index + 100)
+                }
             }
-        }
             Button(action: {
                 menu.append("")
+                focusedField = (menu.count - 1) + 100 // 新しいフィールドにフォーカスを設定
             }) {
-                Text("メニュー項目を追加")
+                Label("メニュー項目を追加", systemImage: "plus.circle.fill")
             }
             Button {
+                // 空のフィールドを削除
+                menu.removeAll(where: { $0.isEmpty })
                 fillMenuYourself = false
             } label: {
                 Text("閉じる")
@@ -275,18 +292,17 @@ struct WritingAjiwaiCardView: View {
                 ForEach(menu, id: \.self) { content in
                     Text(content)
                 }
-            } else {
-                VStack {
-                    Button {
-                        showQRscanner = true
-                    } label: {
-                        Text("QRコードから入力する")
-                    }
-                    Button {
-                        fillMenuYourself = true
-                    } label: {
-                        Text("自分で入力する")
-                    }
+            }
+            HStack{
+                Button {
+                    showQRscanner = true
+                } label: {
+                    Label("QRコードから入力", systemImage: "qrcode")
+                }
+                Button {
+                    fillMenuYourself = true
+                } label: {
+                    Label("自分で入力する", systemImage: "pencil.line")
                 }
             }
         }
@@ -337,24 +353,25 @@ struct WritingAjiwaiCardView: View {
             actionButtons()
         }
     }
-    private func dateBar(geometry: GeometryProxy) -> some View{
-        Button{
+
+    private func dateBar(geometry: GeometryProxy) -> some View {
+        Button {
             withAnimation {
                 showDatePicker = true
             }
-        }label: {
+        } label: {
             Image("mt_DateBar")
-                .overlay{
+                .overlay {
                     Text(dateFormatter(date: saveDay))
                         .font(.custom("GenJyuuGothicX-Bold", size: 28))
                         .foregroundStyle(.white)
                 }
         }
-        
-        .position(x:geometry.size.width*0.9,y:geometry.size.height*0.04)
+        .position(x: geometry.size.width * 0.9, y: geometry.size.height * 0.04)
     }
-    private func customDatePicker(geometry: GeometryProxy) -> some View{
-        ZStack{
+
+    private func customDatePicker(geometry: GeometryProxy) -> some View {
+        ZStack {
             if showDatePicker {
                 Color.gray
                     .opacity(0.5)
@@ -383,6 +400,7 @@ struct WritingAjiwaiCardView: View {
             }
         }
     }
+
     private func actionButtons() -> some View {
         HStack {
             saveButton()
@@ -396,10 +414,10 @@ struct WritingAjiwaiCardView: View {
             Image("bt_base")
                 .resizable()
                 .scaledToFit()
-                .frame(height:50)
+                .frame(height: 50)
                 .opacity(isSave() ? 0.5 : 1.0)
                 .overlay {
-                    HStack{
+                    HStack {
                         Image(systemName: "")
                         Text("保存する")
                             .foregroundStyle(Color.buttonColor)
@@ -475,7 +493,6 @@ struct WritingAjiwaiCardView: View {
         }
     }
 
-
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
@@ -504,13 +521,15 @@ struct WritingAjiwaiCardView: View {
         formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: date)
     }
+    
     private func handleSelectedItemChange(newValue: PhotosPickerItem?) {
-           Task {
-               guard let data = try? await newValue?.loadTransferable(type: Data.self) else { return }
-               guard let uiImage = UIImage(data: data) else { return }
-               self.uiimage = uiImage
-           }
-       }
+        Task {
+            guard let data = try? await newValue?.loadTransferable(type: Data.self) else { return }
+            guard let uiImage = UIImage(data: data) else { return }
+            self.uiimage = uiImage
+        }
+    }
+    
     private func onAppear() {
         filereMenu()
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
@@ -554,7 +573,7 @@ struct TextFieldWithCounter: View {
     
     var body: some View {
         ZStack(alignment: .trailing) {
-            TextField("", text: $text,axis: .vertical)
+            TextField("", text: $text, axis: .vertical)
                 .padding(.trailing, 40)
             Text("\(text.count)/\(maxLength)")
                 .font(.custom("GenJyuuGothicX-Bold", size: 12))
@@ -571,6 +590,7 @@ struct TextFieldWithCounter: View {
         .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
         .environmentObject(UserData())
 }
+
 #Preview {
     ChildHomeView()
         .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
@@ -613,6 +633,7 @@ func DeleteAll(modelContext: ModelContext) {
         fatalError(error.localizedDescription)
     }
 }
+
 
 import UIKit
 import SwiftUI

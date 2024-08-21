@@ -230,10 +230,9 @@ struct AjiwaiCardDataPreview: View {
     }
 }
 
-
-
 import SwiftUI
 import SwiftData
+import PhotosUI
 
 struct AjiwaiCardDetailView: View {
     @Environment(\.modelContext) private var context
@@ -247,7 +246,12 @@ struct AjiwaiCardDetailView: View {
     @State private var editedSmell: String
     @State private var editedHearing: String
     @State private var editedMenu: [String]
+    @State private var editedImagePath: URL
+    @State private var selectedPhotoItem: PhotosPickerItem? = nil
+    @State private var uiimage: UIImage? = nil
     @State private var showingSaveAlert = false
+    @State private var showCameraPicker = false
+    @State private var showingCameraView = false
     
     init(selectedDate: Date, data: AjiwaiCardData) {
         self.selectedDate = selectedDate
@@ -259,6 +263,7 @@ struct AjiwaiCardDetailView: View {
         _editedSmell = State(initialValue: data.smell)
         _editedHearing = State(initialValue: data.hearing)
         _editedMenu = State(initialValue: data.menu)
+        _editedImagePath = State(initialValue: data.imagePath)
     }
     
     var body: some View {
@@ -283,20 +288,37 @@ struct AjiwaiCardDetailView: View {
                     .foregroundColor(.red)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("保存") {
-                        showingSaveAlert = true
+                    HStack {
+                        Button("削除") {
+                            showingSaveAlert = true
+                        }
+                        .foregroundColor(.red)
+                        
+                        Button("保存") {
+                            showingSaveAlert = true
+                        }
+                        .foregroundColor(.blue)
                     }
-                    .foregroundColor(.blue)
                 }
             }
-            .alert("変更を保存", isPresented: $showingSaveAlert) {
+            .alert("このカードを削除しますか？", isPresented: $showingSaveAlert) {
                 Button("キャンセル", role: .cancel) { }
-                Button("保存") {
-                    saveChanges()
+                Button("削除", role: .destructive) {
+                    deleteCard()
                     dismiss()
                 }
             } message: {
-                Text("変更を保存しますか？")
+                Text("このカードは削除されます。元に戻すことはできません。")
+            }
+            .fullScreenCover(isPresented: $showCameraPicker) {
+                ImagePicker(image: $uiimage, sourceType: .camera)
+                    .ignoresSafeArea()
+                    .onAppear() {
+                        showingCameraView = false
+                        if let uiimage = uiimage {
+                            saveNewImage(image: uiimage)
+                        }
+                    }
             }
         }
     }
@@ -306,19 +328,37 @@ struct AjiwaiCardDetailView: View {
             Text("今日の一枚")
                 .font(.custom("GenJyuuGothicX-Bold", size: 15))
                 .padding(.bottom, 5)
-            AsyncImage(url: data.imagePath) { image in
+            AsyncImage(url: editedImagePath) { image in
                 image.resizable().aspectRatio(contentMode: .fit)
             } placeholder: {
                 Image("mt_No_Image")
                     .resizable()
                     .scaledToFit()
-                    .frame(height:400)
-                
-                
+                    .frame(height: 400)
             }
             .frame(height: 400)
             .cornerRadius(5)
             .shadow(radius: 5)
+            
+            HStack {
+                PhotosPicker(selection: $selectedPhotoItem) {
+                    Label("写真を選ぶ", systemImage: "photo")
+                }
+                Button {
+                    showCameraPicker = true
+                    showingCameraView = true
+                } label: {
+                    Label("カメラで撮る", systemImage: "camera")
+                }
+            }
+            .onChange(of: selectedPhotoItem) {_ , newItem in
+                Task {
+                    if let data = try? await newItem?.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        saveNewImage(image: uiImage)
+                    }
+                }
+            }
         }
         .padding()
         .background(Color.white)
@@ -385,7 +425,7 @@ struct AjiwaiCardDetailView: View {
         HStack {
             Image(systemName: icon)
                 .foregroundColor(.blue)
-                .frame(width:30,height: 30)
+                .frame(width: 30, height: 30)
             Text(title)
                 .font(.custom("GenJyuuGothicX-Bold", size: 16))
                 .foregroundColor(.gray)
@@ -407,7 +447,30 @@ struct AjiwaiCardDetailView: View {
         data.smell = editedSmell
         data.hearing = editedHearing
         data.menu = editedMenu
+        data.imagePath = editedImagePath
         try? context.save()
+    }
+    
+    private func deleteCard() {
+        context.delete(data)
+        try? context.save()
+    }
+    
+    private func saveNewImage(image: UIImage) {
+        let fileURL = saveImageToDocumentsDirectory(image: image)
+        editedImagePath = fileURL
+    }
+    
+    private func saveImageToDocumentsDirectory(image: UIImage) -> URL {
+        let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileName = UUID().uuidString + ".jpg"
+        let fileURL = documentDirectory.appendingPathComponent(fileName)
+        
+        if let data = image.jpegData(compressionQuality: 0.8) {
+            try? data.write(to: fileURL)
+        }
+        
+        return fileURL
     }
 }
 
@@ -421,3 +484,5 @@ struct AjiwaiCardDetailView: View {
         .environmentObject(UserData())
         .modelContainer(for: [AjiwaiCardData.self,MenuData.self,ColumnData.self])
 }
+
+

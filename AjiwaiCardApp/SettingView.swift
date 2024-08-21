@@ -258,12 +258,12 @@ struct ProfileEditView: View {
                 .font(.custom("GenJyuuGothicX-Bold", size: 15))
             
             infoRow(icon: "person.fill", title: "名前") {
-                TextField("名前", text: $editedName)
+                TextField("名前", text: $user.name)
                     .font(.custom("GenJyuuGothicX-Bold", size: 17))
             }
             
             infoRow(icon: "graduationcap.fill", title: "学年") {
-                Picker("学年", selection: $editedGrade) {
+                Picker("学年", selection: $user.grade) {
                     ForEach(1..<7) { grade in
                         Text("\(grade)年生").tag(grade)
                     }
@@ -271,7 +271,7 @@ struct ProfileEditView: View {
                 .pickerStyle(MenuPickerStyle())
             }
             infoRow(icon: "book.fill", title: "クラス") {
-                Picker("クラス", selection: $editedClass) {
+                Picker("クラス", selection: $user.yourClass) {
                     ForEach(1..<25) { Class in
                         Text("\(Class)").tag(Class)
                     }
@@ -279,7 +279,7 @@ struct ProfileEditView: View {
                 .pickerStyle(MenuPickerStyle())
             }
             infoRow(icon: "birthday.cake.fill", title: "年齢") {
-                Picker("年齢", selection: $editedAge) {
+                Picker("年齢", selection: $user.age) {
                     ForEach(6..<13) { age in
                         Text("\(age)歳").tag(age)
                     }
@@ -305,8 +305,8 @@ struct ProfileEditView: View {
     }
 
     private func saveChanges() {
-        user.name = editedName
-        user.grade = editedGrade
-        user.age = editedAge
+        if user.name == ""{
+            user.name = "ななし"
+        }
     }
 }
