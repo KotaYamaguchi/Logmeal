@@ -20,7 +20,7 @@ struct ShopView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .topLeading) {
-                Image("bg_shop_\(user.selectedCharactar)")
+                Image("bg_shop_\(user.selectedCharacter)")
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
@@ -39,7 +39,7 @@ struct ShopView: View {
                     .buttonStyle(PlainButtonStyle())
                     .disabled(buying)
                 }
-                Image("mt_bord_shop_\(user.selectedCharactar)")
+                Image("mt_bord_shop_\(user.selectedCharacter)")
                     .resizable()
                     .scaledToFit()
                     .frame(width: geometry.size.width * 0.4, height: geometry.size.height * 0.8)
@@ -68,18 +68,16 @@ struct ShopView: View {
                             selectedProduct = nil
                             insufficientPoints = true
                         }
-                        withAnimation(.spring.delay(0.2)){
-                            showAlert = true
-                        }
-                        
+                        showAlert = true
                     }
                 } label: {
-                    Image("bt_buy_\(user.selectedCharactar)")
+                    Image("bt_buy_\(user.selectedCharacter)")
                         .resizable()
                         .scaledToFit()
                         .frame(width: geometry.size.width * 0.18)
                 }
                 .position(x: geometry.size.width * 0.25, y: geometry.size.height * 0.9)
+                .buttonStyle(PlainButtonStyle())
                 HStack{
                     Text("今持っているpoint：")
                         .font(.custom("GenJyuuGothicX-Bold", size: 15))
@@ -127,21 +125,12 @@ struct ShopView: View {
                         }
                         .listRowBackground(Color.clear)
                         .disabled(buying || product.isBought)
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
                 .scrollContentBackground(.hidden)
                 .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.6)
                 .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.55)
-                
-                ZStack {
-                    if showAlert{
-                        Color.gray.opacity(0.8)
-                            .ignoresSafeArea()
-                    }
-                    AlertView(size: geometry.size, showAlert: $showAlert, confirmAction: confirmPurchase, insufficientPoints: insufficientPoints)
-                        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                        .scaleEffect(showAlert ? 1.0 : 0.0)
-                }
                 
                 if showPurchaseMessage {
                     Text("購入しました！\nホーム画面でのキャラクターの動きが変化したよ！")
@@ -161,51 +150,66 @@ struct ShopView: View {
                         }
                 }
             }
+            .alert(isPresented: $showAlert) {
+                if insufficientPoints {
+                    return Alert(
+                        title: Text("ポイントが足りません"),
+                        message: Text(""),
+                        dismissButton: .default(Text("閉じる"))
+                    )
+                } else {
+                    return Alert(
+                        title: Text("購入しますか？"),
+                        primaryButton: .cancel(Text("いいえ")),
+                        secondaryButton: .default(Text("はい"), action: confirmPurchase)
+                    )
+                }
+            }
             .onAppear {
                 print("訪問回数：\(NumberOfVisits)")
                 print("1回目：\(products)")
                 print("2回目以降：\(products = user.loadProducts(key: "products"))")
                 //ビジット回数が1回目の時はデフォルトのものを表示、2回目以降はユーザーデフォルトから持ってくる
                 if NumberOfVisits <= 1 {
-                    switch user.selectedCharactar {
+                    switch user.selectedCharacter {
                     case "Dog":
                         products = [
-                            Product(name: "Dog_animation_applause", price: 200, img: "img_dog_applause", isBought: false),
-                            Product(name: "Dog_animation_bow", price: 400, img: "img_dog_bow", isBought: false),
-                            Product(name: "Dog_animation_byebye", price: 600, img: "img_dog_byebye", isBought: false),
-                            Product(name: "Dog_animation_eat", price: 800, img: "img_dog_eat", isBought: false),
-                            Product(name: "Dog_animation_question", price: 1000, img: "img_dog_question", isBought: false),
-                            Product(name: "Dog_animation_sit", price: 300, img: "img_dog_sit", isBought: false),
-                            Product(name: "Dog_animation_sleep", price: 500, img: "img_dog_sleep", isBought: false),
-                            Product(name: "Dog_animation_surprised", price: 700, img: "img_dog_surprised", isBought: false),
-                            Product(name: "Dog_animation_yawn", price: 900, img: "img_dog_yawn", isBought: false),
-                            Product(name: "Dog_animation_yell", price: 150, img: "img_dog_yell", isBought: false)
+                            Product(name: "Dog3_animation_applause", price: 200, img: "img_dog_applause", isBought: false),
+                            Product(name: "Dog3_animation_bow", price: 400, img: "img_dog_bow", isBought: false),
+                            Product(name: "Dog3_animation_byebye", price: 600, img: "img_dog_byebye", isBought: false),
+                            Product(name: "Dog3_animation_eat", price: 800, img: "img_dog_eat", isBought: false),
+                            Product(name: "Dog3_animation_question", price: 1000, img: "img_dog_question", isBought: false),
+                            Product(name: "Dog3_animation_sit", price: 300, img: "img_dog_sit", isBought: false),
+                            Product(name: "Dog3_animation_sleep", price: 500, img: "img_dog_sleep", isBought: false),
+                            Product(name: "Dog3_animation_surprised", price: 700, img: "img_dog_surprised", isBought: false),
+                            Product(name: "Dog3_animation_yawn", price: 900, img: "img_dog_yawn", isBought: false),
+                            Product(name: "Dog3_animation_yell", price: 150, img: "img_dog_yell", isBought: false)
                         ]
                     case "Cat":
                         products = [
-                            Product(name: "Cat_animation_applause", price: 250, img: "img_cat_applause", isBought: false),
-                            Product(name: "Cat_animation_bow", price: 500, img: "img_cat_bow", isBought: false),
-                            Product(name: "Cat_animation_byebye", price: 750, img: "img_cat_byebye", isBought: false),
-                            Product(name: "Cat_animation_eat", price: 1000, img: "img_cat_eat", isBought: false),
-                            Product(name: "Cat_animation_question", price: 350, img: "img_cat_question", isBought: false),
-                            Product(name: "Cat_animation_sit", price: 600, img: "img_cat_sit", isBought: false),
-                            Product(name: "Cat_animation_sleep", price: 850, img: "img_cat_sleep", isBought: false),
-                            Product(name: "Cat_animation_surprised", price: 150, img: "img_cat_surprised", isBought: false),
-                            Product(name: "Cat_animation_yawn", price: 400, img: "img_cat_yawn", isBought: false),
-                            Product(name: "Cat_animation_yell", price: 650, img: "img_cat_yell", isBought: false)
+                            Product(name: "Cat3_animation_applause", price: 250, img: "img_cat_applause", isBought: false),
+                            Product(name: "Cat3_animation_bow", price: 500, img: "img_cat_bow", isBought: false),
+                            Product(name: "Cat3_animation_byebye", price: 750, img: "img_cat_byebye", isBought: false),
+                            Product(name: "Cat3_animation_eat", price: 1000, img: "img_cat_eat", isBought: false),
+                            Product(name: "Cat3_animation_question", price: 350, img: "img_cat_question", isBought: false),
+                            Product(name: "Cat3_animation_sit", price: 600, img: "img_cat_sit", isBought: false),
+                            Product(name: "Cat3_animation_sleep", price: 850, img: "img_cat_sleep", isBought: false),
+                            Product(name: "Cat3_animation_surprised", price: 150, img: "img_cat_surprised", isBought: false),
+                            Product(name: "Cat3_animation_yawn", price: 400, img: "img_cat_yawn", isBought: false),
+                            Product(name: "Cat3_animation_yell", price: 650, img: "img_cat_yell", isBought: false)
                         ]
                     case "Rabbit":
                         products = [
-                            Product(name: "Rabbit_animation_applause", price: 150, img: "img_rabbit_applause", isBought: false),
-                            Product(name: "Rabbit_animation_bow", price: 300, img: "img_rabbit_bow", isBought: false),
-                            Product(name: "Rabbit_animation_byebye", price: 450, img: "img_rabbit_byebye", isBought: false),
-                            Product(name: "Rabbit_animation_eat", price: 600, img: "img_rabbit_eat", isBought: false),
-                            Product(name: "Rabbit_animation_question", price: 750, img: "img_rabbit_question", isBought: false),
-                            Product(name: "Rabbit_animation_sit", price: 900, img: "img_rabbit_sit", isBought: false),
-                            Product(name: "Rabbit_animation_sleep", price: 1000, img: "img_rabbit_sleep", isBought: false),
-                            Product(name: "Rabbit_animation_surprised", price: 200, img: "img_rabbit_surprised", isBought: false),
-                            Product(name: "Rabbit_animation_yawn", price: 350, img: "img_rabbit_yawn", isBought: false),
-                            Product(name: "Rabbit_animation_yell", price: 500, img: "img_rabbit_yell", isBought: false)
+                            Product(name: "Rabbit3_animation_applause", price: 150, img: "img_rabbit_applause", isBought: false),
+                            Product(name: "Rabbit3_animation_bow", price: 300, img: "img_rabbit_bow", isBought: false),
+                            Product(name: "Rabbit3_animation_byebye", price: 450, img: "img_rabbit_byebye", isBought: false),
+                            Product(name: "Rabbit3_animation_eat", price: 600, img: "img_rabbit_eat", isBought: false),
+                            Product(name: "Rabbit3_animation_question", price: 750, img: "img_rabbit_question", isBought: false),
+                            Product(name: "Rabbit3_animation_sit", price: 900, img: "img_rabbit_sit", isBought: false),
+                            Product(name: "Rabbit3_animation_sleep", price: 1000, img: "img_rabbit_sleep", isBought: false),
+                            Product(name: "Rabbit3_animation_surprised", price: 200, img: "img_rabbit_surprised", isBought: false),
+                            Product(name: "Rabbit3_animation_yawn", price: 350, img: "img_rabbit_yawn", isBought: false),
+                            Product(name: "Rabbit3_animation_yell", price: 500, img: "img_rabbit_yell", isBought: false)
                         ]
                     default:
                         products = []
@@ -233,106 +237,10 @@ struct ShopView: View {
         } else {
             info = "ポイントが足りません"
         }
-        withAnimation{
-            showAlert = false
-        }
     }
 }
 
 #Preview {
     ShopView()
         .environmentObject(UserData())
-}
-#Preview {
-    ContentView()
-        .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
-        .environmentObject(UserData())
-}
-struct AlertView: View {
-    @State var size: CGSize
-    @Binding var showAlert: Bool
-    var confirmAction: () -> Void
-    var insufficientPoints: Bool
-    
-    var body: some View {
-        VStack {
-            if insufficientPoints {
-                InsufficientPointsView()
-            } else {
-                PurchasableView()
-            }
-        }
-        .frame(width: size.width * 0.5, height: 200)
-        .background(Color.white.opacity(0.9))
-        .cornerRadius(12)
-        .clipped()
-    }
-    
-    @ViewBuilder
-    func PurchasableView() -> some View {
-        VStack {
-            Spacer()
-            Text("購入しますか？")
-                .foregroundColor(Color.black)
-                .font(.custom("GenJyuuGothicX-Bold", size: 30))
-            Spacer()
-            Divider()
-            Spacer()
-            HStack(spacing: 0) {
-                Button(action: {
-                    showAlert = false
-                }) {
-                    Rectangle()
-                        .foregroundStyle(.clear)
-                        .overlay {
-                            Text("いいえ")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                                .foregroundColor(.red)
-                        }
-                }
-                .buttonStyle(PlainButtonStyle())
-                Button(action: {
-                    confirmAction()
-                }) {
-                    Rectangle()
-                        .foregroundStyle(.clear)
-                        .overlay {
-                            Text("はい")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                                .foregroundColor(.blue)
-                        }
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-            .frame(height: 10)
-            Spacer()
-        }
-    }
-    
-    @ViewBuilder
-    func InsufficientPointsView() -> some View {
-        VStack {
-            Spacer()
-            Text("ポイントが足りません")
-                .foregroundColor(Color.black)
-                .font(.custom("GenJyuuGothicX-Bold", size: 30))
-            Spacer()
-            Divider()
-            Spacer()
-            Button(action: {
-                showAlert = false
-            }) {
-                Rectangle()
-                    .foregroundStyle(.clear)
-                    .overlay {
-                        Text("閉じる")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                            .foregroundColor(.black)
-                    }
-            }
-            .frame(height: 10)
-            .buttonStyle(PlainButtonStyle())
-            Spacer()
-        }
-    }
 }

@@ -36,13 +36,13 @@ struct ChildHomeView: View {
     
     private func updateGifData() {
         changeGifData()
-        self.gifData = NSDataAsset(name: gifArray.randomElement()! as! NSDataAssetName)?.data
+        self.gifData = NSDataAsset(name: gifArray.randomElement()! )?.data
     }
     
     private func changeGifData() {
         switch user.growthStage {
         case 1:
-            switch user.selectedCharactar {
+            switch user.selectedCharacter {
             case "Dog":
                 gifData = NSDataAsset(name: "Dog1_animation_breath")?.data
                 gifArray = ["Dog1_animation_breath",
@@ -60,7 +60,7 @@ struct ChildHomeView: View {
                 gifArray = []
             }
         case 2:
-            switch user.selectedCharactar {
+            switch user.selectedCharacter {
             case "Dog":
                 gifData = NSDataAsset(name: "Dog2_animation_breath")?.data
                 gifArray = ["Dog2_animation_breath",
@@ -78,23 +78,23 @@ struct ChildHomeView: View {
                 gifArray = []
             }
         case 3:
-            switch user.selectedCharactar {
+            switch user.selectedCharacter {
             case "Dog":
-                gifData = NSDataAsset(name: "Dog_animation_breath")?.data
+                gifData = NSDataAsset(name: "Dog3_animation_breath")?.data
                 gifArray = [
-                    "Dog_animation_breath",
-                    "Dog_animation_sleep"
+                    "Dog3_animation_breath",
+                    "Dog3_animation_sleep"
                 ] + boughtProducts.map { $0.name }
             case "Cat":
-                gifData = NSDataAsset(name: "Cat_animation_breath")?.data
-                gifArray = ["Cat_animation_breath",
-                            "Cat_animation_sleep",
+                gifData = NSDataAsset(name: "Cat3_animation_breath")?.data
+                gifArray = ["Cat3_animation_breath",
+                            "Cat3_animation_sleep",
                 ] + boughtProducts.map { $0.name }
             case "Rabbit":
-                gifData = NSDataAsset(name: "Rabbit_animation_breath")?.data
+                gifData = NSDataAsset(name: "Rabbit3_animation_breath")?.data
                 gifArray = [
-                    "Rabbit_animation_breath",
-                    "Rabbit_animation_sleep"
+                    "Rabbit3_animation_breath",
+                    "Rabbit3_animation_sleep"
                 ] + boughtProducts.map { $0.name }
             default:
                 gifData = nil
@@ -136,7 +136,7 @@ struct ChildHomeView: View {
             .onChanged { value in
                 isDrag = true
                 playGif = false
-                gifData = NSDataAsset(name: "\(user.selectedCharactar)\(user.growthStage)_Drag")?.data
+                gifData = NSDataAsset(name: "\(user.selectedCharacter)\(user.growthStage)_Drag")?.data
                 gifWidth = 200.0
                 gifHeight = 200.0
 
@@ -224,7 +224,7 @@ struct ChildHomeView: View {
                     _ = user.growth()
                     changeGifData()
                 }
-                .onChange(of: user.selectedCharactar) { _, _ in
+                .onChange(of: user.selectedCharacter) { _, _ in
                     changeGifData()
                 }
                 .onAppear {
@@ -235,7 +235,7 @@ struct ChildHomeView: View {
                     checkForUnreadColumn()
                     startGifTimer()
                     self.boughtProducts = user.loadProducts(key: "boughtItem")
-                    print(user.selectedCharactar)
+                    print(user.selectedCharacter)
                     print(user.growthStage)
                 }
                 .onDisappear {
@@ -279,7 +279,7 @@ struct ChildHomeView: View {
     }
     
     @ViewBuilder func imageView(size: CGSize) -> some View {
-        Image("Dragged_\(user.selectedCharactar)\(user.growthStage)")
+        Image("Dragged_\(user.selectedCharacter)\(user.growthStage)")
             .resizable()
             .scaledToFit()
             .frame(width: size.width * 0.1)
@@ -291,11 +291,11 @@ struct ChildHomeView: View {
         if let gifData = gif {
             GIFImage(data: gifData,loopCount: 3, playGif: $playGif) {
                 print("GIF animation finished!")
-                self.gifData = NSDataAsset(name: gifArray.randomElement()! as! NSDataAssetName)?.data
+                self.gifData = NSDataAsset(name: gifArray.randomElement()! )?.data
             }
             .frame(width: gifWidth,height: gifHeight)
             .onTapGesture {
-                self.gifData = NSDataAsset(name: gifArray.randomElement()! as! NSDataAssetName)?.data
+                self.gifData = NSDataAsset(name: gifArray.randomElement()! )?.data
             }
             .position(gifPosition)
             .gesture(dragGesture)
@@ -305,7 +305,7 @@ struct ChildHomeView: View {
     @ViewBuilder func childHome(size: CGSize) -> some View {
         NavigationStack(path: $user.path) {
             ZStack {
-                Image("bg_\(user.selectedCharactar)")
+                Image("bg_\(user.selectedCharacter)")
                     .resizable()
                     .frame(width: size.width)
                     .ignoresSafeArea(.all)
@@ -315,7 +315,7 @@ struct ChildHomeView: View {
                     ShopView()
                         .navigationBarBackButtonHidden(true)
                 } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharactar)_2")
+                    Image("bt_HomeVIew_\(user.selectedCharacter)_2")
                         .resizable()
                         .scaledToFit()
                         .shadow(radius: 5, y: 20)
@@ -329,7 +329,7 @@ struct ChildHomeView: View {
                     CharacterView()
                         .navigationBarBackButtonHidden(true)
                 } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharactar)_3")
+                    Image("bt_HomeVIew_\(user.selectedCharacter)_3")
                         .resizable()
                         .scaledToFit()
                         .shadow(radius: 5, y: 20)
@@ -342,7 +342,7 @@ struct ChildHomeView: View {
                     LookBackView(fromAjiwaiCard:false)
                         .navigationBarBackButtonHidden(true)
                 } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharactar)_4")
+                    Image("bt_HomeVIew_\(user.selectedCharacter)_4")
                         .resizable()
                         .scaledToFit()
                         .shadow(radius: 5, y: 20)
@@ -354,7 +354,7 @@ struct ChildHomeView: View {
                 NavigationLink {
                     ColumnListView()
                 } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharactar)_5")
+                    Image("bt_HomeVIew_\(user.selectedCharacter)_5")
                         .resizable()
                         .scaledToFit()
                         .shadow(radius: 5, y: 20)
@@ -370,7 +370,7 @@ struct ChildHomeView: View {
                         user.path.append(.ajiwaiCard(nil))
                     }
                 } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharactar)_1")
+                    Image("bt_HomeVIew_\(user.selectedCharacter)_1")
                         .resizable()
                         .scaledToFit()
                         .shadow(radius: 5, y: 20)

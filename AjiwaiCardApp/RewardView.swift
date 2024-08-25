@@ -13,33 +13,34 @@ struct RewardView: View {
         GeometryReader { geometry in
             ZStack {
                 backgroundView(geometry: geometry)
-                if user.isDataSaved {
-                    animationView(geometry: geometry)
-                }
+                animationView(geometry: geometry)
                 confettiView(geometry: geometry)
                 navigationButton(geometry: geometry)
+            }
+            .onAppear(){
+                handleOnAppear()
             }
         }
     }
     private func getFirstGifName() -> String {
         switch user.growthStage {
         case 2:
-            return "\(user.selectedCharactar)1_animation_breath"
+            return "\(user.selectedCharacter)1_animation_breath"
         case 3:
-            return "\(user.selectedCharactar)2_animation_breath"
+            return "\(user.selectedCharacter)2_animation_breath"
         default:
-            return "\(user.selectedCharactar)\(user.growthStage)_animation_breath"
+            return "\(user.selectedCharacter)\(user.growthStage)_animation_breath"
         }
     }
     
     private func getSecondGifName() -> String {
         switch user.growthStage {
         case 2:
-            return "\(user.selectedCharactar)2_animation_breath"
+            return "\(user.selectedCharacter)2_animation_breath"
         case 3:
-            return "\(user.selectedCharactar)3_animation_breath"
+            return "\(user.selectedCharacter)3_animation_breath"
         default:
-            return "\(user.selectedCharactar)\(user.growthStage)_animation_breath"
+            return "\(user.selectedCharacter)\(user.growthStage)_animation_breath"
         }
     }
     
@@ -67,22 +68,22 @@ struct RewardView: View {
                 BaseAnimationView(
                     firstGifName: getFirstGifName(),
                     secondGifName: getSecondGifName(),
-                    text1: "おや、\(user.selectedCharactar)のようすが…",
-                    text2: "おめでとう！\(user.selectedCharactar)が進化したよ！",
+                    text1: "おや、\(user.characterName)のようすが…",
+                    text2: "おめでとう！\(user.characterName)が進化したよ！",
                     useBackGroundColor: true
                 )
             } else if showBaseLevelUpView {
                 BaseLevelUpView(
-                    characterGifName: "\(user.selectedCharactar)\(user.growthStage)_animation_breath",
-                    text: "\(user.selectedCharactar)がレベルアップしたよ！",
-                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharactar)",
+                    characterGifName: "\(user.selectedCharacter)\(user.growthStage)_animation_breath",
+                    text: "\(user.characterName)がレベルアップしたよ！",
+                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharacter)",
                     useBackGroundColor: false
                 )
             } else if showNormalCharacterView {
                 NormalCharacterView(
-                    characterGifName: "\(user.selectedCharactar)\(user.growthStage)_animation_breath",
-                    text: "\(user.selectedCharactar)は元気にしています！",
-                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharactar)",
+                    characterGifName: "\(user.selectedCharacter)\(user.growthStage)_animation_breath",
+                    text: "今日も記録してくれてありがとう！",
+                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharacter)",
                     useBackGroundColor: false
                 )
             }

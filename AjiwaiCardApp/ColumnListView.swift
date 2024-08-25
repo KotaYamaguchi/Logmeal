@@ -57,7 +57,6 @@ struct ColumnListView: View {
         NavigationSplitView {
             ZStack {
                 Color.white.edgesIgnoringSafeArea(.all)
-                
                 VStack(spacing: 16) {
                     HStack {
                         Picker("月を選択", selection: $selectedMonth) {
@@ -74,15 +73,15 @@ struct ColumnListView: View {
                         
                         Spacer()
                         
-                        Button(action: {
+                        Button{
                             sortAscending.toggle()
                             updateSortedDates()
-                        }) {
+                        }label:{
                             Image(systemName: sortAscending ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
                                 .foregroundColor(.blue)
                                 .font(.title2)
                         }
-                        
+                        .buttonStyle(PlainButtonStyle())
                         Button("今日のコラム") {
                             if let closestColumnId = getClosestColumnId() {
                                 withAnimation {
@@ -100,14 +99,15 @@ struct ColumnListView: View {
                         ScrollView {
                             LazyVStack(spacing: 12) {
                                 ForEach(sortedDates, id: \.self) { date in
-                                    Button(action: {
+                                    Button{
                                         selectedDate = date
-                                    }) {
+                                    }label:{
                                         if let column = allColumn.first(where: { $0.columnDay == date }) {
                                             ColumnCard(date: date, title: column.title)
                                         }
                                     }
                                     .id(date)
+                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
                             .padding(.horizontal)
@@ -136,11 +136,17 @@ struct ColumnListView: View {
         } detail: {
             if let selectedDate = selectedDate,
                let column = allColumn.first(where: { $0.columnDay == selectedDate }) {
-                ColumnDetailView(title: column.title, content: column.caption)
+                DestinationCard(title: column.title, description: column.caption)
             } else {
-                Text("コラムを選択してください")
-                    .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                    .foregroundColor(.secondary)
+                ZStack{
+                    Image("bg_AjiwaiCardView")
+                        .resizable()
+                        .scaledToFill()
+                        .ignoresSafeArea()
+                    Text("コラムを選択してください")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                        .foregroundColor(.secondary)
+                }
             }
         }
     }
@@ -179,46 +185,63 @@ struct ColumnCard: View {
         }
         .padding()
         .background(Color.white)
-        .cornerRadius(15)
         .shadow(color: Color.gray.opacity(0.2), radius: 5, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 15)
-                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                .stroke(Color.blue.opacity(0.3), lineWidth: 2)
         )
     }
 }
 
-struct ColumnDetailView: View {
+struct DestinationCard: View {
+    let imageName: String = "fork.knife"
     let title: String
-    let content: String
-    
+    let description: String
+    let systemNames:[String] = ["cup.and.saucer.fill","mug.fill","takeoutbag.and.cup.and.straw.fill","wineglass.fill","waterbottle.fill","birthday.cake.fill","carrot.fill","fork.knife"]
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text(title)
-                    .font(.custom("GenJyuuGothicX-Bold", size: 35))
-                    .fontWeight(.bold)
-                    .foregroundColor(.black)
-                    .padding(.bottom, 10)
-                Text(content)
-                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                    .foregroundColor(.black)
+        GeometryReader{ geometry in
+            VStack{
+                Spacer()
+                HStack{
+                    Spacer()
+                    VStack(alignment: .center) {
+                        Spacer()
+                        Image(systemName: systemNames.randomElement()!)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 60, height: 60)
+                            .foregroundColor(.blue)
+                            .padding()
+                            .background(Circle().fill(Color.blue.opacity(0.1)))
+                        Spacer()
+                        Text(title)
+                            .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                        Divider()
+                        Text(description)
+                            .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        Spacer()
+                    }
                     .padding()
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(15)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 15)
-                            .stroke(Color.blue.opacity(0.3), lineWidth: 1)
-                    )
+                    .frame(width: geometry.size.width*0.7, height: geometry.size.height*0.9)
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .shadow(color: Color.gray.opacity(0.2), radius: 5, x: 0, y: 2)
+                    Spacer()
+                }
+                Spacer()
             }
-            .padding()
+            .background(){
+                Image("bg_AjiwaiCardView")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+            }
         }
-        .navigationTitle("コラム詳細")
-        .navigationBarTitleDisplayMode(.inline)
-        .background(Color.white.edgesIgnoringSafeArea(.all))
     }
 }
-
 struct CustomButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -232,18 +255,8 @@ struct CustomButtonStyle: ButtonStyle {
     }
 }
 
-// Preview用のサンプルデータ
-struct ColumnListView_Previews: PreviewProvider {
-    static var previews: some View {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(for: ColumnData.self, configurations: config)
-        
-        for date in ["2024-07-15", "2024-07-10", "2024-07-05"] {
-            let column = ColumnData(columnDay: date, title: "サンプルタイトル \(date)", caption: "サンプル内容 \(date)")
-            container.mainContext.insert(column)
-        }
-        
-        return ColumnListView()
-            .modelContainer(container)
-    }
+#Preview{
+    ColumnListView()
+        .environmentObject(UserData())
+        .modelContainer(for: [AjiwaiCardData.self,MenuData.self,ColumnData.self])
 }

@@ -7,7 +7,7 @@ struct CharacterView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showModal:Bool = false
     func setBackGround() -> String{
-        switch user.selectedCharactar{
+        switch user.selectedCharacter{
         case "Dog":
             switch user.growthStage {
             case 1:
@@ -73,6 +73,7 @@ struct CharacterView: View {
                     .resizable()
                     .frame(width:50,height: 50)
             }
+            .buttonStyle(PlainButtonStyle())
             Spacer()
             Button{
                 showModal = true
@@ -81,6 +82,7 @@ struct CharacterView: View {
                     .resizable()
                     .frame(width:50,height: 50)
             }
+            .buttonStyle(PlainButtonStyle())
         }
         .padding(.horizontal)
     }

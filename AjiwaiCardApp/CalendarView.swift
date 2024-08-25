@@ -8,7 +8,7 @@ struct CalendarDisplayView: View {
     @State private var opacity: Double = 1.0
     private let calendar = Calendar(identifier: .gregorian)
     let allData: [AjiwaiCardData]
-
+    
     var body: some View {
         GeometryReader { geometry in
             let width = geometry.size.width
@@ -22,7 +22,6 @@ struct CalendarDisplayView: View {
                 Button(action: todayMonth) {
                     Image("bt_base")
                         .resizable()
-                       // .scaledToFit()
                         .overlay{
                             Text("今日")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 15))
@@ -78,6 +77,7 @@ struct CalendarDisplayView: View {
 
     private func todayMonth() {
         currentDate = Date()
+        selectedDate = Date()
     }
 }
 
@@ -163,7 +163,7 @@ struct CalendarView: View {
     }
     
     private var backgroundMainColor: Color {
-        switch user.selectedCharactar {
+        switch user.selectedCharacter {
         case "Dog":
             return mainColors[1]
         case "Cat":
@@ -175,7 +175,7 @@ struct CalendarView: View {
         }
     }
     private var backgroundSubColor: Color {
-        switch user.selectedCharactar {
+        switch user.selectedCharacter {
         case "Dog":
             return subColors[1]
         case "Cat":
@@ -211,7 +211,7 @@ struct DayView: View {
     private let calendar = Calendar(identifier: .gregorian)
     
     private var fillColor:Color {
-        switch user.selectedCharactar{
+        switch user.selectedCharacter{
         case "Dog":
             return .red
         case "Cat":

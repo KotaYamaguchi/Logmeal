@@ -1,46 +1,37 @@
 import SwiftUI
 import SwiftData
-
+// MARK: - LookBackView
 struct LookBackView: View {
+    //SwiftData
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
+    var filteredData: AjiwaiCardData? {
+        allData.first { Calendar.current.isDate($0.saveDay, inSameDayAs: selectDate) }
+    }
+    
+    //Environment
     @EnvironmentObject var user: UserData
+    @Environment(\.dismiss) private var dismiss
+    //カレンダー関連
     @State private var selectDate: Date = Date()
+    //味わいカード関連
     @State private var showDetail: Bool = false
     @State private var navigateToWritingView: Bool = false
-    @Environment(\.dismiss) private var dismiss
+    //アニメーション関連
     @State private var showBaseLevelUpView = false
     @State private var showBaseAnimationView = false
     @State private var showNormalCharacterView = false
     @State private var showTextCompleted = false
     @State var fromAjiwaiCard:Bool = true
-    var filteredData: AjiwaiCardData? {
-        allData.first { Calendar.current.isDate($0.saveDay, inSameDayAs: selectDate) }
-    }
     
+    //MARK: - body
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                Image("bg_calenderView_\(user.selectedCharactar)")
-                    .resizable()
-                    .ignoresSafeArea()
-                
-                Button {
-                    dismiss()
-                } label: {
-                    Image("bt_back")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                }
-                .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
-                
-                CalendarDisplayView(selectedDate: $selectDate, allData: allData)
-                    .frame(width: geometry.size.width * 0.85, height: geometry.size.height)
-                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                
-                AjiwaiCardDataPreview(selectedDate: selectDate, allData: allData, showDetail: $showDetail, navigateToWritingView: $navigateToWritingView)
-                    .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.5)
-                
+                backgroundView(geometry:geometry)
+                actionButton(geometry: geometry)
+                calenderView(geometry: geometry)
+                ajiwaiCardPreview(geometry: geometry)
                 if user.isDataSaved {
                     animationView(geometry: geometry)
                         .onTapGesture {
@@ -61,34 +52,64 @@ struct LookBackView: View {
             }
         }
     }
-
+    //MARK: - View Components
+    private func backgroundView(geometry:GeometryProxy) -> some View{
+        Image("bg_calenderView_\(user.selectedCharacter)")
+            .resizable()
+            .ignoresSafeArea()
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+    }
+    private func actionButton(geometry:GeometryProxy) -> some View{
+        Button {
+            dismiss()
+        } label: {
+            Image("bt_back")
+                .resizable()
+                .frame(width: 50, height: 50)
+        }
+        .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
+        .buttonStyle(PlainButtonStyle())
+    }
+    private func calenderView(geometry:GeometryProxy) -> some View{
+        CalendarDisplayView(selectedDate: $selectDate, allData: allData)
+            .frame(width: geometry.size.width * 0.85, height: geometry.size.height)
+            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+    }
+    private func ajiwaiCardPreview(geometry:GeometryProxy) -> some View{
+        AjiwaiCardDataPreview(selectedDate: selectDate, allData: allData, showDetail: $showDetail, navigateToWritingView: $navigateToWritingView)
+            .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.5)
+    }
     private func animationView(geometry: GeometryProxy) -> some View{
         ZStack{
             if showBaseAnimationView {
                 BaseAnimationView(
                     firstGifName: getFirstGifName(),
                     secondGifName: getSecondGifName(),
-                    text1: "おや、\(user.selectedCharactar)のようすが…",
-                    text2: "おめでとう！\(user.selectedCharactar)が進化したよ！",
+                    text1: "おや、\(user.characterName)のようすが…",
+                    text2: "おめでとう！\(user.characterName)が進化したよ！",
                     useBackGroundColor: true
                 )
             } else if showBaseLevelUpView {
                 BaseLevelUpView(
-                    characterGifName: "\(user.selectedCharactar)\(user.growthStage)_animation_breath",
-                    text: "\(user.selectedCharactar)がレベルアップしたよ！",
-                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharactar)",
+                    characterGifName: "\(user.selectedCharacter)\(user.growthStage)_animation_breath",
+                    text: "\(user.characterName)がレベルアップしたよ！",
+                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharacter)",
                     useBackGroundColor: true
                 )
             } else if showNormalCharacterView {
                 NormalCharacterView(
-                    characterGifName: "\(user.selectedCharactar)\(user.growthStage)_animation_breath",
-                    text: "\(user.selectedCharactar)は元気にしています！",
-                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharactar)",
+                    characterGifName: "\(user.selectedCharacter)\(user.growthStage)_animation_breath",
+                    text: "今日も記録してくれてありがとう！",
+                    backgroundImage: "mt_RewardView_callout_\(user.selectedCharacter)",
                     useBackGroundColor: true
                 )
             }
         }
     }
+    
+    
+//MARK: - functions
     private func handleOnDisAppear() {
         let levelUp = user.checkLevel()
         let growth = user.growth()
@@ -100,132 +121,158 @@ struct LookBackView: View {
         } else {
             showNormalCharacterView = true
         }
-        
         // TypeWriterTextView の表示が終わった後の処理
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             showTextCompleted = true
         }
     }
+
     private func getFirstGifName() -> String {
         switch user.growthStage {
         case 2:
-            return "\(user.selectedCharactar)1_animation_breath"
+            return "\(user.selectedCharacter)1_animation_breath"
         case 3:
-            return "\(user.selectedCharactar)2_animation_breath"
+            return "\(user.selectedCharacter)2_animation_breath"
         default:
-            return "\(user.selectedCharactar)\(user.growthStage)_animation_breath"
+            return "\(user.selectedCharacter)\(user.growthStage)_animation_breath"
         }
     }
     
     private func getSecondGifName() -> String {
         switch user.growthStage {
         case 2:
-            return "\(user.selectedCharactar)2_animation_breath"
+            return "\(user.selectedCharacter)2_animation_breath"
         case 3:
-            return "\(user.selectedCharactar)3_animation_breath"
+            return "\(user.selectedCharacter)3_animation_breath"
         default:
-            return "\(user.selectedCharactar)\(user.growthStage)_animation_breath"
+            return "\(user.selectedCharacter)\(user.growthStage)_animation_breath"
         }
     }
 }
-
+// MARK: - AjiwaiCardDataPreview
 
 struct AjiwaiCardDataPreview: View {
+    //Environment
     @EnvironmentObject var user:UserData
+    //カレンダー用
     let selectedDate: Date
+    //選択したデータ
     let allData: [AjiwaiCardData]
-    
     var filteredData: AjiwaiCardData? {
         allData.first { Calendar.current.isDate($0.saveDay, inSameDayAs: selectedDate) }
     }
+    //View遷移管理
     @Binding var showDetail: Bool
-    @Binding var navigateToWritingView: Bool // 追加
-    
+    @Binding var navigateToWritingView: Bool
+//MARK: - Body
     var body: some View {
         VStack{
             Spacer()
             if let data = filteredData {
-                
-                AsyncImage(url: data.imagePath) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                    case .success(let image):
-                        ZStack{
-                            
-                            image
-                                .resizable()
-                                .frame(width: 400,height:300)
-                                .offset(y:-40)
-                            Image("mt_calenderView_imageFrame_\(user.selectedCharactar)")
-                                .resizable()
-                                .frame(width: 650,height:400)
-                        }
-                        
-                    case .failure(_):
-                        ZStack{
-                            Image("mt_No_Image")
-                                .resizable()
-                                .frame(width: 400,height:300)
-                                .offset(y:-40)
-                            Image("mt_calenderView_imageFrame_\(user.selectedCharactar)")
-                                .resizable()
-                                .frame(width: 650,height:400)
-                        }
-                        
-                    @unknown default:
-                        ZStack{
-                            Image("mt_No_Image")
-                                .resizable()
-                                .frame(width: 400,height:300)
-                                .offset(y:-40)
-                            Image("mt_calenderView_imageFrame_\(user.selectedCharactar)")
-                                .resizable()
-                                .frame(width: 650,height:400)
-                        }
-                    }
-                }
+                imageView(data: data)
                 .offset(y:50)
-                Image("mt_calenderView_menuList")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 400)
-                    .overlay{
-                        VStack(alignment:.leading){
-                            ForEach(data.menu, id: \.self) { content in
-                                VStack(alignment: .leading, spacing: 0){
-                                    Text("・" + content)
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                                        .foregroundStyle(Color.black)
-                                    Rectangle()
-                                        .frame(width: 300, height: 1)
-                                        .foregroundStyle(Color.gray)
-                                }
-                                .padding(.vertical,2)
-                            }
-                        }
-                    }
-                Button {
-                    showDetail = true
-                } label: {
-                    Text("詳しく見る")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                }
+              menuListPreview(data: data)
+                showDetailButton()
             } else {
-                Text("データがありません")
-                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                Button(action: {
-                    navigateToWritingView = true
-                }) {
-                    Text("この日のデータを記録する")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                        .frame(width: 250, height: 50)
-                        .background(Color.cyan)
-                        .foregroundStyle(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                }
+             isEnptyView()
             }
             Spacer()
+        }
+    }
+    //MARK: - View Componets
+    private func imageView(data:AjiwaiCardData) -> some View{
+        AsyncImage(url: data.imagePath) { phase in
+            switch phase {
+            case .empty:
+                ProgressView()
+            case .success(let image):
+                succeedImageView(image: image)
+            case .failure(_):
+               defaultImageView()
+                
+            @unknown default:
+                defaultImageView()
+            }
+        }
+    }
+    private func succeedImageView(image:Image) -> some View{
+        ZStack{
+            image
+                .resizable()
+                .frame(width: 400,height:300)
+                .offset(y:-40)
+            imageFrameView()
+        }
+    }
+    private func defaultImageView() -> some View{
+        ZStack{
+            placeholdarImageView()
+            imageFrameView()
+        }
+    }
+    private func placeholdarImageView() -> some View{
+        Image("mt_No_Image")
+            .resizable()
+            .frame(width: 400,height:300)
+            .offset(y:-40)
+    }
+    private func imageFrameView() -> some View{
+        Image("mt_calenderView_imageFrame_\(user.selectedCharacter)")
+            .resizable()
+            .frame(width: 650,height:400)
+    }
+    private func menuListPreview(data:AjiwaiCardData) -> some View{
+        Image("mt_calenderView_menuList")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 400)
+            .overlay{
+                VStack(alignment:.leading){
+                    ForEach(data.menu, id: \.self) { content in
+                        VStack(alignment: .leading, spacing: 0){
+                            Text("・" + content)
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .foregroundStyle(Color.black)
+                            Rectangle()
+                                .frame(width: 300, height: 1)
+                                .foregroundStyle(Color.gray)
+                        }
+                        .padding(.vertical,2)
+                    }
+                }
+            }
+    }
+    private func showDetailButton() -> some View{
+        Button {
+            showDetail = true
+        } label: {
+            Image("bt_base")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 50)
+                .overlay{
+                    Text("詳しく見る")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                        .foregroundStyle(Color.buttonColor)
+                }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    private func isEnptyView() -> some View{
+        Group{
+            Text("データがありません")
+                .font(.custom("GenJyuuGothicX-Bold", size: 17))
+            Button{
+                navigateToWritingView = true
+            }label:{
+                Text("この日のデータを記録する")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                    .frame(width: 250, height: 50)
+                    .background(Color.cyan)
+                    .foregroundStyle(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+            }
+            .buttonStyle(PlainButtonStyle())
         }
     }
 }
@@ -250,6 +297,7 @@ struct AjiwaiCardDetailView: View {
     @State private var selectedPhotoItem: PhotosPickerItem? = nil
     @State private var uiimage: UIImage? = nil
     @State private var showingSaveAlert = false
+    @State private var showingDeleteAlert = false
     @State private var showCameraPicker = false
     @State private var showingCameraView = false
     
@@ -290,7 +338,7 @@ struct AjiwaiCardDetailView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button("削除") {
-                            showingSaveAlert = true
+                            showingDeleteAlert = true
                         }
                         .foregroundColor(.red)
                         
@@ -301,7 +349,7 @@ struct AjiwaiCardDetailView: View {
                     }
                 }
             }
-            .alert("このカードを削除しますか？", isPresented: $showingSaveAlert) {
+            .alert("このカードを削除しますか？", isPresented: $showingDeleteAlert) {
                 Button("キャンセル", role: .cancel) { }
                 Button("削除", role: .destructive) {
                     deleteCard()
@@ -309,6 +357,15 @@ struct AjiwaiCardDetailView: View {
                 }
             } message: {
                 Text("このカードは削除されます。元に戻すことはできません。")
+            }
+            .alert("変更を保存", isPresented: $showingSaveAlert) {
+                Button("キャンセル", role: .cancel) { }
+                Button("保存") {
+                    saveChanges()
+                    dismiss()
+                }
+            } message: {
+                Text("変更を保存しますか？")
             }
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiimage, sourceType: .camera)

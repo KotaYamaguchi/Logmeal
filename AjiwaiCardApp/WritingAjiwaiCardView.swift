@@ -47,6 +47,7 @@ struct WritingAjiwaiCardView: View {
     @State var selectedItem: PhotosPickerItem?
     @State private var keyboardHeight: CGFloat = 0
     @FocusState private var focusedField: Int?
+    @FocusState private var lunchComentFocusedField:Bool
     @State private var showingSaveAlert = false
     @State private var toNext: Bool = true
     @State private var showCameraPicker = false
@@ -65,13 +66,13 @@ struct WritingAjiwaiCardView: View {
             ZStack {
                 backgroundView(geometry: geometry)
                     .onTapGesture {
-                        focusedField = nil
+                        lunchComentFocusedField = false
                     }
-                
                 contentView(geometry: geometry)
                     .onTapGesture {
-                        focusedField = nil
+                        lunchComentFocusedField = false
                     }
+                    
                 dateBar(geometry: geometry)
                 
                 customDatePicker(geometry: geometry)
@@ -116,11 +117,6 @@ struct WritingAjiwaiCardView: View {
         .ignoresSafeArea(.keyboard)
         .alert("保存が完了しました", isPresented: $showSaveSuccess) {
             Button("OK", role: .cancel) {
-                gotEXP = Int.random(in: 10...20)
-                user.exp += gotEXP
-                user.gotEXP = gotEXP
-                user.appearExp += 10
-                user.point += 100
                 if isFullScreen {
                     dismiss()
                 } else {
@@ -154,6 +150,7 @@ struct WritingAjiwaiCardView: View {
             }
         }
         .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
+        .buttonStyle(PlainButtonStyle())
     }
 
     private func showingCameraOverlayview() -> some View {
@@ -202,10 +199,6 @@ struct WritingAjiwaiCardView: View {
                 }
                 Spacer()
                 commentsAndFeelingsView(geometry: geometry)
-                    .onTapGesture {
-                        // タップ時にテキストフィールドのフォーカスを外す
-                        focusedField = nil
-                    }
                 Spacer()
             }
         
@@ -270,10 +263,10 @@ struct WritingAjiwaiCardView: View {
                     .focused($focusedField, equals: index + 100)
                 }
             }
-            Button(action: {
+            Button{
                 menu.append("")
                 focusedField = (menu.count - 1) + 100 // 新しいフィールドにフォーカスを設定
-            }) {
+            }label:{
                 Label("メニュー項目を追加", systemImage: "plus.circle.fill")
             }
             Button {
@@ -322,7 +315,7 @@ struct WritingAjiwaiCardView: View {
                             }
                         ), axis: .vertical)
                         .frame(width: 400, height: 200)
-                        .focused($focusedField, equals: -1)
+                        .focused($lunchComentFocusedField)
                         Text("\(lunchComent.count)/\(lunchCommentMaxLength)")
                             .font(.caption)
                             .foregroundColor(.gray)
@@ -345,7 +338,7 @@ struct WritingAjiwaiCardView: View {
                             feelingTexts[index] = newValue
                         }
                     }
-                ), maxLength: feelingTextMaxLength)
+                ), maxLength: feelingTextMaxLength, placeholdar: feelings[index])
                 .feelingsTextFieldStyle(image: iconArray[index], underlineColor: colors[index])
                 .padding(.bottom)
                 .focused($focusedField, equals: index)
@@ -368,6 +361,7 @@ struct WritingAjiwaiCardView: View {
                 }
         }
         .position(x: geometry.size.width * 0.9, y: geometry.size.height * 0.04)
+        .buttonStyle(PlainButtonStyle())
     }
 
     private func customDatePicker(geometry: GeometryProxy) -> some View {
@@ -425,6 +419,7 @@ struct WritingAjiwaiCardView: View {
                     }
                 }
         }
+        .buttonStyle(PlainButtonStyle())
         .disabled(isSave())
         .padding()
     }
@@ -482,13 +477,11 @@ struct WritingAjiwaiCardView: View {
                 
                 // データ保存フラグをtrueに設定
                 user.isDataSaved = true
-
-                // LookBackViewへ戻る
-                if isFullScreen {
-                    dismiss()
-                } else {
-                    user.path.append(.reward)
-                }
+                gotEXP = Int.random(in: 10...20)
+                user.exp += gotEXP
+                user.gotEXP = gotEXP
+                user.appearExp += 10
+                user.point += 100
             }
         }
     }
@@ -570,11 +563,12 @@ struct TextFieldWithCounterWithBorder: View {
 struct TextFieldWithCounter: View {
     @Binding var text: String
     let maxLength: Int
-    
+    let placeholdar:String
     var body: some View {
         ZStack(alignment: .trailing) {
-            TextField("", text: $text, axis: .vertical)
+            TextField(placeholdar, text: $text, axis: .vertical)
                 .padding(.trailing, 40)
+                .textFieldStyle(.plain)
             Text("\(text.count)/\(maxLength)")
                 .font(.custom("GenJyuuGothicX-Bold", size: 12))
                 .foregroundColor(.gray)

@@ -1,10 +1,3 @@
-//
-//  LaunchScreen.swift
-//  AjiwaiCardApp
-//
-//  Created by 山口昂大 on 2024/07/24.
-//
-
 import SwiftUI
 
 struct LaunchScreen: View {
@@ -13,9 +6,10 @@ struct LaunchScreen: View {
         GeometryReader{ geometry in
             if isLoading{
                 ZStack{
-                    Image("logmeal_icon")
+                    Image("logmeal_icon_view")
                         .resizable()
                         .scaledToFit()
+                        .clipShape(RoundedRectangle(cornerRadius: 50))
                         .frame(width:geometry.size.width*0.5,height: geometry.size.height*0.5)
                         .position(x:geometry.size.width*0.5,y: geometry.size.height*0.5)
                 }
@@ -35,4 +29,5 @@ struct LaunchScreen: View {
 
 #Preview {
     LaunchScreen()
+        .environmentObject(UserData())
 }

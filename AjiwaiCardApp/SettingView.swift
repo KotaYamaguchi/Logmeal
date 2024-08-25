@@ -28,15 +28,6 @@ struct SettingView: View {
                     .ignoresSafeArea()
                     .saturation(0.0)
                 VStack(spacing: 20) {
-                    Text("設定画面")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                        .padding(.top, 20)
-                    Picker("キャラクターを選択", selection: $user.selectedCharactar) {
-                        Text("いぬ").tag("Dog")
-                        Text("ねこ").tag("Cat")
-                        Text("うさぎ").tag("Rabbit")
-                    }
-                    .frame(width: 300, height: 50)
                     NavigationLink{
                         ProfileEditView()
                     } label: {
@@ -47,6 +38,7 @@ struct SettingView: View {
                             .foregroundStyle(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
+                    .buttonStyle(PlainButtonStyle())
                     Button {
                         showQRscaner = true
                     } label: {
@@ -57,6 +49,7 @@ struct SettingView: View {
                             .foregroundStyle(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
+                    .buttonStyle(PlainButtonStyle())
                     Button {
                         showActionSheet = true
                     } label: {
@@ -67,6 +60,7 @@ struct SettingView: View {
                             .foregroundStyle(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
+                    .buttonStyle(PlainButtonStyle())
                     .disabled(allData.isEmpty)
                     .actionSheet(isPresented: $showActionSheet) {
                         ActionSheet(title: Text("共有方法を選択してください"), buttons: [
@@ -88,10 +82,11 @@ struct SettingView: View {
                         Text("タイトルに戻る")
                             .font(.custom("GenJyuuGothicX-Bold", size: 15))
                             .frame(width: 220, height: 50)
-                            .background(Color.white)
-                            .foregroundStyle(Color.cyan)
+                            .background(Color.red)
+                            .foregroundStyle(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
                 if isGenerating {
                     ProgressView("共有の準備中...")
@@ -148,7 +143,7 @@ struct SettingView: View {
                     .background(Color.cyan)
                     .foregroundStyle(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
-
+                    .buttonStyle(PlainButtonStyle())
                     Button("キャンセル") {
                         showDatePicker = false
                     }
@@ -157,6 +152,7 @@ struct SettingView: View {
                     .background(Color.gray)
                     .foregroundStyle(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .buttonStyle(PlainButtonStyle())
                 }
                 
             }

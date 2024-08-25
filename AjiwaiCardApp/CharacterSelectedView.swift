@@ -5,8 +5,8 @@ struct CharacterSelectView: View {
     @State private var selectedCharacter: Profile? = nil
     @State private var isDetailViewPresented = false
     @Binding var isSelectedCharacter: Bool
-    @State private var focusedIndex: Int? = nil  // 初期値をnilに変更
-    @State private var hasBeenTapped = false  // 新しい状態変数を追加
+    @State private var focusedIndex: Int? = nil
+    @State private var hasBeenTapped = false
     
     var profiles = [
         Profile(charaName: "レーク", charaImage: "Dog", mainStatus: "犬とトマトのハーフ", subStatus: "朝ごはんがだいすき！"),
@@ -78,21 +78,21 @@ struct CharacterSelectView: View {
     
     // CharacterView は個々のキャラクター表示を担当
     struct CharacterView: View {
-          let profile: Profile
-          let isFocused: Bool
-          let hasBeenTapped: Bool
-          let size: CGSize
-          
-          var body: some View {
-              Image("\(profile.charaImage)_normal_1")
-                  .resizable()
-                  .scaledToFit()
-                  .frame(height: isFocused ? size.height * 0.3 : size.height * 0.2)
-                  .colorMultiply(isFocused || !hasBeenTapped ? .white : .gray)
-                  .offset(y: isFocused ? 0 : 20)
-                  .animation(.easeInOut(duration: 0.3), value: isFocused)
-          }
-      }
+        let profile: Profile
+        let isFocused: Bool
+        let hasBeenTapped: Bool
+        let size: CGSize
+        
+        var body: some View {
+            Image("\(profile.charaImage)_normal_1")
+                .resizable()
+                .scaledToFit()
+                .frame(height: isFocused ? size.height * 0.3 : size.height * 0.2)
+                .colorMultiply(isFocused || !hasBeenTapped ? .white : .gray)
+                .offset(y: isFocused ? 0 : 20)
+                .animation(.easeInOut(duration: 0.3), value: isFocused)
+        }
+    }
     
     @ViewBuilder func detailView(size:CGSize) -> some View{
         if let character = selectedCharacter {
@@ -112,29 +112,16 @@ struct CharacterSelectView: View {
                 .offset(x:30,y:15)
                 HStack{
                     Spacer()
-                    if character.charaImage == "Cat" || character.charaImage == "Dog"{
+   
                         ZStack{
                             Image("mt_groundCircle")
-                                .offset(y:110)
+                                .offset(y:100)
                             Image("\(character.charaImage)_normal_1")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: size.height * 0.3)
-                                .background(){
-                                    
-                                }
+                               
                         }
-                    }else{
-                        ZStack{
-                            Image("mt_groundCircle")
-                                .offset(y:150)
-                            Image("\(character.charaImage)_normal_1")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: size.height * 0.4)
-                        }
-                        
-                    }
                     
                     Spacer()
                     VStack {
@@ -156,10 +143,11 @@ struct CharacterSelectView: View {
                             }
                         Button {
                             if let character = selectedCharacter {
-                                user.selectedCharactar = character.charaImage
+                                user.selectedCharacter = character.charaImage
+                                user.characterName = character.charaName
                             }
                             isSelectedCharacter = true
-                            print(user.selectedCharactar)
+                            print(user.characterName)
                         } label: {
                             Image("bt_base")
                                 .resizable()
@@ -192,7 +180,7 @@ struct CharacterSelectView: View {
         }
         
     }
-
+    
 }
 
 #Preview{

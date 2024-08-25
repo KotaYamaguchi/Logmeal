@@ -1,11 +1,12 @@
+
 import SwiftUI
 
 struct FirstLoginView: View {
     @EnvironmentObject var user: UserData
     @State private var isSelectedCharacter: Bool = false
     @State private var showFillName: Bool = false
-    @State private var selectedGrade: String = ""
-    @State private var selectedClass: String = ""
+    @State private var selectedGrade: Int?
+    @State private var selectedClass:Int?
     @State private var showClassPicker: Bool = false
     @State private var showButtonCount: Int = 0
     @State private var isStart: Bool = false
@@ -22,14 +23,7 @@ struct FirstLoginView: View {
                 } else {
                     Image("bg_AjiwaiCardView")
                         .resizable()
-                        .onTapGesture {
-                            if showButtonCount == 2 {
-                                withAnimation {
-                                    user.isLogined = true
-                                }
-                            }
-                        }
-                    Image("\(user.selectedCharactar)_normal_1")
+                    Image("\(user.selectedCharacter)_normal_1")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 180)
@@ -68,7 +62,7 @@ struct FirstLoginView: View {
                 .frame(width: size.width * 0.4)
                 .position(x: size.width * 0.5, y: size.height * 0.3)
             
-            Button(action: {
+            Button{
                 if user.name.isEmpty{
                     user.name = "ななし"
                 }
@@ -76,7 +70,7 @@ struct FirstLoginView: View {
                 withAnimation {
                     showClassPicker = true
                 }
-            }) {
+            }label:{
                 Image("bt_base")
                     .resizable()
                     .scaledToFit()
@@ -87,7 +81,7 @@ struct FirstLoginView: View {
                             .foregroundStyle(Color.buttonColor)
                     }
             }
-//            .disabled(user.name.isEmpty)
+            .disabled(user.name.isEmpty)
             .position(x: size.width * 0.5, y: size.height * 0.8)
             .buttonStyle(PlainButtonStyle())
         }
@@ -101,34 +95,36 @@ struct FirstLoginView: View {
             .position(x: size.width * 0.5, y: size.height * 0.2)
             
             VStack(spacing: 20) {
-                TextField("学年：3年生なら 3 と入力してね", text: $selectedGrade)
+                TextField("学年：3年生なら 3 と入力してね", value: $selectedGrade, format: .number)
                     .font(.custom("GenJyuuGothicX-Bold", size: 17))
                     .padding(10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                     .padding(.horizontal)
                     .frame(width: size.width * 0.4)
+                    .keyboardType(.numberPad)
                 
-                TextField("クラス：1組なら 1 と入力してね", text: $selectedClass)
+                TextField("クラス：1組なら 1 と入力してね", value: $selectedClass, format: .number)
                     .font(.custom("GenJyuuGothicX-Bold", size: 17))
                     .padding(10)
                     .background(Color(.systemGray6))
                     .cornerRadius(10)
                     .padding(.horizontal)
                     .frame(width: size.width * 0.4)
+                    .keyboardType(.numberPad)
             }
             .position(x: size.width * 0.5, y: size.height * 0.3)
             
-            Button(action: {
-                if let grade = Int(selectedGrade), let classNumber = Int(selectedClass) {
+            Button{
+                if let grade = selectedGrade, let yourClass = selectedClass{
                     user.grade = grade
-                    user.yourClass = classNumber
+                    user.yourClass = yourClass
                     showClassPicker = false
                     withAnimation {
                         isStart = true
                     }
                 }
-            }) {
+            }label:{
                 Image("bt_base")
                     .resizable()
                     .scaledToFit()
@@ -138,9 +134,8 @@ struct FirstLoginView: View {
                             .font(.custom("GenJyuuGothicX-Bold", size: 20))
                             .foregroundStyle(Color.buttonColor)
                     }
-                    .opacity(selectedGrade.isEmpty || selectedClass.isEmpty ? 0.5 : 1.0)
             }
-            .disabled(selectedGrade.isEmpty || selectedClass.isEmpty)
+            .disabled(selectedGrade == nil || selectedClass == nil)
             .position(x: size.width * 0.5, y: size.height * 0.8)
             .buttonStyle(PlainButtonStyle())
         }
@@ -157,8 +152,9 @@ struct FirstLoginView: View {
                     
                 } else if conversationCount == 1 {
                     TypeWriterTextView("よし！これからよろしくね！", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 17), onAnimationCompleted: {
-                        print("アニメーションが終了しました")
-                        showButtonCount = 2
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0){
+                            user.isLogined = true
+                        }
                     })
                 }
                 
@@ -181,13 +177,6 @@ struct FirstLoginView: View {
                 }
                 .padding(.top, 30)
                 .position(x: size.width * 0.5, y: size.height * 0.8)
-            } else if showButtonCount == 2 {
-                Text("画面をタップしてゲームを始めよう")
-                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                    .foregroundStyle(.gray)
-                    .padding(.top, 30)
-                    .position(x: size.width * 0.5, y: size.height * 0.8)
-                    .scaleEffect(conversationCount == 1 ? 1.1 : 0)
             }
         }
         .onAppear() {

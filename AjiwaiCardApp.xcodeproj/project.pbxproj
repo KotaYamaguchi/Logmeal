@@ -36,7 +36,6 @@
 		92615B032B68BEBC0072AC98 /* RewardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92615B002B68BEBC0072AC98 /* RewardView.swift */; };
 		92615B072B68C1F10072AC98 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92615B062B68C1F10072AC98 /* UserData.swift */; };
 		9281D8382C1ABBB600263877 /* GoogleSheetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9281D8372C1ABBB600263877 /* GoogleSheetAPI.swift */; };
-		928E02AC2BA56B8D002BF51F /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 928E02AB2BA56B8D002BF51F /* FSCalendar */; };
 		92A2A0CA2C0C5C73005C4998 /* PDFGenerater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A2A0C92C0C5C73005C4998 /* PDFGenerater.swift */; };
 		92BE0D662B2BFCF200CA50A8 /* AjiwaiCardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BE0D652B2BFCF200CA50A8 /* AjiwaiCardApp.swift */; };
 		92BE0D682B2BFCF200CA50A8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BE0D672B2BFCF200CA50A8 /* ContentView.swift */; };
@@ -93,7 +92,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9228A5352BD8C8D500E5128F /* CodeScanner in Frameworks */,
-				928E02AC2BA56B8D002BF51F /* FSCalendar in Frameworks */,
 				92123F3F2C36F70B00B2C25C /* ConfettiSwiftUI in Frameworks */,
 				92DB8B2A2BF1E4DD001D3A1E /* SwiftyGif in Frameworks */,
 			);
@@ -201,7 +199,6 @@
 			);
 			name = AjiwaiCardApp;
 			packageProductDependencies = (
-				928E02AB2BA56B8D002BF51F /* FSCalendar */,
 				9228A5342BD8C8D500E5128F /* CodeScanner */,
 				92DB8B292BF1E4DD001D3A1E /* SwiftyGif */,
 				92123F3E2C36F70B00B2C25C /* ConfettiSwiftUI */,
@@ -584,11 +581,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 9228A5332BD8C8D500E5128F /* XCRemoteSwiftPackageReference "CodeScanner" */;
 			productName = CodeScanner;
-		};
-		928E02AB2BA56B8D002BF51F /* FSCalendar */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 928E02AA2BA56B8D002BF51F /* XCRemoteSwiftPackageReference "FSCalendar" */;
-			productName = FSCalendar;
 		};
 		92DB8B292BF1E4DD001D3A1E /* SwiftyGif */ = {
 			isa = XCSwiftPackageProductDependency;
