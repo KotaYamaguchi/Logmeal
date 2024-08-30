@@ -12,151 +12,251 @@ struct SettingView: View {
     @State private var showActionSheet = false
     @State private var showDatePicker = false
     @State private var selectedFileType: FileType = .pdf
-
     @State private var startDate: Date = Date()
     @State private var endDate: Date = Date()
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("hasSeenSettingViewTutorial") private var hasSeenTutorial = false
+    @State private var showHowToUseView = false
+    @State private var showTutorialView = false
+    @State private var showProfileEditlView = false
+   private let tutorialImage:[String] = ["HowToUseHome","HowToUseCalendar","HowToUseShop","HowToUseCharacter","HowToUseColumnList","HowToUseAjiwaiCard","HowToUseQr","HowToUseCardEdit","HowToUseSetting","HowToUseShare1","HowToUseShare2"]
 
+    private let soundManager:SoundManager = SoundManager()
     enum FileType {
         case pdf, csv
     }
 
     var body: some View {
-        NavigationStack{
-            ZStack {
-                Image("bg_AjiwaiCardView")
-                    .resizable()
-                    .ignoresSafeArea()
-                    .saturation(0.0)
-                VStack(spacing: 20) {
-                    NavigationLink{
-                        ProfileEditView()
-                    } label: {
-                        Text("プロフィールを編集する")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                            .frame(width: 300, height: 50)
-                            .background(Color.cyan)
-                            .foregroundStyle(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    Button {
-                        showQRscaner = true
-                    } label: {
-                        Text("1ヶ月分のメニューを入力する")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                            .frame(width: 300, height: 50)
-                            .background(Color.cyan)
-                            .foregroundStyle(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    Button {
-                        showActionSheet = true
-                    } label: {
-                        Text("共有する")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                            .frame(width: 300, height: 50)
-                            .background(Color.cyan)
-                            .foregroundStyle(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .disabled(allData.isEmpty)
-                    .actionSheet(isPresented: $showActionSheet) {
-                        ActionSheet(title: Text("共有方法を選択してください"), buttons: [
-                            .default(Text("PDFで共有")) {
-                                selectedFileType = .pdf
-                                showDatePicker = true
-                            },
-                            .default(Text("CSVで共有")) {
-                                selectedFileType = .csv
-                                showDatePicker = true
-                            },
-                            .cancel()
-                        ])
-                    }
-                    Button {
-                        print(user.path)
-                        user.path.removeLast()
-                    } label: {
-                        Text("タイトルに戻る")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                            .frame(width: 220, height: 50)
-                            .background(Color.red)
-                            .foregroundStyle(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 20))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                if isGenerating {
-                    ProgressView("共有の準備中...")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                        .padding()
-                        .background(Color.black.opacity(0.7))
-                        .tint(.white)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    Color.gray.opacity(0.5)
+        GeometryReader{ geometry in
+            NavigationStack{
+                ZStack(alignment:.topLeading){
+                    Image("bg_AjiwaiCardView")
+                        .resizable()
                         .ignoresSafeArea()
-                }
-            }
-            .sheet(isPresented: $showQRscaner) {
-                ScannerView(isPresentingScanner: $showQRscaner)
-            }
-            .sheet(isPresented: $showShareSheet) {
-                if let url = pdfURL {
-                    ShareSheet(activityItems: [url])
-                        .onAppear(){
-                            isGenerating = false
-                        }
-                }
-            }
-            .sheet(isPresented: $showDatePicker) {
-                VStack{
-                    HStack{
-                        VStack{
-                            Text("この日から")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                            DatePicker("開始日", selection: $startDate, displayedComponents: .date)
-                                .datePickerStyle(GraphicalDatePickerStyle())
-                                .padding()
-                        }
+                        .saturation(0.0)
+                    Button {
+                        dismiss()
+                        soundManager.playSound(named: "se_nagative")
+                    } label: {
+                        Image("bt_close")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 50)
+                    }
+                    .padding()
+                    .buttonStyle(PlainButtonStyle())
+                    VStack(spacing: 20) {
+                        Text("設定画面")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 35))
                         Divider()
-                            .frame(height: 400)
-                        VStack{
-                            Text("この日まで")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                            DatePicker("終了日", selection: $endDate, displayedComponents: .date)
-                                .datePickerStyle(GraphicalDatePickerStyle())
-                                .padding()
+                            .frame(width:geometry.size.width*0.5)
+                        HStack{
+                            Button{
+                                user.selectedCharacter = "Dog"
+                            }label: {
+                                Text("いぬにする")
+                            }
+                            Button{
+                                user.selectedCharacter = "Rabbit"
+                            }label: {
+                                Text("うさぎにする")
+                            }
+                            Button{
+                                user.selectedCharacter = "Cat"
+                            }label: {
+                                Text("ねこにする")
+                            }
                         }
+                        HStack{
+                            Button{
+                                user.growthStage = 1
+                            }label: {
+                                Text("1段階目にする")
+                            }
+                            Button{
+                                user.growthStage = 2
+                            }label: {
+                                Text("2段階目にする")
+                            }
+                            Button{
+                                user.growthStage = 3
+                            }label: {
+                                Text("3段階目にする")
+                            }
                     }
-                    Button("データを共有する") {
-                        showDatePicker = false
-                        isGenerating = true
-                        Task {
-                            await generateAndShareFile()
+                        Button{
+                            showProfileEditlView = true
+                        } label: {
+                            Text("プロフィールを編集する")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .frame(width: 300, height: 50)
+                                .background(Color.cyan)
+                                .foregroundStyle(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
                         }
+                        .buttonStyle(PlainButtonStyle())
+                        .simultaneousGesture(TapGesture().onEnded {
+                            soundManager.playSound(named: "se_positive")
+                        })
+                        Button{
+                            showTutorialView = true
+                        } label: {
+                            Text("アプリの使い方を見る")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .frame(width: 300, height: 50)
+                                .background(Color.cyan)
+                                .foregroundStyle(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .simultaneousGesture(TapGesture().onEnded {
+                            soundManager.playSound(named: "se_positive")
+                        })
+                        Button {
+                            showQRscaner = true
+                            soundManager.playSound(named: "se_positive")
+                        } label: {
+                            Text("1ヶ月分のメニューを入力する")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .frame(width: 300, height: 50)
+                                .background(Color.cyan)
+                                .foregroundStyle(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        Button {
+                            showActionSheet = true
+                            soundManager.playSound(named: "se_positive")
+                        } label: {
+                            Text("共有する")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .frame(width: 300, height: 50)
+                                .background(Color.cyan)
+                                .foregroundStyle(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .disabled(allData.isEmpty)
+                        .actionSheet(isPresented: $showActionSheet) {
+                            ActionSheet(title: Text("共有方法を選択してください"), buttons: [
+                                .default(Text("PDFで共有")) {
+                                    selectedFileType = .pdf
+                                    showDatePicker = true
+                                },
+                                .default(Text("CSVで共有")) {
+                                    selectedFileType = .csv
+                                    showDatePicker = true
+                                },
+                                .cancel()
+                            ])
+                        }
+                        Button {
+                            print(user.path)
+                            user.path.removeLast()
+                            soundManager.playSound(named: "se_negative")
+                        } label: {
+                            Text("タイトルに戻る")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .frame(width: 220, height: 50)
+                                .background(Color.red)
+                                .foregroundStyle(Color.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                    .frame(width: 220, height: 50)
-                    .background(Color.cyan)
-                    .foregroundStyle(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .buttonStyle(PlainButtonStyle())
-                    Button("キャンセル") {
-                        showDatePicker = false
+                    .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
+                    if isGenerating {
+                        ProgressView("共有の準備中...")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                            .padding()
+                            .background(Color.black.opacity(0.7))
+                            .tint(.white)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        Color.gray.opacity(0.5)
+                            .ignoresSafeArea()
                     }
-                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                    .frame(width: 220, height: 50)
-                    .background(Color.gray)
-                    .foregroundStyle(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .buttonStyle(PlainButtonStyle())
                 }
-                
+               
+                .onAppear(){
+                    if !hasSeenTutorial {
+                        showHowToUseView = true
+                    }
+                }
+                .sheet(isPresented:$showTutorialView){
+                    TutorialView(imageArray: tutorialImage)
+                }
+                .sheet(isPresented:$showProfileEditlView){
+                    ProfileEditView()
+                }
+                .sheet(isPresented: $showQRscaner) {
+                    ScannerView(isPresentingScanner: $showQRscaner)
+                }
+                .sheet(isPresented: $showShareSheet) {
+                    if let url = pdfURL {
+                        ShareSheet(activityItems: [url])
+                            .onAppear(){
+                                isGenerating = false
+                            }
+                    }
+                }
+                .sheet(isPresented: $showDatePicker) {
+                    VStack{
+                        HStack{
+                            VStack{
+                                Text("この日から")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                                DatePicker("開始日", selection: $startDate, displayedComponents: .date)
+                                    .datePickerStyle(GraphicalDatePickerStyle())
+                                    .padding()
+                            }
+                            Divider()
+                                .frame(height: 400)
+                            VStack{
+                                Text("この日まで")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                                DatePicker("終了日", selection: $endDate, displayedComponents: .date)
+                                    .datePickerStyle(GraphicalDatePickerStyle())
+                                    .padding()
+                            }
+                        }
+                        Button("データを共有する") {
+                            soundManager.playSound(named: "se_positive")
+                            showDatePicker = false
+                            isGenerating = true
+                            Task {
+                                await generateAndShareFile()
+                            }
+                        }
+                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                        .frame(width: 220, height: 50)
+                        .background(Color.cyan)
+                        .foregroundStyle(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .buttonStyle(PlainButtonStyle())
+                        Button("キャンセル") {
+                            showDatePicker = false
+                            soundManager.playSound(named: "se_negative")
+                        }
+                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                        .frame(width: 220, height: 50)
+                        .background(Color.gray)
+                        .foregroundStyle(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    
+                }
+                .sheet(isPresented:$showHowToUseView){
+                    TutorialView(imageArray: ["HowToUseSetting","HowToUseQr","HowToUseShare1","HowToUseShare2"])
+                        .interactiveDismissDisabled()
+                        .onDisappear(){
+                            hasSeenTutorial = true
+                        }
+                }
             }
         }
+        
     }
     @MainActor
     func generateAndShareFile() async {
@@ -182,7 +282,7 @@ struct SettingView: View {
 
         case .csv:
             let exportData = ExportData()
-            let filename = "\(user.name)の味わいカード"
+            let filename = "\(user.grade)年 \(user.yourClass)組\(user.name)の味わいカード"
             exportData.createCSV(filename: filename, datas: filteredData)
 
             let documentsPath = exportData.getDocumentsDirectory()
@@ -205,6 +305,11 @@ struct SettingView: View {
         .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
         .environmentObject(UserData())
 }
+#Preview {
+    ChildHomeView()
+        .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
+        .environmentObject(UserData())
+}
 
 import SwiftUI
 
@@ -220,6 +325,7 @@ struct ProfileEditView: View {
    
 
     var body: some View {
+        NavigationStack{
             ScrollView {
                 VStack(spacing: 20) {
                     profileInfoSection
@@ -230,6 +336,11 @@ struct ProfileEditView: View {
             .navigationTitle("プロフィール編集")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement:.topBarLeading){
+                    Button("キャンセル",role: .cancel){
+                        dismiss()
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("保存") {
                         showingSaveAlert = true
@@ -246,6 +357,7 @@ struct ProfileEditView: View {
             } message: {
                 Text("変更を保存しますか？")
             }
+        }
     }
     
     private var profileInfoSection: some View {

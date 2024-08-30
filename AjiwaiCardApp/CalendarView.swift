@@ -7,6 +7,7 @@ struct CalendarDisplayView: View {
     @Binding var selectedDate: Date
     @State private var opacity: Double = 1.0
     private let calendar = Calendar(identifier: .gregorian)
+    private let soundManager:SoundManager = SoundManager()
     let allData: [AjiwaiCardData]
     
     var body: some View {
@@ -19,7 +20,9 @@ struct CalendarDisplayView: View {
                     .frame(width: width * 0.5, height: height * 0.8)
                     .position(x: width * 0.25, y: height * 0.5)
                     .padding(.horizontal)
-                Button(action: todayMonth) {
+                Button{
+                    todayMonth()
+                }label: {
                     Image("bt_base")
                         .resizable()
                         .overlay{
@@ -31,21 +34,23 @@ struct CalendarDisplayView: View {
                 .buttonStyle(PlainButtonStyle())
                 .frame(width:120,height: 45)
                 .position(x:width*0.4,y:height*0.18)
-            
-                VStack {
-                    Button(action: previousMonth) {
-                        Image("bt_calendar_progress&back")
-                            .rotationEffect(Angle.degrees(180))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                .position(x: width * 0.035, y: height * 0.5)
                 
-                Button(action: nextMonth) {
+                Button{
+                    previousMonth()
+                }label: {
+                    Image("bt_calendar_progress&back")
+                        .rotationEffect(Angle.degrees(180))
+                }
+                .buttonStyle(PlainButtonStyle())
+                .position(x: width * 0.035, y: height * 0.5)
+                Button{
+                    nextMonth()
+                }label: {
                     Image("bt_calendar_progress&back")
                 }
                 .position(x: width * 0.495, y: height * 0.5)
                 .buttonStyle(PlainButtonStyle())
+                
             }
             .frame(width: width * 0.5, height: height * 0.9)
         }

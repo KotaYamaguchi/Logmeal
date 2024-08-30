@@ -7,7 +7,7 @@ struct CharacterSelectView: View {
     @Binding var isSelectedCharacter: Bool
     @State private var focusedIndex: Int? = nil
     @State private var hasBeenTapped = false
-    
+    private let soundManager:SoundManager = SoundManager()
     var profiles = [
         Profile(charaName: "レーク", charaImage: "Dog", mainStatus: "犬とトマトのハーフ", subStatus: "朝ごはんがだいすき！"),
         Profile(charaName: "ラン", charaImage: "Rabbit", mainStatus: "ウサギとニンジンのハーフ", subStatus: "お昼ごはんがだいすき！"),
@@ -34,9 +34,9 @@ struct CharacterSelectView: View {
             
             VStack {
                 Text("キャラクターを選んでね")
+                    .foregroundStyle(Color.textColor)
                     .font(.custom("GenJyuuGothicX-Bold", size: 50))
                     .bold()
-                    .foregroundStyle(.gray)
                 
                 HStack(spacing: size.width * 0.04) {
                     ForEach(profiles.indices, id: \.self) { index in
@@ -55,6 +55,7 @@ struct CharacterSelectView: View {
                         withAnimation {
                             isDetailViewPresented.toggle()
                         }
+                        soundManager.playSound(named: "se_positive")
                     }
                 } label: {
                     Image("bt_base")
@@ -101,6 +102,7 @@ struct CharacterSelectView: View {
                     withAnimation {
                         isDetailViewPresented.toggle()
                     }
+                    soundManager.playSound(named: "se_negative")
                 } label: {
                     Image("bt_back")
                         .resizable()
@@ -134,20 +136,28 @@ struct CharacterSelectView: View {
                             .overlay {
                                 if let character = selectedCharacter {
                                     VStack {
+                                        Text(character.charaName)
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 40))
+                                            .foregroundStyle(Color.textColor)
+                                        Divider()
                                         Text(character.mainStatus)
-                                            .font(.custom("GenJyuuGothicX-Bold", size: 30))
-                                        Text(character.subStatus)
                                             .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                                            .foregroundStyle(Color.textColor)
+                                        Text(character.subStatus)
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                            .foregroundStyle(Color.textColor)
                                     }
+                                    .frame(width: size.width*0.3)
                                 }
                             }
                         Button {
                             if let character = selectedCharacter {
                                 user.selectedCharacter = character.charaImage
                                 user.characterName = character.charaName
+                                soundManager.playSound(named: "se_positive")
+                                isSelectedCharacter = true
+                                print(user.characterName)
                             }
-                            isSelectedCharacter = true
-                            print(user.characterName)
                         } label: {
                             Image("bt_base")
                                 .resizable()

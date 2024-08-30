@@ -9,6 +9,8 @@ struct RewardView: View {
     @State private var showTextCompleted = false
     @State private var scaleFlag = false
     @State private var counter = 0
+    private let soundManager:SoundManager = SoundManager()
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -103,6 +105,8 @@ struct RewardView: View {
             user.isDataSaved = false // フラグをリセット
             user.path.removeAll()
             user.path.append(.home)
+            soundManager.playSound(named: "se_negative")
+            
         } label: {
             Image("bt_backHome")
                 .resizable()

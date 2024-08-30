@@ -47,7 +47,7 @@ struct BaseAnimationView: View {
                     TypeWriterTextView(text1,
                                        speed: 0.1,
                                        font: .custom("GenJyuuGothicX-Bold", size: 17),
-                                       textColor: useBackGroundColor ? .white : .black) {
+                                       textColor: useBackGroundColor ? .white : .textColor) {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             showText1 = false
                             playGrowthAnimation()
@@ -61,7 +61,7 @@ struct BaseAnimationView: View {
                     TypeWriterTextView(text2,
                                        speed: 0.1,
                                        font: .custom("GenJyuuGothicX-Bold", size: 17),
-                                       textColor: useBackGroundColor ? .white : .black) {
+                                       textColor: useBackGroundColor ? .white : .textColor) {
                         // 完了アクション
                     }
                                        .padding()
@@ -123,7 +123,7 @@ struct BaseLevelUpView: View {
                     TypeWriterTextView(text,
                                        speed: 0.1,
                                        font: .custom("GenJyuuGothicX-Bold", size: 17),
-                                       textColor: useBackGroundColor ? .white : .black) {
+                                       textColor: useBackGroundColor ? .white : .textColor) {
                         // 完了アクション (必要に応じて)
                     }
                                        .padding()
@@ -167,7 +167,7 @@ struct NormalCharacterView: View {
                     TypeWriterTextView(text,
                                        speed: 0.1,
                                        font: .custom("GenJyuuGothicX-Bold", size: 17),
-                                       textColor: useBackGroundColor ? .white : .black) {
+                                       textColor: useBackGroundColor ? .white : .textColor) {
                         // 完了アクション (必要に応じて)
                     }
                                        .padding()

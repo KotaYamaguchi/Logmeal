@@ -1,23 +1,26 @@
-
 import SwiftUI
 
 struct FirstLoginView: View {
     @EnvironmentObject var user: UserData
     @State private var isSelectedCharacter: Bool = false
     @State private var showFillName: Bool = false
+    @State private var selectedName: String = ""
     @State private var selectedGrade: Int?
-    @State private var selectedClass:Int?
+    @State private var selectedClass: Int?
+    @State private var selectedAge: Int?
     @State private var showClassPicker: Bool = false
+    @State private var showAgePicker: Bool = false
     @State private var showButtonCount: Int = 0
     @State private var isStart: Bool = false
     @State private var conversationCount: Int = 0
-
+    private let soundManager: SoundManager = SoundManager()
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 if !isSelectedCharacter {
                     CharacterSelectView(isSelectedCharacter: $isSelectedCharacter)
-                        .onDisappear() {
+                        .onDisappear {
                             showFillName = true
                         }
                 } else {
@@ -38,6 +41,8 @@ struct FirstLoginView: View {
                         fillUserName(size: geometry.size)
                     } else if showClassPicker {
                         selectGradeAndClass(size: geometry.size)
+                    } else if showAgePicker {
+                        selectAge(size: geometry.size)
                     } else if isStart {
                         gameStart(size: geometry.size)
                     }
@@ -48,12 +53,12 @@ struct FirstLoginView: View {
     
     @ViewBuilder func fillUserName(size: CGSize) -> some View {
         ZStack {
-            TypeWriterTextView("あなたの名前を教えてね", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 25), onAnimationCompleted: {
+            TypeWriterTextView("あなたの名前を教えてね", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 25),textColor:.textColor, onAnimationCompleted: {
                 print("アニメーションが終了しました")
             })
             .position(x: size.width * 0.5, y: size.height * 0.2)
             
-            TextField("", text: $user.name)
+            TextField("あなたの名前を入力しよう", text: $selectedName)
                 .font(.custom("GenJyuuGothicX-Bold", size: 17))
                 .padding(10)
                 .background(Color(.systemGray6))
@@ -62,34 +67,36 @@ struct FirstLoginView: View {
                 .frame(width: size.width * 0.4)
                 .position(x: size.width * 0.5, y: size.height * 0.3)
             
-            Button{
-                if user.name.isEmpty{
+            Button {
+                if selectedName.isEmpty {
                     user.name = "ななし"
                 }
+                user.name = selectedName
                 showFillName = false
                 withAnimation {
                     showClassPicker = true
                 }
-            }label:{
+                soundManager.playSound(named: "se_positive")
+            } label: {
                 Image("bt_base")
                     .resizable()
                     .scaledToFit()
-                    .frame(width:200,height: 100)
+                    .frame(width: 200, height: 100)
                     .overlay {
                         Text("決定!")
                             .font(.custom("GenJyuuGothicX-Bold", size: 20))
                             .foregroundStyle(Color.buttonColor)
                     }
             }
-            .disabled(user.name.isEmpty)
+            .disabled(selectedName.isEmpty)
             .position(x: size.width * 0.5, y: size.height * 0.8)
             .buttonStyle(PlainButtonStyle())
         }
     }
-
+    
     @ViewBuilder func selectGradeAndClass(size: CGSize) -> some View {
         ZStack {
-            TypeWriterTextView("学年とクラスを入力してね！", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 25), onAnimationCompleted: {
+            TypeWriterTextView("学年とクラスを入力してね！", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 25),textColor:.textColor,  onAnimationCompleted: {
                 print("アニメーションが終了しました")
             })
             .position(x: size.width * 0.5, y: size.height * 0.2)
@@ -115,20 +122,21 @@ struct FirstLoginView: View {
             }
             .position(x: size.width * 0.5, y: size.height * 0.3)
             
-            Button{
-                if let grade = selectedGrade, let yourClass = selectedClass{
+            Button {
+                if let grade = selectedGrade, let yourClass = selectedClass {
                     user.grade = grade
                     user.yourClass = yourClass
                     showClassPicker = false
+                    soundManager.playSound(named: "se_positive")
                     withAnimation {
-                        isStart = true
+                        showAgePicker = true
                     }
                 }
-            }label:{
+            } label: {
                 Image("bt_base")
                     .resizable()
                     .scaledToFit()
-                    .frame(width:200,height: 100)
+                    .frame(width: 200, height: 100)
                     .overlay {
                         Text("決定！")
                             .font(.custom("GenJyuuGothicX-Bold", size: 20))
@@ -141,45 +149,89 @@ struct FirstLoginView: View {
         }
     }
     
+    @ViewBuilder func selectAge(size: CGSize) -> some View {
+        ZStack {
+            TypeWriterTextView("あなたの年齢を教えてね！", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 25), textColor:.textColor, onAnimationCompleted: {
+                print("アニメーションが終了しました")
+            })
+            .position(x: size.width * 0.5, y: size.height * 0.2)
+            
+            TextField("年齢を入力してね", value: $selectedAge, format: .number)
+                .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                .padding(10)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+                .padding(.horizontal)
+                .frame(width: size.width * 0.4)
+                .keyboardType(.numberPad)
+                .position(x: size.width * 0.5, y: size.height * 0.3)
+            
+            Button {
+                if let age = selectedAge{
+                    user.age = age
+                    showAgePicker = false
+                    soundManager.playSound(named: "se_positive")
+                    withAnimation {
+                        isStart = true
+                    }
+                }
+            } label: {
+                Image("bt_base")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200, height: 100)
+                    .overlay {
+                        Text("決定！")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                            .foregroundStyle(Color.buttonColor)
+                    }
+            }
+            .disabled(user.age <= 0)
+            .position(x: size.width * 0.5, y: size.height * 0.8)
+            .buttonStyle(PlainButtonStyle())
+        }
+    }
+    
     @ViewBuilder func gameStart(size: CGSize) -> some View {
         ZStack {
             VStack(alignment: .leading) {
                 if conversationCount == 0 {
-                    TypeWriterTextView("それじゃあゲームを始めるよ\n準備はいい？", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 17), onAnimationCompleted: {
+                    TypeWriterTextView("それじゃあゲームを始めるよ\n準備はいい？", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 17),textColor:.textColor,  onAnimationCompleted: {
                         print("アニメーションが終了しました")
                         showButtonCount = 1
                     })
-                    
                 } else if conversationCount == 1 {
-                    TypeWriterTextView("よし！これからよろしくね！", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 17), onAnimationCompleted: {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0){
+                    TypeWriterTextView("よし！これからよろしくね！", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 17),textColor:.textColor,  onAnimationCompleted: {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                             user.isLogined = true
                         }
                     })
                 }
-                
             }
             .position(x: size.width * 0.5, y: size.height * 0.35)
+            
             if showButtonCount == 1 {
                 Button {
                     conversationCount = 1
                     showButtonCount = 0
+                    soundManager.playSound(named: "se_positive")
                 } label: {
                     Image("bt_base")
                         .resizable()
                         .scaledToFit()
-                        .frame(width:200,height: 100)
+                        .frame(width: 200, height: 100)
                         .overlay {
                             Text("もちろん!")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                 .foregroundStyle(Color.buttonColor)
                         }
                 }
+                .buttonStyle(PlainButtonStyle())
                 .padding(.top, 30)
                 .position(x: size.width * 0.5, y: size.height * 0.8)
             }
         }
-        .onAppear() {
+        .onAppear {
             showButtonCount = 0
         }
     }

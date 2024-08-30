@@ -6,6 +6,7 @@ struct ChildHomeView: View {
     @Environment(\.modelContext) private var context
     @Query private var allColumn:[ColumnData]
     @Query private var allData:[AjiwaiCardData]
+    private let soundManager:SoundManager = SoundManager()
     @State var isShowShareSheet:Bool = false
     @State var progressValue:CGFloat = 0.1
     @State var width:CGFloat = 300
@@ -15,6 +16,7 @@ struct ChildHomeView: View {
     @State var playGif:Bool = true
     @State private var hasUnreadColumn:Bool = false
     @State private var gifPosition:CGPoint = CGPoint(x: 500, y: 550)
+    @State private var baseGifPosition:CGPoint = CGPoint(x: 0, y: 0)
     @State private var gifOffset:Double = 0.0
     @State private var gifWidth:CGFloat = 0.0
     @State private var gifHeight:CGFloat = 0.0
@@ -25,8 +27,14 @@ struct ChildHomeView: View {
     @State private var selectedCardData: AjiwaiCardData? = nil
     @State private var isLoading:Bool = false
     @State private var showSettingView:Bool = false
+    @State private var showHowToUseView:Bool = false
     @State private var timer: Timer? = nil
     @State private var boughtProducts:[Product] = []
+    @State private var toglleHouseImage:Bool = false
+    @State private var toglleBalloonImage:Bool = false
+    @AppStorage("hasVisitedChildHomeView") var hasVisitedChildHomeView :Bool = false
+    
+    
     private func startGifTimer() {
         timer?.invalidate() // 既存のタイマーがあれば無効化する
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
@@ -38,7 +46,8 @@ struct ChildHomeView: View {
         changeGifData()
         self.gifData = NSDataAsset(name: gifArray.randomElement()! )?.data
     }
-    
+
+
     private func changeGifData() {
         switch user.growthStage {
         case 1:
@@ -137,9 +146,6 @@ struct ChildHomeView: View {
                 isDrag = true
                 playGif = false
                 gifData = NSDataAsset(name: "\(user.selectedCharacter)\(user.growthStage)_Drag")?.data
-                gifWidth = 200.0
-                gifHeight = 200.0
-
                 // 遅延アニメーションで位置を更新
                 withAnimation(.easeOut(duration: 0.2)) {
                     gifPosition = value.location
@@ -176,13 +182,10 @@ struct ChildHomeView: View {
                 if gifPosition.y <= 400 { // ここで条件を指定
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         withAnimation(.easeIn(duration: 0.7)) {
-                            gifPosition.y = 550
+                            gifPosition.y = UIScreen.main.bounds.width*0.45
                         }
                     }
                 }
-                
-                gifWidth = 200.0
-                gifHeight = 200.0
                 isDrag = false
                 changeGifData()
             }
@@ -191,9 +194,7 @@ struct ChildHomeView: View {
     var doubleTapGesture: some Gesture {
         TapGesture(count: 2)
             .onEnded {
-                
-                gifPosition = CGPoint(x: 500, y: 550)
-                
+                gifPosition = baseGifPosition
             }
     }
     
@@ -204,7 +205,6 @@ struct ChildHomeView: View {
                     childHome(size: geometry.size)
                         .navigationBarHidden(true)
                         .gesture(doubleTapGesture)
-                    
                     if showColumn {
                         Color.gray
                             .opacity(0.7)
@@ -213,6 +213,7 @@ struct ChildHomeView: View {
                                 withAnimation {
                                     showColumn = false
                                 }
+                                soundManager.playSound(named: "se_negative")
                             }
                     }
                     ColumnView()
@@ -228,9 +229,17 @@ struct ChildHomeView: View {
                     changeGifData()
                 }
                 .onAppear {
+                    print("おとずれた？",hasVisitedChildHomeView)
+                    if !hasVisitedChildHomeView{
+                        showHowToUseView = true
+                    }else{
+                        showHowToUseView = false
+                    }
                     user.setGrowthStage()
-                    gifWidth =  200
-                    gifHeight = 200
+                    gifWidth = geometry.size.width*0.15
+                    gifHeight = geometry.size.width*0.15
+                    baseGifPosition = CGPoint(x: geometry.size.width*0.45, y: geometry.size.height*0.75)
+                    gifPosition = baseGifPosition
                     changeGifData()
                     checkForUnreadColumn()
                     startGifTimer()
@@ -238,6 +247,7 @@ struct ChildHomeView: View {
                     print(user.selectedCharacter)
                     print(user.growthStage)
                 }
+
                 .onDisappear {
                     timer?.invalidate() // ビューが消えた時にタイマーを無効化する
                 }
@@ -272,19 +282,17 @@ struct ChildHomeView: View {
                         }
                     }
                 }
+                .sheet(isPresented:$showHowToUseView){
+                    TutorialView(imageArray: ["HowToUseHome"])
+                        .interactiveDismissDisabled()
+                        .onDisappear(){
+                            hasVisitedChildHomeView = true
+                        }
+                }
             } else {
                 FirstLoginView()
             }
         }
-    }
-    
-    @ViewBuilder func imageView(size: CGSize) -> some View {
-        Image("Dragged_\(user.selectedCharacter)\(user.growthStage)")
-            .resizable()
-            .scaledToFit()
-            .frame(width: size.width * 0.1)
-            .position(gifPosition)
-            .gesture(dragGesture)
     }
     
     @ViewBuilder func gifView(size: CGSize, gif: Data?) -> some View {
@@ -305,93 +313,118 @@ struct ChildHomeView: View {
     @ViewBuilder func childHome(size: CGSize) -> some View {
         NavigationStack(path: $user.path) {
             ZStack {
-                Image("bg_\(user.selectedCharacter)")
+                Image("bg_homeView")
                     .resizable()
                     .frame(width: size.width)
                     .ignoresSafeArea(.all)
-              
-                
-                NavigationLink {
-                    ShopView()
-                        .navigationBarBackButtonHidden(true)
-                } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharacter)_2")
-                        .resizable()
-                        .scaledToFit()
-                        .shadow(radius: 5, y: 20)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .frame(width: size.width * 0.0884, height: size.height * 0.2333)
-                .position(x: size.width * 0.67, y: size.height * 0.72)
-              //  .disabled(user.growthStage < 3)
-                
-                NavigationLink {
-                    CharacterView()
-                        .navigationBarBackButtonHidden(true)
-                } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharacter)_3")
-                        .resizable()
-                        .scaledToFit()
-                        .shadow(radius: 5, y: 20)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .frame(width: size.width * 0.0884, height: size.height * 0.2333)
-                .position(x: size.width * 0.735, y: size.height * 0.60)
-                
-                NavigationLink {
-                    LookBackView(fromAjiwaiCard:false)
-                        .navigationBarBackButtonHidden(true)
-                } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharacter)_4")
-                        .resizable()
-                        .scaledToFit()
-                        .shadow(radius: 5, y: 20)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .frame(width: size.width * 0.0884, height: size.height * 0.2333)
-                .position(x: size.width * 0.84, y: size.height * 0.575)
-                
-                NavigationLink {
-                    ColumnListView()
-                } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharacter)_5")
-                        .resizable()
-                        .scaledToFit()
-                        .shadow(radius: 5, y: 20)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .frame(width: size.width * 0.0884, height: size.height * 0.2333)
-                .position(x: size.width * 0.91, y: size.height * 0.69)
-                
-                Button {
-                    if todayData != nil {
-                        showCardAlert = true
-                    } else {
-                        user.path.append(.ajiwaiCard(nil))
+                Image(toglleHouseImage ?"mt_house_\(user.selectedCharacter)_open" : "mt_house_\(user.selectedCharacter)_close")
+                    .position(x:size.width*0.2,y:size.height*0.685)
+                    .onTapGesture {
+                        soundManager.playSound(named: "se_door")
+                        toglleHouseImage.toggle()
                     }
-                } label: {
-                    Image("bt_HomeVIew_\(user.selectedCharacter)_1")
-                        .resizable()
-                        .scaledToFit()
-                        .shadow(radius: 5, y: 20)
-                }
-                .buttonStyle(PlainButtonStyle())
-                .frame(width: size.width * 0.1764, height: size.height * 0.3672)
-                .position(x: size.width * 0.798, y: size.height * 0.752)
                 
+                Image(toglleBalloonImage ? "mt_balloon_\(user.selectedCharacter)_fire" : "mt_balloon_\(user.selectedCharacter)_noFire")
+                    .position(x:size.width*0.75,y:size.height*0.3)
+                    .onTapGesture {
+                        soundManager.playSound(named: "se_fire")
+                            toglleBalloonImage.toggle()
+                        
+                    }
+                Group{
+                    NavigationLink {
+                        ShopView()
+                            .navigationBarBackButtonHidden(true)
+                    } label: {
+                        Image("bt_HomeVIew_\(user.selectedCharacter)_2")
+                            .resizable()
+                            .scaledToFit()
+                            .shadow(radius: 5, y: 20)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .frame(width: size.width * 0.0884, height: size.height * 0.2333)
+                    .position(x: size.width * 0.67, y: size.height * 0.72)
+                    .disabled(user.growthStage < 3)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        soundManager.playSound(named: "se_positive")
+                    })
+                    NavigationLink {
+                        CharacterView()
+                            .navigationBarBackButtonHidden(true)
+                    } label: {
+                        Image("bt_HomeVIew_\(user.selectedCharacter)_3")
+                            .resizable()
+                            .scaledToFit()
+                            .shadow(radius: 5, y: 20)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .frame(width: size.width * 0.0884, height: size.height * 0.2333)
+                    .position(x: size.width * 0.735, y: size.height * 0.60)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        soundManager.playSound(named: "se_positive")
+                    })
+                    NavigationLink {
+                        LookBackView(fromAjiwaiCard:false)
+                            .navigationBarBackButtonHidden(true)
+                    } label: {
+                        Image("bt_HomeVIew_\(user.selectedCharacter)_4")
+                            .resizable()
+                            .scaledToFit()
+                            .shadow(radius: 5, y: 20)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .frame(width: size.width * 0.0884, height: size.height * 0.2333)
+                    .position(x: size.width * 0.84, y: size.height * 0.575)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        soundManager.playSound(named: "se_positive")
+                    })
+                    NavigationLink {
+                        ColumnListView()
+                    } label: {
+                        Image("bt_HomeVIew_\(user.selectedCharacter)_5")
+                            .resizable()
+                            .scaledToFit()
+                            .shadow(radius: 5, y: 20)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .frame(width: size.width * 0.0884, height: size.height * 0.2333)
+                    .position(x: size.width * 0.91, y: size.height * 0.69)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        soundManager.playSound(named: "se_positive")
+                    })
+                    Button {
+                        if todayData != nil {
+                            showCardAlert = true
+                            soundManager.playSound(named: "se_positive")
+                        } else {
+                            user.path.append(.ajiwaiCard(nil))
+                            soundManager.playSound(named: "se_positive")
+                        }
+                    } label: {
+                        Image("bt_HomeVIew_\(user.selectedCharacter)_1")
+                            .resizable()
+                            .scaledToFit()
+                            .shadow(radius: 5, y: 20)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .frame(width: size.width * 0.1764, height: size.height * 0.3672)
+                    .position(x: size.width * 0.798, y: size.height * 0.752)
+                }
+                .offset(y:size.height*0.07)
                 StatusBarVIew()
                     .position(x: size.width * 0.54, y: size.height * 0.52)
                 
                 VStack(spacing: 0) {
                     Button{
                        showSettingView = true
+                        soundManager.playSound(named: "se_positive")
                     } label: {
                         Image("bt_gear")
                             .resizable()
                             .scaledToFit()
                             .frame(width: width * 0.8)
                     }
-                    .sheet(isPresented:$showSettingView){
+                    .fullScreenCover(isPresented:$showSettingView){
                         SettingView()
                     }
                     Button {
@@ -399,8 +432,10 @@ struct ChildHomeView: View {
                             withAnimation {
                                 showColumn = true
                             }
+                            soundManager.playSound(named: "se_positive")
                         } else {
                             showNoColumnAlert = true
+                            soundManager.playSound(named: "se_negative")
                         }
                     } label: {
                         Image("bt_news")

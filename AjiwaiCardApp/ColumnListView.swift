@@ -10,7 +10,10 @@ struct ColumnListView: View {
     @State private var selectedMonth: String?
     @State private var sortAscending = true
     @State private var scrollProxy: ScrollViewProxy?
-    
+    private let soundManager:SoundManager = SoundManager()
+    @AppStorage("hasSeenColumnListViewTutorial") private var hasSeenTutorial = false
+    @State private var showHowToUseView = false
+
     private func loadColumnData() {
         updateSortedDates()
     }
@@ -76,6 +79,7 @@ struct ColumnListView: View {
                         Button{
                             sortAscending.toggle()
                             updateSortedDates()
+                            soundManager.playSound(named: "se_negative")
                         }label:{
                             Image(systemName: sortAscending ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
                                 .foregroundColor(.blue)
@@ -84,6 +88,7 @@ struct ColumnListView: View {
                         .buttonStyle(PlainButtonStyle())
                         Button("今日のコラム") {
                             if let closestColumnId = getClosestColumnId() {
+                                soundManager.playSound(named: "se_negative")
                                 withAnimation {
                                     scrollProxy?.scrollTo(closestColumnId, anchor: .top)
                                     selectedDate = closestColumnId  // 今日のコラムを選択状態にする
@@ -100,6 +105,7 @@ struct ColumnListView: View {
                             LazyVStack(spacing: 12) {
                                 ForEach(sortedDates, id: \.self) { date in
                                     Button{
+                                        soundManager.playSound(named: "se_negative")
                                         selectedDate = date
                                     }label:{
                                         if let column = allColumn.first(where: { $0.columnDay == date }) {
@@ -123,6 +129,9 @@ struct ColumnListView: View {
             
             .onAppear {
                 loadColumnData()
+                if !hasSeenTutorial {
+                    showHowToUseView = true
+                }
             }
             .onChange(of: searchText) { _, _ in
                 updateSortedDates()
@@ -149,6 +158,14 @@ struct ColumnListView: View {
                 }
             }
         }
+        .sheet(isPresented:$showHowToUseView){
+            TutorialView(imageArray: ["HowToUseColumnList"])
+                .interactiveDismissDisabled()
+                .onDisappear(){
+                    hasSeenTutorial = true
+                }
+        }
+
     }
     
     private func formatMonth(_ month: String) -> String {

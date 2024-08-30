@@ -36,7 +36,9 @@ struct WritingAjiwaiCardView: View {
         Color(red: 139 / 255, green: 194 / 255, blue: 222 / 255),
         Color(red: 196 / 255, green: 160 / 255, blue: 193 / 255)
     ]
-    
+    //使い方View
+    @AppStorage("hasSeenAjiwaiCardViewTutorial") private var hasSeenTutorial = false
+    @State private var showHowToUseView = false
     // その他の状態管理
     @State private var showDatePicker: Bool = false
     @State var showQRscanner: Bool = false
@@ -61,6 +63,7 @@ struct WritingAjiwaiCardView: View {
     private let feelingTextMaxLength = 250
     private let menuTextMaxLength = 30
     
+    private let soundManager:SoundManager = SoundManager()
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -100,6 +103,13 @@ struct WritingAjiwaiCardView: View {
                         filereMenu()
                     }
             }
+            .sheet(isPresented:$showHowToUseView){
+                TutorialView(imageArray: ["HowToUseAjiwaiCard"])
+                    .interactiveDismissDisabled()
+                    .onDisappear(){
+                        hasSeenTutorial = true
+                    }
+            }
             .alert(isPresented: $showingSaveAlert) {
                 saveConfirmationAlert()
             }
@@ -119,8 +129,10 @@ struct WritingAjiwaiCardView: View {
             Button("OK", role: .cancel) {
                 if isFullScreen {
                     dismiss()
+                    soundManager.playSound(named: "se_negative")
                 } else {
                     user.path.append(.reward)
+                    soundManager.playSound(named: "se_positive")
                 }
             }
         }
@@ -138,6 +150,7 @@ struct WritingAjiwaiCardView: View {
     private func dismissView(geometry: GeometryProxy) -> some View {
         Button {
             dismiss()
+            soundManager.playSound(named: "se_negative")
         } label: {
             if isFullScreen {
                 Image("bt_close")
@@ -282,8 +295,10 @@ struct WritingAjiwaiCardView: View {
     private func menuSelectionButtons() -> some View {
         VStack {
             if !menu.isEmpty {
-                ForEach(menu, id: \.self) { content in
-                    Text(content)
+                VStack(alignment:.leading){
+                    ForEach(menu, id: \.self) { content in
+                        Text(content)
+                    }
                 }
             }
             HStack{
@@ -404,6 +419,7 @@ struct WritingAjiwaiCardView: View {
     private func saveButton() -> some View {
         Button {
             showingSaveAlert = true
+            soundManager.playSound(named: "se_positive")
         } label: {
             Image("bt_base")
                 .resizable()
@@ -436,7 +452,7 @@ struct WritingAjiwaiCardView: View {
     // MARK: - Functions
     
     private func isSave() -> Bool {
-        return menu.isEmpty || lunchComent.isEmpty || feelingTexts.contains(where: { $0.isEmpty })
+        return menu.isEmpty || lunchComent.isEmpty 
     }
     
     private func filereMenu() {
@@ -450,12 +466,13 @@ struct WritingAjiwaiCardView: View {
     
     private func saveData() {
         isSaving = true
-
+            
         DispatchQueue.global(qos: .userInitiated).async {
             let imageToSave: UIImage
             
             if let uiimage = self.uiimage {
-                imageToSave = uiimage
+                let resizedUIimage = resizeImage(image: uiimage)
+                imageToSave = resizedUIimage
             } else if let placeholderUIImage = placeholderImage {
                 imageToSave = placeholderUIImage
             } else {
@@ -477,7 +494,7 @@ struct WritingAjiwaiCardView: View {
                 
                 // データ保存フラグをtrueに設定
                 user.isDataSaved = true
-                gotEXP = Int.random(in: 10...20)
+                gotEXP = Int.random(in: 10...15)
                 user.exp += gotEXP
                 user.gotEXP = gotEXP
                 user.appearExp += 10
@@ -485,7 +502,18 @@ struct WritingAjiwaiCardView: View {
             }
         }
     }
-
+    private func resizeImage(image:UIImage) -> UIImage{
+        // 縦横の画素数を半分にする
+        let width = image.size.width * 0.5
+        let height = image.size.height * 0.5
+        // scale の設定が0だとオリジナル画像よりもサイズが大きくなるので1を設定
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, 1.0)
+        image.draw(in: CGRect(x: 0, y: 0, width: width, height: height))
+        let resizeImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return resizeImage!
+    }
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
@@ -537,6 +565,9 @@ struct WritingAjiwaiCardView: View {
             withAnimation {
                 keyboardHeight = 0
             }
+        }
+        if !hasSeenTutorial {
+            showHowToUseView = true
         }
     }
 }
@@ -620,13 +651,7 @@ extension View {
     }
 }
 
-func DeleteAll(modelContext: ModelContext) {
-    do {
-        try modelContext.delete(model: AjiwaiCardData.self)
-    } catch {
-        fatalError(error.localizedDescription)
-    }
-}
+
 
 
 import UIKit

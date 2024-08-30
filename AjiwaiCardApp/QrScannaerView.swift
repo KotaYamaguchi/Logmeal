@@ -25,6 +25,7 @@ struct ScannerView: View {
     @State private var showQRscanResults: Bool = false
     @State private var QRscanResults: Bool = false
     @State private var isReady:Bool = true
+    private let soundManager:SoundManager = SoundManager()
     func fetchData() {
         sheetID = extractSheetID(from: sheetURL)
         Task {
@@ -139,6 +140,7 @@ struct ScannerView: View {
                     Button {
                         showQRscanResults = false
                         isPresentingScanner = false
+                        soundManager.playSound(named: "se_negative")
                     } label: {
                         Text("閉じる")
                     }

@@ -2,7 +2,8 @@
   "data" : [
     {
       "filename" : "Rabbit3_animation_byebye.gif",
-      "idiom" : "universal"
+      "idiom" : "universal",
+      "universal-type-identifier" : "com.compuserve.gif"
     }
   ],
   "info" : {

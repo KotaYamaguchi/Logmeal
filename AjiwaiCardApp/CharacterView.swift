@@ -6,6 +6,9 @@ struct CharacterView: View {
     @EnvironmentObject var user:UserData
     @Environment(\.dismiss) private var dismiss
     @State private var showModal:Bool = false
+    private let soundManager:SoundManager = SoundManager()
+    @AppStorage("hasSeenCharacterViewTutorial") private var hasSeenTutorial = false
+    @State private var showHowToUseView = false
     func setBackGround() -> String{
         switch user.selectedCharacter{
         case "Dog":
@@ -54,6 +57,19 @@ struct CharacterView: View {
             .sheet(isPresented:$showModal){
                 
             }
+            .sheet(isPresented:$showHowToUseView){
+                TutorialView(imageArray: ["HowToUseCharacter"])
+                    .interactiveDismissDisabled()
+                    .onDisappear(){
+                        hasSeenTutorial = true
+                    }
+            }
+            .onAppear {
+                if !hasSeenTutorial {
+                    showHowToUseView = true
+                }
+            }
+
         }
     }
     private func imageView(geometry:GeometryProxy) -> some View{
@@ -68,6 +84,7 @@ struct CharacterView: View {
         HStack{
             Button{
                 dismiss()
+                soundManager.playSound(named: "se_negative")
             }label: {
                 Image("bt_back")
                     .resizable()
@@ -77,6 +94,7 @@ struct CharacterView: View {
             Spacer()
             Button{
                 showModal = true
+                soundManager.playSound(named: "se_positive")
             }label: {
                 Image("bt_description")
                     .resizable()

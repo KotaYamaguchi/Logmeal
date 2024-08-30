@@ -13,10 +13,14 @@ struct ShopView: View {
     @State var playGif = true
     @State var selectedProductIndex: Int? = nil
     @State var showPurchaseMessage = false
+    @State var showText = false
     @State private var buying: Bool = false
     @Environment(\.dismiss) private var dismiss
     @State var products: [Product] = []
-    
+    private let soundManager:SoundManager = SoundManager()
+    @AppStorage("hasSeenShopViewTutorial") private var hasSeenTutorial = false
+    @State private var showHowToUseView = false
+
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .topLeading) {
@@ -29,6 +33,7 @@ struct ShopView: View {
                 VStack{
                     Button {
                         dismiss()
+                        soundManager.playSound(named: "se_nagative")
                     } label: {
                         Image("bt_back")
                             .resizable()
@@ -44,29 +49,36 @@ struct ShopView: View {
                     .scaledToFit()
                     .frame(width: geometry.size.width * 0.4, height: geometry.size.height * 0.8)
                     .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.5)
-                if let gifData = gifData {
-                    GIFImage(data: gifData, playGif: $playGif) {
-                        print("GIF animation finished!")
-                    }
-                    .frame(width: geometry.size.width*0.4)
-                    .onTapGesture {
-                        playGif = true
-                    }
-                    .position(x: geometry.size.width * 0.25, y: geometry.size.height * 0.5)
-                } else {
-                    Text("右側から商品を選んでね")
+                if showText{
+                Text("ポイントが足りないよ...")
                         .font(.custom("GenJyuuGothicX-Bold", size: 17))
                         .position(x: geometry.size.width * 0.25, y: geometry.size.height * 0.5)
+                }else{
+                    if let gifData = gifData {
+                        GIFImage(data: gifData, playGif: $playGif) {
+                            print("GIF animation finished!")
+                        }
+                        .frame(width: geometry.size.width*0.4)
+                        .onTapGesture {
+                            playGif = true
+                        }
+                        .position(x: geometry.size.width * 0.25, y: geometry.size.height * 0.5)
+                    } else {
+                        Text("右側から商品を選んでね")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                            .position(x: geometry.size.width * 0.25, y: geometry.size.height * 0.5)
+                    }
                 }
-                
                 Button {
                     if let selectedIndex = selectedProductIndex {
                         if user.point >= products[selectedIndex].price {
                             selectedProduct = products[selectedIndex]
                             insufficientPoints = false
+                            soundManager.playSound(named: "se_positive")
                         } else {
                             selectedProduct = nil
                             insufficientPoints = true
+                            soundManager.playSound(named: "se_positive")
                         }
                         showAlert = true
                     }
@@ -91,7 +103,13 @@ struct ShopView: View {
                         Button {
                             selectedProductIndex = index
                             itemIndex = index
-                            gifData = NSDataAsset(name: product.name)?.data
+                            if user.point < product.price{
+                                showText = true
+                                gifData = nil
+                            }else{
+                                gifData = NSDataAsset(name: product.name)?.data
+                                showText = false
+                            }
                             playGif = true
                         } label: {
                             HStack {
@@ -100,7 +118,7 @@ struct ShopView: View {
                                         .resizable()
                                         .scaledToFit()
                                         .frame(height: 65)
-                                        .brightness(product.isBought ? -0.2 : 0.0) // 購入された商品の画像を暗くする
+                                        .brightness(product.isBought ? -0.2 : -100) // 購入された商品の画像を暗くする
                                     if product.isBought {
                                         Text("買ったよ")
                                             .font(.custom("GenJyuuGothicX-Bold", size: 14))
@@ -129,7 +147,7 @@ struct ShopView: View {
                     }
                 }
                 .scrollContentBackground(.hidden)
-                .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.6)
+                .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.5)
                 .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.55)
                 
                 if showPurchaseMessage {
@@ -150,6 +168,13 @@ struct ShopView: View {
                         }
                 }
             }
+            .sheet(isPresented:$showHowToUseView){
+                TutorialView(imageArray: ["HowToUseShop"])
+                    .interactiveDismissDisabled()
+                    .onDisappear(){
+                        hasSeenTutorial = true
+                    }
+            }
             .alert(isPresented: $showAlert) {
                 if insufficientPoints {
                     return Alert(
@@ -166,6 +191,9 @@ struct ShopView: View {
                 }
             }
             .onAppear {
+                if !hasSeenTutorial {
+                    showHowToUseView = true
+                }
                 print("訪問回数：\(NumberOfVisits)")
                 print("1回目：\(products)")
                 print("2回目以降：\(products = user.loadProducts(key: "products"))")

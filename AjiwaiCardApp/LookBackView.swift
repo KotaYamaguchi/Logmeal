@@ -1,37 +1,47 @@
 import SwiftUI
 import SwiftData
-// MARK: - LookBackView
+
 struct LookBackView: View {
-    //SwiftData
+    // SwiftData
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
     var filteredData: AjiwaiCardData? {
         allData.first { Calendar.current.isDate($0.saveDay, inSameDayAs: selectDate) }
     }
     
-    //Environment
+    // Environment
     @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
-    //カレンダー関連
+    
+    // カレンダー関連
     @State private var selectDate: Date = Date()
-    //味わいカード関連
+    
+    // 味わいカード関連
     @State private var showDetail: Bool = false
     @State private var navigateToWritingView: Bool = false
-    //アニメーション関連
+    
+    // アニメーション関連
     @State private var showBaseLevelUpView = false
     @State private var showBaseAnimationView = false
     @State private var showNormalCharacterView = false
     @State private var showTextCompleted = false
-    @State var fromAjiwaiCard:Bool = true
+    @State var fromAjiwaiCard: Bool = true
     
-    //MARK: - body
+    // チュートリアル関連
+    @AppStorage("hasSeenLookBackTutorial") private var hasSeenTutorial = false
+    @State private var showHowToUseView = false
+    
+    private let soundManager: SoundManager = SoundManager()
+    
+    // MARK: - body
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                backgroundView(geometry:geometry)
+                backgroundView(geometry: geometry)
                 actionButton(geometry: geometry)
                 calenderView(geometry: geometry)
                 ajiwaiCardPreview(geometry: geometry)
+                
                 if user.isDataSaved {
                     animationView(geometry: geometry)
                         .onTapGesture {
@@ -46,23 +56,39 @@ struct LookBackView: View {
             }
             .fullScreenCover(isPresented: $navigateToWritingView) {
                 WritingAjiwaiCardView(saveDay: selectDate, isFullScreen: true)
-                    .onDisappear(){
+                    .onDisappear() {
                         handleOnDisAppear()
                     }
             }
+            .sheet(isPresented: $showHowToUseView) {
+                TutorialView(imageArray: ["HowToUseCalendar"])
+                    .interactiveDismissDisabled()
+                    .onDisappear(){
+                        hasSeenTutorial = true
+                    }
+
+            }
+            .onAppear {
+                if !hasSeenTutorial {
+                    showHowToUseView = true
+                }
+            }
         }
     }
-    //MARK: - View Components
-    private func backgroundView(geometry:GeometryProxy) -> some View{
+    
+    // MARK: - View Components
+    private func backgroundView(geometry: GeometryProxy) -> some View {
         Image("bg_calenderView_\(user.selectedCharacter)")
             .resizable()
             .ignoresSafeArea()
             .frame(width: geometry.size.width, height: geometry.size.height)
             .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
     }
-    private func actionButton(geometry:GeometryProxy) -> some View{
+    
+    private func actionButton(geometry: GeometryProxy) -> some View {
         Button {
             dismiss()
+            soundManager.playSound(named: "se_negative")
         } label: {
             Image("bt_back")
                 .resizable()
@@ -71,17 +97,20 @@ struct LookBackView: View {
         .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
         .buttonStyle(PlainButtonStyle())
     }
-    private func calenderView(geometry:GeometryProxy) -> some View{
+    
+    private func calenderView(geometry: GeometryProxy) -> some View {
         CalendarDisplayView(selectedDate: $selectDate, allData: allData)
             .frame(width: geometry.size.width * 0.85, height: geometry.size.height)
             .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
     }
-    private func ajiwaiCardPreview(geometry:GeometryProxy) -> some View{
+    
+    private func ajiwaiCardPreview(geometry: GeometryProxy) -> some View {
         AjiwaiCardDataPreview(selectedDate: selectDate, allData: allData, showDetail: $showDetail, navigateToWritingView: $navigateToWritingView)
             .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.5)
     }
-    private func animationView(geometry: GeometryProxy) -> some View{
-        ZStack{
+    
+    private func animationView(geometry: GeometryProxy) -> some View {
+        ZStack {
             if showBaseAnimationView {
                 BaseAnimationView(
                     firstGifName: getFirstGifName(),
@@ -108,8 +137,7 @@ struct LookBackView: View {
         }
     }
     
-    
-//MARK: - functions
+    // MARK: - functions
     private func handleOnDisAppear() {
         let levelUp = user.checkLevel()
         let growth = user.growth()
@@ -121,12 +149,13 @@ struct LookBackView: View {
         } else {
             showNormalCharacterView = true
         }
+        
         // TypeWriterTextView の表示が終わった後の処理
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             showTextCompleted = true
         }
     }
-
+    
     private func getFirstGifName() -> String {
         switch user.growthStage {
         case 2:
@@ -154,6 +183,7 @@ struct LookBackView: View {
 struct AjiwaiCardDataPreview: View {
     //Environment
     @EnvironmentObject var user:UserData
+    private let soundManager:SoundManager = SoundManager()
     //カレンダー用
     let selectedDate: Date
     //選択したデータ
@@ -245,6 +275,7 @@ struct AjiwaiCardDataPreview: View {
     private func showDetailButton() -> some View{
         Button {
             showDetail = true
+            soundManager.playSound(named: "se_positive")
         } label: {
             Image("bt_base")
                 .resizable()
@@ -264,13 +295,17 @@ struct AjiwaiCardDataPreview: View {
                 .font(.custom("GenJyuuGothicX-Bold", size: 17))
             Button{
                 navigateToWritingView = true
+                soundManager.playSound(named: "se_positive")
             }label:{
-                Text("この日のデータを記録する")
-                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                    .frame(width: 250, height: 50)
-                    .background(Color.cyan)
-                    .foregroundStyle(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                Image("bt_base")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 70)
+                    .overlay{
+                        Text("この日のデータを\n記録する！")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                            .foregroundStyle(Color.buttonColor)
+                    }
             }
             .buttonStyle(PlainButtonStyle())
         }
@@ -300,7 +335,9 @@ struct AjiwaiCardDetailView: View {
     @State private var showingDeleteAlert = false
     @State private var showCameraPicker = false
     @State private var showingCameraView = false
-    
+    @AppStorage("hasSeenCardEditViewTutorial") private var hasSeenTutorial = false
+    @State private var showHowToUseView = false
+    private let soundManager:SoundManager = SoundManager()
     init(selectedDate: Date, data: AjiwaiCardData) {
         self.selectedDate = selectedDate
         self.data = data
@@ -326,6 +363,11 @@ struct AjiwaiCardDetailView: View {
                 .padding()
             }
             .background(Color(UIColor.systemGray6))
+            .onAppear(){
+                if !hasSeenTutorial {
+                    showHowToUseView = true
+                }
+            }
             .navigationTitle("味わいカード編集")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -377,6 +419,14 @@ struct AjiwaiCardDetailView: View {
                         }
                     }
             }
+            .sheet(isPresented:$showHowToUseView){
+                TutorialView(imageArray: ["HowToUseCardEdit"])
+                    .interactiveDismissDisabled()
+                    .onDisappear(){
+                        hasSeenTutorial = true
+                    }
+            }
+
         }
     }
     
@@ -437,6 +487,7 @@ struct AjiwaiCardDetailView: View {
             .onDelete(perform: deleteMenuItem)
             Button(action: {
                 editedMenu.append("")
+                soundManager.playSound(named: "se_negative")
             }) {
                 Label("メニュー項目を追加", systemImage: "plus.circle.fill")
             }
