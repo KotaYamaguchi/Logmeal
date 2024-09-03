@@ -10,7 +10,7 @@ struct ColumnListView: View {
     @State private var selectedMonth: String?
     @State private var sortAscending = true
     @State private var scrollProxy: ScrollViewProxy?
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     @AppStorage("hasSeenColumnListViewTutorial") private var hasSeenTutorial = false
     @State private var showHowToUseView = false
 
@@ -57,115 +57,127 @@ struct ColumnListView: View {
     }
     
     var body: some View {
-        NavigationSplitView {
-            ZStack {
-                Color.white.edgesIgnoringSafeArea(.all)
-                VStack(spacing: 16) {
-                    HStack {
-                        Picker("月を選択", selection: $selectedMonth) {
-                            Text("全て").tag(String?.none)
-                               
-                            ForEach(months, id: \.self) { month in
-                                Text(formatMonth(month)).tag(String?.some(month))
+        ZStack(alignment:.topTrailing){
+            NavigationSplitView {
+                ZStack {
+                    Color.white.edgesIgnoringSafeArea(.all)
+                    VStack(spacing: 16) {
+                        HStack {
+                            Picker("月を選択", selection: $selectedMonth) {
+                                Text("全て").tag(String?.none)
+                                
+                                ForEach(months, id: \.self) { month in
+                                    Text(formatMonth(month)).tag(String?.some(month))
+                                }
                             }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        .padding(8)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(10)
-                        
-                        Spacer()
-                        
-                        Button{
-                            sortAscending.toggle()
-                            updateSortedDates()
-                            soundManager.playSound(named: "se_negative")
-                        }label:{
-                            Image(systemName: sortAscending ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-                                .foregroundColor(.blue)
-                                .font(.title2)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        Button("今日のコラム") {
-                            if let closestColumnId = getClosestColumnId() {
+                            .pickerStyle(MenuPickerStyle())
+                            .padding(8)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(10)
+                            
+                            Spacer()
+                            
+                            Button{
+                                sortAscending.toggle()
+                                updateSortedDates()
                                 soundManager.playSound(named: "se_negative")
-                                withAnimation {
-                                    scrollProxy?.scrollTo(closestColumnId, anchor: .top)
-                                    selectedDate = closestColumnId  // 今日のコラムを選択状態にする
-                                }
+                            }label:{
+                                Image(systemName: sortAscending ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.title2)
                             }
-                        }
-                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                        .buttonStyle(CustomButtonStyle())
-                    }
-                    .padding(.horizontal)
-                    
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            LazyVStack(spacing: 12) {
-                                ForEach(sortedDates, id: \.self) { date in
-                                    Button{
-                                        soundManager.playSound(named: "se_negative")
-                                        selectedDate = date
-                                    }label:{
-                                        if let column = allColumn.first(where: { $0.columnDay == date }) {
-                                            ColumnCard(date: date, title: column.title)
-                                        }
+                            .buttonStyle(PlainButtonStyle())
+                            Button("今日のコラム") {
+                                if let closestColumnId = getClosestColumnId() {
+                                    soundManager.playSound(named: "se_negative")
+                                    withAnimation {
+                                        scrollProxy?.scrollTo(closestColumnId, anchor: .top)
+                                        selectedDate = closestColumnId  // 今日のコラムを選択状態にする
                                     }
-                                    .id(date)
-                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
-                            .padding(.horizontal)
+                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                            .buttonStyle(CustomButtonStyle())
                         }
-                        .onAppear {
-                            loadColumnData()
-                            scrollProxy = proxy
+                        .padding(.horizontal)
+                        
+                        ScrollViewReader { proxy in
+                            ScrollView {
+                                LazyVStack(spacing: 12) {
+                                    ForEach(sortedDates, id: \.self) { date in
+                                        Button{
+                                            soundManager.playSound(named: "se_negative")
+                                            selectedDate = date
+                                        }label:{
+                                            if let column = allColumn.first(where: { $0.columnDay == date }) {
+                                                ColumnCard(date: date, title: column.title)
+                                            }
+                                        }
+                                        .id(date)
+                                        .buttonStyle(PlainButtonStyle())
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                            .onAppear {
+                                loadColumnData()
+                                scrollProxy = proxy
+                            }
                         }
                     }
                 }
-            }
-            .navigationTitle("コラム一覧")
-            
-            .onAppear {
-                loadColumnData()
-                if !hasSeenTutorial {
-                    showHowToUseView = true
+                .navigationTitle("コラム一覧")
+                
+                .onAppear {
+                    loadColumnData()
+                    if !hasSeenTutorial {
+                        showHowToUseView = true
+                    }
+                }
+                .onChange(of: searchText) { _, _ in
+                    updateSortedDates()
+                }
+                .onChange(of: selectedMonth) { _, _ in
+                    updateSortedDates()
+                }
+                .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "検索...")
+                .disableAutocorrection(true)
+                .autocapitalization(.none)
+            } detail: {
+                
+                if let selectedDate = selectedDate,
+                   let column = allColumn.first(where: { $0.columnDay == selectedDate }) {
+                    DestinationCard(title: column.title, description: column.caption)
+                } else {
+                    ZStack{
+                        Image("bg_AjiwaiCardView")
+                            .resizable()
+                            .scaledToFill()
+                            .ignoresSafeArea()
+                        Text("コラムを選択してください")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
-            .onChange(of: searchText) { _, _ in
-                updateSortedDates()
+            .sheet(isPresented:$showHowToUseView){
+                TutorialView(imageArray: ["HowToUseColumnList"])
+                    .interactiveDismissDisabled()
+                    .onDisappear(){
+                        hasSeenTutorial = true
+                    }
             }
-            .onChange(of: selectedMonth) { _, _ in
-                updateSortedDates()
+            Button{
+                showHowToUseView = true
+                soundManager.playSound(named: "se_positive")
+            }label: {
+                Image("bt_description")
+                    .resizable()
+                    .frame(width:50,height: 50)
             }
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "検索...")
-            .disableAutocorrection(true)
-            .autocapitalization(.none)
-        } detail: {
-            if let selectedDate = selectedDate,
-               let column = allColumn.first(where: { $0.columnDay == selectedDate }) {
-                DestinationCard(title: column.title, description: column.caption)
-            } else {
-                ZStack{
-                    Image("bg_AjiwaiCardView")
-                        .resizable()
-                        .scaledToFill()
-                        .ignoresSafeArea()
-                    Text("コラムを選択してください")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                        .foregroundColor(.secondary)
-                }
-            }
+            .padding()
+            .buttonStyle(PlainButtonStyle())
         }
-        .sheet(isPresented:$showHowToUseView){
-            TutorialView(imageArray: ["HowToUseColumnList"])
-                .interactiveDismissDisabled()
-                .onDisappear(){
-                    hasSeenTutorial = true
-                }
-        }
-
     }
     
     private func formatMonth(_ month: String) -> String {

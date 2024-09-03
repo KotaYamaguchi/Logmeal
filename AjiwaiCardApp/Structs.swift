@@ -21,4 +21,3 @@ struct Profile: Identifiable {
     var mainStatus: String
     var subStatus: String
 }
-

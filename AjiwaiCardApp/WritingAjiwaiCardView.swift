@@ -63,7 +63,7 @@ struct WritingAjiwaiCardView: View {
     private let feelingTextMaxLength = 250
     private let menuTextMaxLength = 30
     
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -363,20 +363,32 @@ struct WritingAjiwaiCardView: View {
     }
 
     private func dateBar(geometry: GeometryProxy) -> some View {
-        Button {
-            withAnimation {
-                showDatePicker = true
-            }
-        } label: {
-            Image("mt_DateBar")
-                .overlay {
-                    Text(dateFormatter(date: saveDay))
-                        .font(.custom("GenJyuuGothicX-Bold", size: 28))
-                        .foregroundStyle(.white)
+        VStack(alignment:.trailing){
+            Button {
+                withAnimation {
+                    showDatePicker = true
                 }
+            } label: {
+                Image("mt_DateBar")
+                    .overlay {
+                        Text(dateFormatter(date: saveDay))
+                            .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                            .foregroundStyle(.white)
+                    }
+            }
+            .buttonStyle(PlainButtonStyle())
+            Button{
+                showHowToUseView = true
+                soundManager.playSound(named: "se_positive")
+            }label: {
+                Image("bt_description")
+                    .resizable()
+                    .frame(width:50,height: 50)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .offset(x:-geometry.size.width*0.03)
         }
-        .position(x: geometry.size.width * 0.9, y: geometry.size.height * 0.04)
-        .buttonStyle(PlainButtonStyle())
+        .position(x: geometry.size.width * 0.88, y: geometry.size.height * 0.06)
     }
 
     private func customDatePicker(geometry: GeometryProxy) -> some View {
@@ -498,7 +510,9 @@ struct WritingAjiwaiCardView: View {
                 user.exp += gotEXP
                 user.gotEXP = gotEXP
                 user.appearExp += 10
-                user.point += 100
+                if user.growthStage >= 3{
+                    user.point += 100
+                }
             }
         }
     }

@@ -9,7 +9,7 @@ struct RewardView: View {
     @State private var showTextCompleted = false
     @State private var scaleFlag = false
     @State private var counter = 0
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     
     var body: some View {
         GeometryReader { geometry in

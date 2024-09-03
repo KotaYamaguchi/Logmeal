@@ -19,8 +19,14 @@ struct TutorialView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                             .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
                     }
+                    
                 }
-                .tabViewStyle(.page)
+                .tabViewStyle(PageTabViewStyle())
+                .onAppear {
+                    // インジケータの色を変更
+                    UIPageControl.appearance().currentPageIndicatorTintColor = UIColor.red
+                    UIPageControl.appearance().pageIndicatorTintColor = UIColor.gray
+                }
                 Button{
                     dismiss()
                 }label: {
@@ -35,7 +41,9 @@ struct TutorialView: View {
     }
 }
 
-//#Preview {
-//    TutorialView(imageArray: tutorialImage)
-//}
+#Preview {
+    SettingView()
+        .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
+        .environmentObject(UserData())
+}
 

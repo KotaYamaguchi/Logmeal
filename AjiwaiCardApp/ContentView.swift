@@ -5,7 +5,7 @@ struct ContentView: View {
     @EnvironmentObject var user: UserData
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
-    private let soundManager: SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     
     @State var itemName = ""
     @State var showMenu = false
@@ -16,39 +16,91 @@ struct ContentView: View {
     
     private var gridItem = [GridItem(.flexible()), GridItem(.flexible())]
     
+    // Separate state variables for image and text animations
+    @State private var imageIsAnimating = false
+    @State private var textIsAnimating = false
+    
+    // Separate scale values for image and text
+    @State private var imageScaleEffectValue: CGFloat = 1.0
+    @State private var textScaleEffectValue: CGFloat = 1.0
+    
+    // Separate timers for image and text animations
+    @State private var imageTimer: Timer? = nil
+    @State private var textTimer: Timer? = nil
+    
+    // Timer function for the image
+    private func startImageTimer() {
+        imageTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            withAnimation(.easeInOut(duration: 1.0)) {
+                self.imageIsAnimating.toggle()
+                self.imageScaleEffectValue = self.imageIsAnimating ? 1.05 : 1.0 // Image scale effect size
+            }
+        }
+    }
+    
+    // Timer function for the text
+    private func startTextTimer() {
+        textTimer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: true) { _ in
+            withAnimation(.easeInOut(duration: 1.5)) {
+                self.textIsAnimating.toggle()
+                self.textScaleEffectValue = self.textIsAnimating ? 5.0 : -5.0 // Text scale effect size
+            }
+        }
+    }
+    
     var body: some View {
         NavigationStack(path: $user.path) {
             GeometryReader { geometry in
                 let width = geometry.size.width
                 let height = geometry.size.height
                 ZStack(alignment: .topTrailing) {
-                    Image("bg_TitleView")
+                    Image("bg_AjiwaiCardView")
                         .resizable()
                         .ignoresSafeArea()
                         .scaledToFill()
                         .frame(width: geometry.size.width * 1.05, height: geometry.size.height)
                         .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+                    
+                    Image("bg_TitleView")
+                        .resizable()
+                        .ignoresSafeArea()
+                        .scaledToFill()
+                        .scaleEffect(imageScaleEffectValue) // Use the separate scale effect for the image
+                        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
                         .onTapGesture {
                             user.path.append(.home)
                             soundManager.playSound(named: "se_positive")
                         }
+                    
                     Button {
                         showMenu = true
+                        soundManager.playSound(named: "se_positive")
                     } label: {
                         Image(systemName: "info.circle.fill")
                             .font(.system(size: 40))
-                            .foregroundStyle(Color.cyan)
+                            .foregroundStyle(Color.pink)
                     }
                     .padding(.all)
                     .buttonStyle(PlainButtonStyle())
+                    
                     Text("画面をタップしてゲームを始めよう")
                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
                         .foregroundStyle(.gray)
                         .padding(.top, 30)
+                        .rotationEffect(.degrees(textScaleEffectValue))
+//                        .scaleEffect(textScaleEffectValue) // Use the separate scale effect for the text
                         .position(x: width * 0.5, y: height * 0.8)
                 }
                 .sheet(isPresented: $showMenu) {
                     appSettingView(geometry: geometry)
+                }
+                .onAppear() {
+                    startImageTimer() // Start image timer
+                    startTextTimer() // Start text timer
+                }
+                .onDisappear() {
+                    imageTimer?.invalidate() // Stop the image timer when the view disappears
+                    textTimer?.invalidate() // Stop the text timer when the view disappears
                 }
             }
             .navigationDestination(for: Homepath.self) { value in
@@ -69,7 +121,6 @@ struct ContentView: View {
     
     @ViewBuilder private func appSettingView(geometry:GeometryProxy) -> some View {
         NavigationStack {
-            
             Form{
                 Section("情報") {
                     NavigationLink {
@@ -116,7 +167,8 @@ struct ContentView: View {
             }
         }
     }
-    @ViewBuilder private func termsOfUse(geometry:GeometryProxy) -> some View{
+    
+    @ViewBuilder private func termsOfUse(geometry:GeometryProxy) -> some View {
         VStack{
             Text("利用規約")
                 .font(.custom("GenJyuuGothicX-Bold", size: 28))
@@ -179,12 +231,13 @@ struct ContentView: View {
         .foregroundStyle(Color.textColor)
         .padding()
     }
-    @ViewBuilder private func creditView(geometry:GeometryProxy) -> some View{
+    
+    @ViewBuilder private func creditView(geometry:GeometryProxy) -> some View {
         VStack{
             Text("クレジット")
                 .font(.custom("GenJyuuGothicX-Bold", size: 28))
             Divider()
-                .frame(width:geometry.size.width*0.5)
+                .frame(width:geometry.size.width*0.3)
                 .padding(.vertical)
             ScrollView{
                 VStack{
@@ -209,41 +262,34 @@ struct ContentView: View {
                         Text("米山 詩歩")
                     }
                     
-                    
                     Text("スーパーバイザー")
                         .padding()
                         .font(.custom("GenJyuuGothicX-Bold", size: 27))
                     Text("飯村 伊智郎")
                     
-                    Text("SpecialThanks")
-                        .padding()
-                        .font(.custom("GenJyuuGothicX-Bold", size: 27))
-                    Text("----")
-                    Text("参考文献")
-                        .padding()
-                        .font(.custom("GenJyuuGothicX-Bold", size: 27))
-                    Text("----")
                     Text("音源提供")
                         .padding()
                         .font(.custom("GenJyuuGothicX-Bold", size: 27))
-                    Text("----")
+                    Text("HALTO(ハルト)")
                     Text("フォント提供")
                         .padding()
                         .font(.custom("GenJyuuGothicX-Bold", size: 27))
+                    let url1 = "http://jikasei.me/font/genshin/"
+                    let url2 = "http://scripts.sil.org/OFL"
                     Text("""
-    本ソフトでは表示フォントに「源柔ゴシックX」(http://jikasei.me/font/genshin/) を使用しています。
-    Licensed under SIL Open Font License 1.1 (http://scripts.sil.org/OFL)
+    本ソフトでは表示フォントに「源柔ゴシックX」(\(url1) を使用しています。
+    Licensed under SIL Open Font License 1.1 (\(url2)
     © 2014-2022 自家製フォント工房,
     © 2014, 2015 Adobe Systems Incorporated,
     © 2015 M+FONTS PROJECT
     """)
+                    .frame(width:geometry.size.width*0.4)
                     
                     Image("Iimulab_logo")
                         .resizable()
                         .frame(width:100,height: 100)
                         .padding(.top,50)
                     Text("© 2024 Iimura Laboratory , Prefectural University of Kumamoto")
-                    
                 }
             }
         }
@@ -273,7 +319,6 @@ struct ContentView: View {
         // Show the deletion result alert
         showDeletionResultAlert = true
     }
-
     
     private func deleteAllImage(deletionMessages: inout [String]) {
         for content in allData {
@@ -318,9 +363,7 @@ struct ContentView: View {
     }
 }
 
-
-
-#Preview{
+#Preview {
     ContentView()
         .environmentObject(UserData())
 }

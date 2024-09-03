@@ -34,6 +34,7 @@
 		92615B072B68C1F10072AC98 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92615B062B68C1F10072AC98 /* UserData.swift */; };
 		9263A6152C81C9D000D9E58F /* se_fire.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9263A6132C81C9D000D9E58F /* se_fire.mp3 */; };
 		9263A6162C81C9D000D9E58F /* se_door.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9263A6142C81C9D000D9E58F /* se_door.mp3 */; };
+		9263A6192C85EDA700D9E58F /* bgm_home.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9263A6182C85EDA700D9E58F /* bgm_home.mp3 */; };
 		927950CF2C7C08A30016C77D /* se_negative.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 927950CD2C7C08A30016C77D /* se_negative.mp3 */; };
 		927950D02C7C08A30016C77D /* se_positive.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 927950CE2C7C08A30016C77D /* se_positive.mp3 */; };
 		927950D42C7CC46B0016C77D /* TutorialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 927950D32C7CC46B0016C77D /* TutorialView.swift */; };
@@ -75,6 +76,7 @@
 		92615B062B68C1F10072AC98 /* UserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
 		9263A6132C81C9D000D9E58F /* se_fire.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_fire.mp3; sourceTree = "<group>"; };
 		9263A6142C81C9D000D9E58F /* se_door.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_door.mp3; sourceTree = "<group>"; };
+		9263A6182C85EDA700D9E58F /* bgm_home.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bgm_home.mp3; sourceTree = "<group>"; };
 		927950CD2C7C08A30016C77D /* se_negative.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_negative.mp3; sourceTree = "<group>"; };
 		927950CE2C7C08A30016C77D /* se_positive.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_positive.mp3; sourceTree = "<group>"; };
 		927950D32C7CC46B0016C77D /* TutorialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialView.swift; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				9263A6142C81C9D000D9E58F /* se_door.mp3 */,
+				9263A6182C85EDA700D9E58F /* bgm_home.mp3 */,
 				9263A6132C81C9D000D9E58F /* se_fire.mp3 */,
 				927950CD2C7C08A30016C77D /* se_negative.mp3 */,
 				927950CE2C7C08A30016C77D /* se_positive.mp3 */,
@@ -255,6 +258,7 @@
 				9263A6162C81C9D000D9E58F /* se_door.mp3 in Resources */,
 				92EE828A2C74C1AD00080109 /* README_GenJyuu.txt in Resources */,
 				92EE828B2C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt in Resources */,
+				9263A6192C85EDA700D9E58F /* bgm_home.mp3 in Resources */,
 				924FB10B2C5E84B800BB3391 /* Preview Assets.xcassets in Resources */,
 				924FB1092C5E842B00BB3391 /* Assets.xcassets in Resources */,
 				92EE828D2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf in Resources */,

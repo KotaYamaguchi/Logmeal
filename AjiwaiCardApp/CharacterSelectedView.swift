@@ -5,9 +5,13 @@ struct CharacterSelectView: View {
     @State private var selectedCharacter: Profile? = nil
     @State private var isDetailViewPresented = false
     @Binding var isSelectedCharacter: Bool
+    @Binding var showFillUserName: Bool
     @State private var focusedIndex: Int? = nil
     @State private var hasBeenTapped = false
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
+    @State private var rotationAngle: Double = 0 // 左右の傾き角度
+    @State private var scaleEffectValue: CGFloat = 1.0 // 拡大縮小のためのスケール変数
+
     var profiles = [
         Profile(charaName: "レーク", charaImage: "Dog", mainStatus: "犬とトマトのハーフ", subStatus: "朝ごはんがだいすき！"),
         Profile(charaName: "ラン", charaImage: "Rabbit", mainStatus: "ウサギとニンジンのハーフ", subStatus: "お昼ごはんがだいすき！"),
@@ -23,6 +27,9 @@ struct CharacterSelectView: View {
                 detailView(size: size)
             }
         }
+        .onAppear {
+            startWobbleAnimation()
+        }
     }
     
     @ViewBuilder func selectView(size: CGSize) -> some View {
@@ -37,10 +44,13 @@ struct CharacterSelectView: View {
                     .foregroundStyle(Color.textColor)
                     .font(.custom("GenJyuuGothicX-Bold", size: 50))
                     .bold()
-                
+                Text("選んだキャラクターがあなたのがんばりによって成長するよ！")
+                    .foregroundStyle(Color.textColor)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                    .bold()
                 HStack(spacing: size.width * 0.04) {
                     ForEach(profiles.indices, id: \.self) { index in
-                        CharacterView(profile: profiles[index], isFocused: focusedIndex == index, hasBeenTapped: hasBeenTapped, size: size)
+                        CharacterView(profile: profiles[index], isFocused: focusedIndex == index, hasBeenTapped: hasBeenTapped, size: size, rotationAngle: rotationAngle)
                             .onTapGesture {
                                 withAnimation(.easeInOut(duration: 0.3)) {
                                     focusedIndex = index
@@ -83,6 +93,7 @@ struct CharacterSelectView: View {
         let isFocused: Bool
         let hasBeenTapped: Bool
         let size: CGSize
+        let rotationAngle: Double
         
         var body: some View {
             Image("\(profile.charaImage)_normal_1")
@@ -90,12 +101,13 @@ struct CharacterSelectView: View {
                 .scaledToFit()
                 .frame(height: isFocused ? size.height * 0.3 : size.height * 0.2)
                 .colorMultiply(isFocused || !hasBeenTapped ? .white : .gray)
+                .rotationEffect(.degrees(rotationAngle)) // 回転を追加
                 .offset(y: isFocused ? 0 : 20)
                 .animation(.easeInOut(duration: 0.3), value: isFocused)
         }
     }
     
-    @ViewBuilder func detailView(size:CGSize) -> some View{
+    @ViewBuilder func detailView(size: CGSize) -> some View {
         if let character = selectedCharacter {
             ZStack(alignment:.topLeading){
                 Button {
@@ -114,16 +126,19 @@ struct CharacterSelectView: View {
                 .offset(x:30,y:15)
                 HStack{
                     Spacer()
-   
-                        ZStack{
-                            Image("mt_groundCircle")
-                                .offset(y:100)
-                            Image("\(character.charaImage)_normal_1")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: size.height * 0.3)
-                               
-                        }
+                    
+                    ZStack{
+                        Image("\(character.charaImage)_normal_1")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: size.height * 0.3)
+                            .scaleEffect(scaleEffectValue) // スケールエフェクトを追加
+                            .rotationEffect(.degrees(rotationAngle)) // 回転を追加
+                            .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: scaleEffectValue) // アニメーションの設定
+                            .onAppear {
+                                startScaleAnimation() // スケールアニメーションを開始
+                            }
+                    }
                     
                     Spacer()
                     VStack {
@@ -131,7 +146,7 @@ struct CharacterSelectView: View {
                             .resizable()
                             .frame(width: size.width * 0.4, height: size.width * 0.4)
                             .clipShape(RoundedRectangle(cornerRadius: 20))
-                            .animation(.spring, value: isDetailViewPresented)
+                            .animation(.spring(), value: isDetailViewPresented)
                             .foregroundStyle(.bar)
                             .overlay {
                                 if let character = selectedCharacter {
@@ -155,7 +170,10 @@ struct CharacterSelectView: View {
                                 user.selectedCharacter = character.charaImage
                                 user.characterName = character.charaName
                                 soundManager.playSound(named: "se_positive")
-                                isSelectedCharacter = true
+                                withAnimation {
+                                    isSelectedCharacter = false
+                                    showFillUserName = true
+                                }
                                 print(user.characterName)
                             }
                         } label: {
@@ -188,13 +206,21 @@ struct CharacterSelectView: View {
                 }
             }
         }
-        
+    }
+
+    private func startWobbleAnimation() {
+        Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { _ in
+            withAnimation(.easeInOut(duration: 1.0)) {
+                self.rotationAngle = 5 * sin(Date().timeIntervalSinceReferenceDate * 2) // 回転角度の計算
+            }
+        }
     }
     
+    private func startScaleAnimation() {
+        Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { _ in
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                self.scaleEffectValue = 1.2 // 拡大率を変更
+            }
+        }
+    }
 }
-
-#Preview{
-    ContentView()
-        .environmentObject(UserData())
-}
-

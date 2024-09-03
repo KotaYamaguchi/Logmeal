@@ -6,7 +6,7 @@ struct CharacterView: View {
     @EnvironmentObject var user:UserData
     @Environment(\.dismiss) private var dismiss
     @State private var showModal:Bool = false
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     @AppStorage("hasSeenCharacterViewTutorial") private var hasSeenTutorial = false
     @State private var showHowToUseView = false
     func setBackGround() -> String{
@@ -93,7 +93,7 @@ struct CharacterView: View {
             .buttonStyle(PlainButtonStyle())
             Spacer()
             Button{
-                showModal = true
+                showHowToUseView = true
                 soundManager.playSound(named: "se_positive")
             }label: {
                 Image("bt_description")

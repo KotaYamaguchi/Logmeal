@@ -7,7 +7,7 @@ struct CalendarDisplayView: View {
     @Binding var selectedDate: Date
     @State private var opacity: Double = 1.0
     private let calendar = Calendar(identifier: .gregorian)
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     let allData: [AjiwaiCardData]
     
     var body: some View {
@@ -37,6 +37,7 @@ struct CalendarDisplayView: View {
                 
                 Button{
                     previousMonth()
+                    soundManager.playSound(named: "se_negative")
                 }label: {
                     Image("bt_calendar_progress&back")
                         .rotationEffect(Angle.degrees(180))
@@ -45,6 +46,7 @@ struct CalendarDisplayView: View {
                 .position(x: width * 0.035, y: height * 0.5)
                 Button{
                     nextMonth()
+                    soundManager.playSound(named: "se_positive")
                 }label: {
                     Image("bt_calendar_progress&back")
                 }

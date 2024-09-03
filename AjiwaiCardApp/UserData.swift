@@ -54,7 +54,7 @@ class UserData:ObservableObject{
     @AppStorage("level") var level:Int = 0
     @AppStorage("exp") var exp:Int = 0
     @AppStorage("appearExp") var appearExp:Int = 0
-    @AppStorage("point") var point:Int = 1000
+    @AppStorage("point") var point:Int = 0
     @Published var levelTable = [0,10,20,30,50,70,90,110,130,150,170,200,220,250,290,350]
     @AppStorage("growthStage") var growthStage = 1
     @Published var gotEXP:Int = 0

@@ -6,7 +6,7 @@ struct ChildHomeView: View {
     @Environment(\.modelContext) private var context
     @Query private var allColumn:[ColumnData]
     @Query private var allData:[AjiwaiCardData]
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     @State var isShowShareSheet:Bool = false
     @State var progressValue:CGFloat = 0.1
     @State var width:CGFloat = 300
@@ -33,7 +33,7 @@ struct ChildHomeView: View {
     @State private var toglleHouseImage:Bool = false
     @State private var toglleBalloonImage:Bool = false
     @AppStorage("hasVisitedChildHomeView") var hasVisitedChildHomeView :Bool = false
-    
+
     
     private func startGifTimer() {
         timer?.invalidate() // 既存のタイマーがあれば無効化する
@@ -310,6 +310,43 @@ struct ChildHomeView: View {
         }
     }
     
+    @ViewBuilder private func bg_cloudImage(size:CGSize) -> some View{
+        ZStack {
+            Image("bg_homeview")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+                .frame(width: size.width, height: size.height)
+                .position(x: size.width * 0.5, y: size.height * 0.5)
+            GIFImage(data: NSDataAsset(name: "cloud_04")!.data, playGif: $playGif)
+                .scaledToFit()
+                .frame(width: size.width * 0.3)
+                .position(x: size.width * 0.087, y: size.height * 0.285)
+            GIFImage(data: NSDataAsset(name: "cloud_01")!.data, playGif: $playGif)
+                .scaledToFit()
+                .frame(width: size.width * 0.3)
+                .position(x: size.width * 0.235, y: size.height * 0.155)
+            GIFImage(data: NSDataAsset(name: "cloud_05")!.data, playGif: $playGif)
+                .scaledToFit()
+                .frame(width: size.width * 0.3)
+                .position(x: size.width * 0.375, y: size.height * 0.1)  // 変更: 左へ移動
+            GIFImage(data: NSDataAsset(name: "cloud_03")!.data, playGif: $playGif)
+                .scaledToFit()
+                .frame(width: size.width * 0.3)
+                .position(x: size.width * 0.49, y: size.height * 0.2)  // 変更: 左へ移動
+            GIFImage(data: NSDataAsset(name: "cloud_06")!.data, playGif: $playGif)
+                .scaledToFit()
+                .frame(width: size.width * 0.3)
+                .position(x: size.width * 0.585, y: size.height * 0.07)  // 変更: 左へ移動
+            GIFImage(data: NSDataAsset(name: "cloud_02")!.data, playGif: $playGif)
+                .scaledToFit()
+                .frame(width: size.width * 0.3)
+                .position(x: size.width * 0.8, y: size.height * 0.06)
+
+        }
+
+    }
+    
     @ViewBuilder func childHome(size: CGSize) -> some View {
         NavigationStack(path: $user.path) {
             ZStack {
@@ -317,19 +354,20 @@ struct ChildHomeView: View {
                     .resizable()
                     .frame(width: size.width)
                     .ignoresSafeArea(.all)
+                bg_cloudImage(size: size)
                 Image(toglleHouseImage ?"mt_house_\(user.selectedCharacter)_open" : "mt_house_\(user.selectedCharacter)_close")
                     .position(x:size.width*0.2,y:size.height*0.685)
                     .onTapGesture {
                         soundManager.playSound(named: "se_door")
                         toglleHouseImage.toggle()
                     }
-                
-                Image(toglleBalloonImage ? "mt_balloon_\(user.selectedCharacter)_fire" : "mt_balloon_\(user.selectedCharacter)_noFire")
-                    .position(x:size.width*0.75,y:size.height*0.3)
+
+                GIFImage(data:toglleBalloonImage ? NSDataAsset(name: "balloon_\(user.selectedCharacter)_fire")!.data : NSDataAsset(name: "balloon_\(user.selectedCharacter)_normal")!.data)
+                    .frame(width:size.width*0.2)
+                    .position(x: size.width * 0.75, y: size.height * 0.3)
                     .onTapGesture {
                         soundManager.playSound(named: "se_fire")
-                            toglleBalloonImage.toggle()
-                        
+                        toglleBalloonImage.toggle()
                     }
                 Group{
                     NavigationLink {
@@ -498,3 +536,5 @@ extension CGPoint {
         return CGPoint(x: lhs.x - rhs.x, y: lhs.y - rhs.y)
     }
 }
+
+

@@ -25,7 +25,7 @@ struct ScannerView: View {
     @State private var showQRscanResults: Bool = false
     @State private var QRscanResults: Bool = false
     @State private var isReady:Bool = true
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     func fetchData() {
         sheetID = extractSheetID(from: sheetURL)
         Task {

@@ -17,20 +17,20 @@ struct ShopView: View {
     @State private var buying: Bool = false
     @Environment(\.dismiss) private var dismiss
     @State var products: [Product] = []
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     @AppStorage("hasSeenShopViewTutorial") private var hasSeenTutorial = false
     @State private var showHowToUseView = false
 
     var body: some View {
         GeometryReader { geometry in
-            ZStack(alignment: .topLeading) {
+            ZStack(alignment: .top) {
                 Image("bg_shop_\(user.selectedCharacter)")
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
                     .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
                     .frame(width: geometry.size.width, height: geometry.size.height)
-                VStack{
+                HStack{
                     Button {
                         dismiss()
                         soundManager.playSound(named: "se_nagative")
@@ -42,6 +42,18 @@ struct ShopView: View {
                     }
                     .padding()
                     .buttonStyle(PlainButtonStyle())
+                    .disabled(buying)
+                    Spacer()
+                    Button{
+                        showHowToUseView = true
+                        soundManager.playSound(named: "se_positive")
+                    }label: {
+                        Image("bt_description")
+                            .resizable()
+                            .frame(width:50,height: 50)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding()
                     .disabled(buying)
                 }
                 Image("mt_bord_shop_\(user.selectedCharacter)")

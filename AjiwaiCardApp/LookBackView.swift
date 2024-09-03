@@ -31,7 +31,7 @@ struct LookBackView: View {
     @AppStorage("hasSeenLookBackTutorial") private var hasSeenTutorial = false
     @State private var showHowToUseView = false
     
-    private let soundManager: SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     
     // MARK: - body
     var body: some View {
@@ -86,18 +86,32 @@ struct LookBackView: View {
     }
     
     private func actionButton(geometry: GeometryProxy) -> some View {
-        Button {
-            dismiss()
-            soundManager.playSound(named: "se_negative")
-        } label: {
-            Image("bt_back")
-                .resizable()
-                .frame(width: 50, height: 50)
+        HStack{
+            Button {
+                dismiss()
+                soundManager.playSound(named: "se_negative")
+            } label: {
+                Image("bt_back")
+                    .resizable()
+                    .frame(width: 50, height: 50)
+            }
+         
+            .buttonStyle(PlainButtonStyle())
+            .padding()
+            Spacer()
+            Button{
+                showHowToUseView = true
+                soundManager.playSound(named: "se_positive")
+            }label: {
+                Image("bt_description")
+                    .resizable()
+                    .frame(width:50,height: 50)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding()
         }
-        .position(x: geometry.size.width * 0.05, y: geometry.size.height * 0.05)
-        .buttonStyle(PlainButtonStyle())
+        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.05)
     }
-    
     private func calenderView(geometry: GeometryProxy) -> some View {
         CalendarDisplayView(selectedDate: $selectDate, allData: allData)
             .frame(width: geometry.size.width * 0.85, height: geometry.size.height)
@@ -183,7 +197,7 @@ struct LookBackView: View {
 struct AjiwaiCardDataPreview: View {
     //Environment
     @EnvironmentObject var user:UserData
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     //カレンダー用
     let selectedDate: Date
     //選択したデータ
@@ -337,7 +351,7 @@ struct AjiwaiCardDetailView: View {
     @State private var showingCameraView = false
     @AppStorage("hasSeenCardEditViewTutorial") private var hasSeenTutorial = false
     @State private var showHowToUseView = false
-    private let soundManager:SoundManager = SoundManager()
+    private let soundManager = SoundManager.shared
     init(selectedDate: Date, data: AjiwaiCardData) {
         self.selectedDate = selectedDate
         self.data = data
