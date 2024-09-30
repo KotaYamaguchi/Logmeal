@@ -5,7 +5,7 @@ class UserData:ObservableObject{
     @AppStorage("grade") var grade:String = ""
     @AppStorage("class") var yourClass:String = ""
     @AppStorage("age") var age:Int = 6
-    @AppStorage("sex") var sex:String = ""
+    @AppStorage("sex") var gender:String = ""
     @AppStorage("isLogined") var isLogined:Bool = false
     @Published var isTeacher:Bool = false
     

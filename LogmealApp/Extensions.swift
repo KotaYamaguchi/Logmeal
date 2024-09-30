@@ -3,4 +3,5 @@ import SwiftUI
 extension Color{
     static let buttonColor = Color("buttonColor")
     static let textColor = Color("textColor")
+    static let skipColor = Color("skipColor")
 }

@@ -10,6 +10,7 @@
 		92123F3F2C36F70B00B2C25C /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 92123F3E2C36F70B00B2C25C /* ConfettiSwiftUI */; };
 		922331D52CA1766D00E081B6 /* NotificationClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922331D42CA1766D00E081B6 /* NotificationClass.swift */; };
 		9228A5352BD8C8D500E5128F /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 9228A5342BD8C8D500E5128F /* CodeScanner */; };
+		923BC75D2CAAE28200A4FA11 /* prologue 2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */; };
 		9241FED12BA884CE004E507B /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9241FED02BA884CE004E507B /* Extensions.swift */; };
 		9241FED32BA9D123004E507B /* Structs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9241FED22BA9D123004E507B /* Structs.swift */; };
 		924FB0B52C510C2900BB3391 /* LaunchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 924FB0B42C510C2900BB3391 /* LaunchScreen.swift */; };
@@ -41,7 +42,6 @@
 		927950D42C7CC46B0016C77D /* TutorialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 927950D32C7CC46B0016C77D /* TutorialView.swift */; };
 		9281D8382C1ABBB600263877 /* GoogleSheetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9281D8372C1ABBB600263877 /* GoogleSheetAPI.swift */; };
 		92A2A0CA2C0C5C73005C4998 /* PDFGenerater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A2A0C92C0C5C73005C4998 /* PDFGenerater.swift */; };
-		92A3BA062CA7024D006CC7A9 /* prologue.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 92A3BA052CA7024D006CC7A9 /* prologue.mp4 */; };
 		92BE0D662B2BFCF200CA50A8 /* LogmealApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BE0D652B2BFCF200CA50A8 /* LogmealApp.swift */; };
 		92BE0D682B2BFCF200CA50A8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BE0D672B2BFCF200CA50A8 /* ContentView.swift */; };
 		92DB8B052BEB4BBA001D3A1E /* CharacterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92DB8B042BEB4BBA001D3A1E /* CharacterView.swift */; };
@@ -54,6 +54,7 @@
 
 /* Begin PBXFileReference section */
 		922331D42CA1766D00E081B6 /* NotificationClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationClass.swift; sourceTree = "<group>"; };
+		923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "prologue 2.mp4"; sourceTree = "<group>"; };
 		9241FED02BA884CE004E507B /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		9241FED22BA9D123004E507B /* Structs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Structs.swift; sourceTree = "<group>"; };
 		924FB0B42C510C2900BB3391 /* LaunchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreen.swift; sourceTree = "<group>"; };
@@ -85,7 +86,6 @@
 		927950D32C7CC46B0016C77D /* TutorialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialView.swift; sourceTree = "<group>"; };
 		9281D8372C1ABBB600263877 /* GoogleSheetAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSheetAPI.swift; sourceTree = "<group>"; };
 		92A2A0C92C0C5C73005C4998 /* PDFGenerater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFGenerater.swift; sourceTree = "<group>"; };
-		92A3BA052CA7024D006CC7A9 /* prologue.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = prologue.mp4; sourceTree = "<group>"; };
 		92BE0D622B2BFCF200CA50A8 /* LogmealApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LogmealApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92BE0D652B2BFCF200CA50A8 /* LogmealApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogmealApp.swift; sourceTree = "<group>"; };
 		92BE0D672B2BFCF200CA50A8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -173,8 +173,8 @@
 				92EE828C2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf */,
 				92EE82882C74C1AD00080109 /* README_GenJyuu.txt */,
 				92EE82892C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt */,
+				923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */,
 				924FB1082C5E842B00BB3391 /* Assets.xcassets */,
-				92A3BA052CA7024D006CC7A9 /* prologue.mp4 */,
 				92BE0D6B2B2BFCF300CA50A8 /* Preview Content */,
 				927950C92C7C084B0016C77D /* Sounds */,
 			);
@@ -257,6 +257,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				923BC75D2CAAE28200A4FA11 /* prologue 2.mp4 in Resources */,
 				927950CF2C7C08A30016C77D /* se_negative.mp3 in Resources */,
 				9263A6162C81C9D000D9E58F /* se_door.mp3 in Resources */,
 				92EE828A2C74C1AD00080109 /* README_GenJyuu.txt in Resources */,
@@ -264,7 +265,6 @@
 				9263A6192C85EDA700D9E58F /* bgm_home.mp3 in Resources */,
 				924FB10B2C5E84B800BB3391 /* Preview Assets.xcassets in Resources */,
 				924FB1092C5E842B00BB3391 /* Assets.xcassets in Resources */,
-				92A3BA062CA7024D006CC7A9 /* prologue.mp4 in Resources */,
 				92EE828D2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf in Resources */,
 				9263A6152C81C9D000D9E58F /* se_fire.mp3 in Resources */,
 				927950D02C7C08A30016C77D /* se_positive.mp3 in Resources */,

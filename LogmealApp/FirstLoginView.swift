@@ -19,6 +19,9 @@ struct FirstLoginView: View {
     @State private var isConnected: Bool = false
     @State private var showYouTube: Bool = true
     @State private var showAlert: Bool = false
+    @State private var showGenderSelect: Bool = false
+    @State private var currentGenderButton: Int?
+    
     @State private var countdownTimer: Timer?
     @State private var countdownDuration: TimeInterval = 120.0
     private let soundManager = SoundManager.shared
@@ -27,11 +30,12 @@ struct FirstLoginView: View {
     @StateObject private var bgmManager = BGMManager.shared
     @FocusState  var isActive:Bool
     @State private var rotationAngle: Double = 0 // 左右の傾き角度
-    @State private var player = AVPlayer(url: Bundle.main.url(forResource: "prologue", withExtension: "mp4")!)
-//https://youtu.be/6SwhhYdYSm4?feature=shared
+    @State private var player = AVPlayer(url: Bundle.main.url(forResource: "prologue 2", withExtension: "mp4")!)
+    //https://youtu.be/6SwhhYdYSm4?feature=shared
     var body: some View {
         GeometryReader { geometry in
             ZStack {
+                
                 if isSelectedCharacter {
                     CharacterSelectView(isSelectedCharacter: $isSelectedCharacter, showFillUserName: $showFillName)
                         .fullScreenCover(isPresented: $showYouTube) {
@@ -51,7 +55,9 @@ struct FirstLoginView: View {
                             selectGradeAndClass()
                         } else if showAgePicker {
                             selectAge()
-                        } else if isStart {
+                        }else if showGenderSelect{
+                            setUserGender()
+                        }else if isStart {
                             gameStart(size: geometry.size)
                         }
                     }
@@ -63,7 +69,7 @@ struct FirstLoginView: View {
             startWobbleAnimation()
         }
     }
-
+    
     private func startWobbleAnimation() {
         Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { _ in
             withAnimation(.easeInOut(duration: 1.0)) {
@@ -94,12 +100,12 @@ struct FirstLoginView: View {
             isSelectedCharacter = true
         }
     }
-
+    
     private func resetCountdown() {
         countdownTimer?.invalidate()
         countdownTimer = nil
     }
-
+    
     @ViewBuilder private func prologueView(geometry:GeometryProxy) -> some View{
         //        if isConnected {
         //                YoutubeView()
@@ -169,8 +175,9 @@ struct FirstLoginView: View {
                     .resizable()
                     .frame(width:50,height: 50)
             }
+            .padding()
         }
-       
+        
     }
     @ViewBuilder func fillUserName() -> some View {
         GeometryReader{ let size = $0.size
@@ -395,7 +402,7 @@ struct FirstLoginView: View {
                         showAgePicker = false
                         soundManager.playSound(named: "se_positive")
                         withAnimation {
-                            isStart = true
+                            showGenderSelect = true
                         }
                     }
                 } label: {
@@ -435,7 +442,146 @@ struct FirstLoginView: View {
             }
         }
     }
-    
+    @ViewBuilder func setUserGender() -> some View{
+        GeometryReader{ let size = $0.size
+            ZStack(alignment: .topLeading) {
+                Image("\(user.selectedCharacter)_normal_1")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 180)
+                    .rotationEffect(.degrees(rotationAngle))
+                    .position(x:size.width * 0.75, y:size.height * 0.75)
+                    .animation(.easeInOut(duration: 0.3), value: rotationAngle)
+                Image("mt_callout")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 650)
+                    .position(x:size.width * 0.5, y:size.height * 0.38)
+                TypeWriterTextView("あなたの性別を教えてね", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 25), textColor: .textColor, onAnimationCompleted: {
+                    print("アニメーションが終了しました")
+                })
+                .position(x: size.width * 0.5, y: size.height * 0.2)
+                VStack{
+                    HStack{
+                        
+                        Button{
+                            user.gender = "男"
+                            currentGenderButton = 1
+                        }label: {
+                            Text("男性")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .frame(width: 150, height: 50)
+                                .background(currentGenderButton == 1 ? Color.orange : Color.white)
+                                .foregroundStyle(currentGenderButton == 1 ? Color.white : Color.black)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color.orange ,lineWidth: 3)
+                                }
+                            
+                        }
+                        
+                        Button{
+                            user.gender = "女"
+                            currentGenderButton = 2
+                        }label: {
+                            Text("女性")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .frame(width: 150, height: 50)
+                                .background(currentGenderButton == 2 ? Color.orange : Color.white)
+                                .foregroundStyle(currentGenderButton == 2 ? Color.white : Color.black)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color.orange ,lineWidth: 3)
+                                }
+                            
+                        }
+                    }
+                    HStack{
+                        Button{
+                            user.gender = "その他"
+                            currentGenderButton = 3
+                        }label: {
+                            Text("その他")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                .frame(width: 150, height: 50)
+                                .background(currentGenderButton == 3 ? Color.orange : Color.white)
+                                .foregroundStyle(currentGenderButton == 3 ? Color.white : Color.black)
+                                .clipShape(RoundedRectangle(cornerRadius: 20))
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(Color.orange ,lineWidth: 3)
+                                }
+                            
+                        }
+                        
+                        
+                        
+                    }
+                }
+                .position(x: size.width * 0.5, y: size.height * 0.4)
+                HStack{
+                    Button {
+                        showGenderSelect = false
+                        withAnimation {
+                            isStart = true
+                        }
+                        soundManager.playSound(named: "se_positive")
+                    } label: {
+                        Image("bt_base")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 200, height: 100)
+                            .overlay {
+                                Text("決定!")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                    .foregroundStyle(Color.buttonColor)
+                            }
+                    }
+                    .disabled(currentGenderButton == nil)
+                    .opacity(currentGenderButton == nil ? 0.6 : 1)
+                    .buttonStyle(PlainButtonStyle())
+                    Button{
+                        user.gender = "答えない"
+                        currentGenderButton = nil
+                        showGenderSelect = false
+                        withAnimation {
+                            isStart = true
+                        }
+                        soundManager.playSound(named: "se_positive")
+                    }label: {
+                        Text("スキップ")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                            .frame(width: 180, height: 50)
+                            .background(Color.white)
+                            .foregroundStyle( Color.skipColor)
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                            .overlay{
+                                RoundedRectangle(cornerRadius: 15)
+                                    .stroke(Color.skipColor ,lineWidth: 4)
+                            }
+                        
+                    }
+                }
+                .position(x: size.width * 0.5, y: size.height * 0.8)
+                .buttonStyle(PlainButtonStyle())
+                Button {
+                    withAnimation {
+                        showAgePicker = true
+                        showGenderSelect = false
+                    }
+                } label: {
+                    Image("bt_back")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 50, height: 50)
+                }
+                .padding()
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+    }
     @ViewBuilder func gameStart(size: CGSize) -> some View {
         ZStack(alignment: .topLeading) {
             Image("\(user.selectedCharacter)_normal_1")
@@ -450,7 +596,7 @@ struct FirstLoginView: View {
                 .scaledToFit()
                 .frame(width: 650)
                 .position(x:size.width * 0.5, y:size.height * 0.38)
-
+            
             VStack(alignment: .leading) {
                 if conversationCount == 0 {
                     TypeWriterTextView("それじゃあゲームを始めるよ\n準備はいい？", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 17), textColor: .textColor, onAnimationCompleted: {

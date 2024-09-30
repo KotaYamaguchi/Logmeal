@@ -67,8 +67,10 @@ struct SettingView: View {
                                 .scaledToFit()
                                 .frame(height: 50)
                         }
+                        .offset(x:15)
                         .padding()
                         .buttonStyle(PlainButtonStyle())
+                        
                         Spacer()
                         Button {
                             showHowToUseView = true
@@ -76,10 +78,12 @@ struct SettingView: View {
                         } label: {
                             Image("bt_description")
                                 .resizable()
-                                .frame(width: 50, height: 50)
+                                .scaledToFit()
+                                .frame(height: 50)
                         }
                         .buttonStyle(PlainButtonStyle())
                         .padding()
+                        .offset(x:-15)
                     }
                     VStack(spacing: 20) {
                         Spacer()
@@ -308,7 +312,7 @@ struct SettingView: View {
                                 .buttonStyle(PlainButtonStyle())
                             }
                             .padding(.top)
-                          
+                            
                             Button {
                                 print(user.path)
                                 user.path.removeLast()
@@ -435,7 +439,7 @@ struct SettingView: View {
         
         switch selectedFileType {
         case .pdf:
-            let pdfGenerator = MultiPagePDFGenerator(allData: filteredData, userName: user.name, userGrade: user.grade, userClass: user.yourClass, userAge: String(user.age), userSex: user.sex)
+            let pdfGenerator = MultiPagePDFGenerator(allData: filteredData, userName: user.name, userGrade: user.grade, userClass: user.yourClass, userAge: String(user.age), userSex: user.gender)
             let pdfPath = await pdfGenerator.generatePDF()
             
             await MainActor.run {
@@ -445,7 +449,7 @@ struct SettingView: View {
             }
             
         case .csv:
-            let exportData = ExportData(userName: user.name, userGrade: user.grade, userClass: user.yourClass, userAge: String(user.age), userSex: user.sex)
+            let exportData = ExportData(userName: user.name, userGrade: user.grade, userClass: user.yourClass, userAge: String(user.age), userSex: user.gender)
             let filename = "\(user.grade)年 \(user.yourClass)組\(user.name)の給食の記録"
             exportData.createCSV(filename: filename, datas: filteredData)
             
@@ -482,7 +486,7 @@ struct ProfileEditView: View {
     @State private var editedClass: Int = 0
     @State private var editedAge: Int = 0
     @State private var showingSaveAlert = false
-    
+    @State private var selectedGender: String = "男性"
     
     
     var body: some View {
@@ -547,12 +551,22 @@ struct ProfileEditView: View {
                     .font(.custom("GenJyuuGothicX-Bold", size: 17))
                     .textFieldStyle(.roundedBorder)
             }
-        }
-        .onAppear(){
-            print(user.name)
-            print(user.age)
-            print(user.grade)
-            print(user.yourClass)
+            infoRow(icon: "figure.arms.open", title: "性別") {
+                Picker("性別を選択", selection: $selectedGender) {
+                    Text("男性").tag("男性")
+                    Text("女性").tag("女性")
+                    Text("その他").tag("その他")
+                    Text("答えない").tag("答えない")
+                    
+                }
+                .pickerStyle(.menu)
+                .onChange(of: selectedGender) { oldValue, newValue in
+                    print(selectedGender)
+                }
+                .onAppear(){
+                    selectedGender = user.gender
+                }
+            }
         }
         .padding()
         .background(Color.white)
@@ -575,6 +589,7 @@ struct ProfileEditView: View {
         if user.name == ""{
             user.name = "ななし"
         }
+        user.gender = selectedGender
     }
 }
 

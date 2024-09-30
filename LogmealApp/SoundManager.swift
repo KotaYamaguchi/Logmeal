@@ -80,7 +80,7 @@ class BGMManager: ObservableObject {
             
             // Set default values if not previously saved
             if self.bgmVolume == 0 {
-                self.bgmVolume = 0.5
+                self.bgmVolume = 0.3
             }
             if (UserDefaults.standard.object(forKey: "isBGMOn") == nil) {
                 self.isBGMOn = true
