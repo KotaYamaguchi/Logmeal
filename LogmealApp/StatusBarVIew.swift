@@ -28,25 +28,36 @@ struct StatusBarVIew: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: size.height * 0.05)
-                            HStack{
-                                Text("\(user.exp) / \(user.levelTable[user.level+1])")
-                                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                                Text("Exp")
-                                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                            if user.level >= 15{
+                                Text("おめでとう！最大レベルになったよ！")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                            }else{
+                                HStack{
+                                    Text("\(user.exp) / \(user.levelTable[user.level+1])")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                    Text("Exp")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                }
+                                ProgressBarView()
+                                    .frame(width: size.width * 0.2)
                             }
-                            ProgressBarView()
-                                .frame(width: size.width * 0.2)
-                            
                         }
                         HStack {
                             Image("mt_point")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: size.height * 0.05)
-                            Text("\(user.point)")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                            Text("Point")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                            if user.growthStage < 3 {
+                                Text("キャラが最後まで成長すると\nポイントを獲得できるようになります")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                    .foregroundStyle(Color.gray)
+                            }else{
+                                Text("\(user.point)")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                Text("Point")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                            }
+                            
                         }
                     }
                 }

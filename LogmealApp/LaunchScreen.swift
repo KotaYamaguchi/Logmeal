@@ -14,7 +14,8 @@ struct LaunchScreen: View {
                         .position(x:geometry.size.width*0.5,y: geometry.size.height*0.5)
                     Text("© 2024 Iimura Laboratory , Prefectural University of Kumamoto")
                         .font(.custom("GenJyuuGothicX-Bold", size: 18))
-                        .position(x:geometry.size.width*0.5,y: geometry.size.height*0.9)
+                        .position(x:geometry.size.width*0.5,y: geometry.size.height*0.9
+                        )
                 }
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {

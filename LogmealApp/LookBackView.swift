@@ -208,6 +208,10 @@ struct AjiwaiCardDataPreview: View {
     //View遷移管理
     @Binding var showDetail: Bool
     @Binding var navigateToWritingView: Bool
+//MARK: - Function
+    func isDateInFuture(_ date: Date) -> Bool {
+           return date > Date()
+       }
 //MARK: - Body
     var body: some View {
         VStack{
@@ -241,11 +245,18 @@ struct AjiwaiCardDataPreview: View {
     }
     private func succeedImageView(image:Image) -> some View{
         ZStack{
+            Rectangle()
+                .frame(width: 400,height:300)
+                .offset(y:-40)
+                .foregroundStyle(Color.white)
             image
                 .resizable()
+                .scaledToFit()
+                .clipShape(Rectangle())
                 .frame(width: 400,height:300)
                 .offset(y:-40)
             imageFrameView()
+            
         }
     }
     private func defaultImageView() -> some View{
@@ -303,27 +314,36 @@ struct AjiwaiCardDataPreview: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-    private func isEnptyView() -> some View{
-        Group{
-            Text("データがありません")
-                .font(.custom("GenJyuuGothicX-Bold", size: 17))
-            Button{
-                navigateToWritingView = true
-                soundManager.playSound(named: "se_positive")
-            }label:{
-                Image("bt_base")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 70)
-                    .overlay{
-                        Text("この日のデータを\n記録する！")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                            .foregroundStyle(Color.buttonColor)
-                    }
+    private func isEnptyView() -> some View {
+        Group {
+            if isDateInFuture(selectedDate) {
+                // 未来の日付の場合
+                Text("まだ記録できないよ")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
+            } else {
+                // 過去または今日の日付の場合
+                Text("データがありません")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                
+                Button {
+                    navigateToWritingView = true
+                    soundManager.playSound(named: "se_positive")
+                } label: {
+                    Image("bt_base")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 70)
+                        .overlay {
+                            Text("この日のデータを\n記録する！")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                                .foregroundStyle(Color.buttonColor)
+                        }
+                }
+                .buttonStyle(PlainButtonStyle())
             }
-            .buttonStyle(PlainButtonStyle())
         }
     }
+
 }
 
 import SwiftUI
@@ -343,6 +363,8 @@ struct AjiwaiCardDetailView: View {
     @State private var editedHearing: String
     @State private var editedMenu: [String]
     @State private var editedImagePath: URL
+    @State private var rotationAngle: Angle = .degrees(0)
+    @State private var imagePortrait:Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem? = nil
     @State private var uiimage: UIImage? = nil
     @State private var showingSaveAlert = false
@@ -449,33 +471,61 @@ struct AjiwaiCardDetailView: View {
             Text("今日の一枚")
                 .font(.custom("GenJyuuGothicX-Bold", size: 15))
                 .padding(.bottom, 5)
-            AsyncImage(url: editedImagePath) { image in
-                image.resizable().aspectRatio(contentMode: .fit)
-            } placeholder: {
-                Image("mt_No_Image")
+            if let uiimage = uiimage {
+                Image(uiImage: uiimage)
                     .resizable()
-                    .scaledToFit()
+                    .aspectRatio(contentMode: .fit)
                     .frame(height: 400)
+                    .cornerRadius(5)
+                    .shadow(radius: 5)
+//                    .rotationEffect(rotationAngle)
+                  
+            } else {
+                AsyncImage(url: editedImagePath) { image in
+                    image.resizable().aspectRatio(contentMode: .fit)
+                        .rotationEffect(rotationAngle)
+                } placeholder: {
+                    Image("mt_No_Image")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 400)
+//                        .rotationEffect(rotationAngle)
+                }
+                .frame(height: 400)
+                .cornerRadius(5)
+                .shadow(radius: 5)
             }
-            .frame(height: 400)
-            .cornerRadius(5)
-            .shadow(radius: 5)
             
             HStack {
+//                Button {
+//                    rotateImage(degrees: -90)
+//                } label: {
+//                    Label("左に回す", systemImage: "rotate.left")
+//                }
+//                Button {
+//                    rotateImage(degrees: 90)
+//                } label: {
+//                    Label("右に回す", systemImage: "rotate.right")
+//                }
+                
                 PhotosPicker(selection: $selectedPhotoItem) {
                     Label("写真を選ぶ", systemImage: "photo")
                 }
-                Button {
-                    showCameraPicker = true
-                    showingCameraView = true
-                } label: {
-                    Label("カメラで撮る", systemImage: "camera")
-                }
+                
+//                Button {
+//                    showCameraPicker = true
+//                    showingCameraView = true
+//                } label: {
+//                    Label("カメラで撮る", systemImage: "camera")
+//                }
+                
+               
             }
             .onChange(of: selectedPhotoItem) {_ , newItem in
                 Task {
                     if let data = try? await newItem?.loadTransferable(type: Data.self),
                        let uiImage = UIImage(data: data) {
+                        uiimage = uiImage
                         saveNewImage(image: uiImage)
                     }
                 }
@@ -581,6 +631,7 @@ struct AjiwaiCardDetailView: View {
     private func saveNewImage(image: UIImage) {
         let fileURL = saveImageToDocumentsDirectory(image: image)
         editedImagePath = fileURL
+        uiimage = image
     }
     
     private func saveImageToDocumentsDirectory(image: UIImage) -> URL {
@@ -594,6 +645,15 @@ struct AjiwaiCardDetailView: View {
         
         return fileURL
     }
+//    private func rotateImage(degrees: CGFloat) {
+//        if let currentImage = uiimage, let rotatedImage = currentImage.rotate(degrees: degrees) {
+//            uiimage = rotatedImage
+//            saveNewImage(image: rotatedImage)
+//        }
+//        withAnimation {
+//            rotationAngle += .degrees(degrees)
+//        }
+//    }
 }
 
 #Preview{

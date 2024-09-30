@@ -265,6 +265,11 @@ struct ContentView: View {
                         .padding()
                         .font(.custom("GenJyuuGothicX-Bold", size: 27))
                     Text("飯村 伊智郎")
+                    Text("Special Thanks")
+                        .padding()
+                        .font(.custom("GenJyuuGothicX-Bold", size: 27))
+                    Text("熊本市教育センター")
+                    Text("千葉県君津市立周西小学校教諭　佐藤孝子")
                     
                     Text("音源提供")
                         .padding()
@@ -283,11 +288,17 @@ struct ContentView: View {
     © 2015 M+FONTS PROJECT
     """)
                     .frame(width:geometry.size.width*0.4)
-                    
-                    Image("Iimulab_logo")
-                        .resizable()
-                        .frame(width:100,height: 100)
-                        .padding(.top,50)
+                    HStack{
+                        Image("Iimulab_logo")
+                            .resizable()
+                            .frame(width:100,height: 100)
+                            .padding(.top,50)
+                        Image("EducationCenter_logo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 200)
+                            .padding(.top,50)
+                    }
                     Text("© 2024 Iimura Laboratory , Prefectural University of Kumamoto")
                 }
             }
@@ -322,16 +333,26 @@ struct ContentView: View {
     private func deleteAllImage(deletionMessages: inout [String]) {
         for content in allData {
             if !removeDocumentFile(itemName: user.dateFormatter(date: content.saveDay)) {
-                deletionMessages.append("画像データ: \(user.dateFormatter(date: content.saveDay)) の削除に失敗しました。")
+//                deletionMessages.append("画像データ: \(user.dateFormatter(date: content.saveDay)) の削除に失敗しました。")
             }
         }
     }
     
     private func deleteAllStatus() {
-//        let appDomain = Bundle.main.bundleIdentifier
-//        UserDefaults.standard.removePersistentDomain(forName: appDomain!)
+        let appDomain = Bundle.main.bundleIdentifier
+        UserDefaults.standard.removePersistentDomain(forName: appDomain!)
         UserDefaults.standard.removeAll()
         user.isLogined = false
+        user.growthStage = 1
+        user.level = 0
+        user.point = 0
+        user.exp = 0
+        user.yourClass = ""
+        user.grade = ""
+        user.age = 6
+        user.selectedCharacter = "Rabbit"
+        user.characterName = "Rabbit"
+        
     }
     
     private func deleteAllSwiftData(modelContext: ModelContext) throws {

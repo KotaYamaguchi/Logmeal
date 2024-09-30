@@ -15,6 +15,8 @@ struct WritingAjiwaiCardView: View {
     
     // Image
     let placeholderImage = UIImage(named: "mt_No_Image")
+    @State private var rotateAngle: Angle = .degrees(0)
+    //menu
     @State private var menu: [String] = []
     
     // 味わいカード
@@ -94,6 +96,9 @@ struct WritingAjiwaiCardView: View {
                 ImagePicker(image: $uiimage, sourceType: .camera)
                     .ignoresSafeArea()
                     .onAppear() {
+                        showingCameraView = false
+                    }
+                    .onDisappear(){
                         showingCameraView = false
                     }
             }
@@ -220,33 +225,56 @@ struct WritingAjiwaiCardView: View {
     }
     
     private func imageSelectionView() -> some View {
+        
         VStack {
-            Group {
-                if let uiimage = self.uiimage {
-                    Image(uiImage: uiimage)
-                        .resizable()
-                        .frame(width: 340, height: 255)
-                } else {
-                    Image(uiImage: placeholderImage!)
-                        .resizable()
-                        .frame(width: 340, height: 255)
+            
+            if let uiimage = self.uiimage {
+                        Image(uiImage: uiimage)
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .frame(width: 340, height: 255)
+                            .rotationEffect(rotateAngle)
+                            .padding()
+                        HStack {
+                            Button {
+                                if let rotatedImage = uiimage.rotate(degrees: 90) {
+                                    self.uiimage = rotatedImage
+                                }
+                            } label: {
+                                Label("右に回す", systemImage: "rotate.right")
+                            }
+                            Button {
+                                if let rotatedImage = uiimage.rotate(degrees: -90) {
+                                    self.uiimage = rotatedImage
+                                }
+                            } label: {
+                                Label("左に回す", systemImage: "rotate.left")
+                            }
+                        }
+                    } else {
+                Image(uiImage: placeholderImage!)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(Rectangle())
+                    .frame(width: 340, height: 255)
+                    .rotationEffect(rotateAngle)
+                    .padding()
+            }
+            HStack {
+                PhotosPicker(selection: $selectedItem) {
+                    Label("写真を選ぶ", systemImage: "photo")
                 }
-                HStack {
-                    PhotosPicker(selection: $selectedItem) {
-                        Label("写真を選ぶ", systemImage: "photo")
-                    }
-                    Button {
-                        showCameraPicker = true
-                        showingCameraView = true
-                    } label: {
-                        Label("カメラで撮る", systemImage: "camera")
-                    }
+                Button {
+                    showCameraPicker = true
+                    showingCameraView = true
+                } label: {
+                    Label("カメラで撮る", systemImage: "camera")
                 }
             }
             .padding()
         }
     }
-
     private func menuInputView() -> some View {
         VStack {
             Text("今日の献立")
@@ -707,4 +735,24 @@ struct ImagePicker: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+}
+import UIKit
+
+extension UIImage {
+    func rotate(degrees: CGFloat) -> UIImage? {
+        let radians = degrees * .pi / 180
+        let newSize = CGSize(width: size.height, height: size.width)
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, scale)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        
+        context.translateBy(x: newSize.width / 2, y: newSize.height / 2)
+        context.rotate(by: radians)
+        draw(in: CGRect(x: -size.width / 2, y: -size.height / 2, width: size.width, height: size.height))
+        
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
+    }
 }

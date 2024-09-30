@@ -30,10 +30,25 @@ struct SettingView: View {
     @State private var toggleSeButton: Bool = false
     @State private var toggleBgmButton: Bool = false
     @State private var bgmVolume: Float = BGMManager.shared.bgmVolume
+    
+    
     enum FileType {
         case pdf, csv
     }
-    
+    private func deleteColumnData(modelContext: ModelContext) throws {
+        do {
+            try modelContext.delete(model: ColumnData.self)
+        } catch {
+            throw error
+        }
+    }
+    private func deleteMenuData(modelContext: ModelContext) throws {
+        do {
+            try modelContext.delete(model: MenuData.self)
+        } catch {
+            throw error
+        }
+    }
     var body: some View {
         GeometryReader { geometry in
             NavigationStack {
@@ -45,7 +60,7 @@ struct SettingView: View {
                     HStack {
                         Button {
                             dismiss()
-                            soundManager.playSound(named: "se_nagative")
+                            soundManager.playSound(named: "se_negative")
                         } label: {
                             Image("bt_close")
                                 .resizable()
@@ -87,6 +102,7 @@ struct SettingView: View {
                                             .font(.title)
                                             .foregroundStyle(.orange)
                                     }
+                                    .buttonStyle(PlainButtonStyle())
                                     Slider(value: $bgmVolume, in: 0...1, onEditingChanged: { editing in
                                         if !editing {
                                             bgmManager.setBGMVolume(bgmVolume)
@@ -102,6 +118,7 @@ struct SettingView: View {
                                             .font(.title)
                                             .foregroundStyle(.orange)
                                     }
+                                    .buttonStyle(PlainButtonStyle())
                                     Button {
                                         bgmManager.toggleBGM()
                                     } label: {
@@ -120,6 +137,7 @@ struct SettingView: View {
                                                 }
                                         }
                                     }
+                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
                             .padding()
@@ -137,6 +155,7 @@ struct SettingView: View {
                                             .font(.title)
                                             .foregroundStyle(.orange)
                                     }
+                                    .buttonStyle(PlainButtonStyle())
                                     Slider(value: Binding(
                                         get: { soundManager.soundVolume },
                                         set: { newVolume in
@@ -156,6 +175,7 @@ struct SettingView: View {
                                             .font(.title)
                                             .foregroundStyle(.orange)
                                     }
+                                    .buttonStyle(PlainButtonStyle())
                                     Button{
                                         soundManager.toggleSound()
                                         
@@ -255,6 +275,40 @@ struct SettingView: View {
                                     .cancel()
                                 ])
                             }
+                            HStack{
+                                Button{
+                                    do {
+                                        try deleteMenuData(modelContext: context)
+                                    } catch {
+                                        print("メニューの削除に失敗しました。")
+                                    }
+                                }label:{
+                                    Text("メニューを削除する")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                        .frame(width: 150, height: 50)
+                                        .background(Color.red)
+                                        .foregroundStyle(Color.white)
+                                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                Button{
+                                    do {
+                                        try deleteColumnData(modelContext: context)
+                                    } catch {
+                                        print("コラムの削除に失敗しました。")
+                                    }
+                                }label:{
+                                    Text("コラムを削除する")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                        .frame(width: 150, height: 50)
+                                        .background(Color.red)
+                                        .foregroundStyle(Color.white)
+                                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                            .padding(.top)
+                          
                             Button {
                                 print(user.path)
                                 user.path.removeLast()
@@ -381,7 +435,7 @@ struct SettingView: View {
         
         switch selectedFileType {
         case .pdf:
-            let pdfGenerator = MultiPagePDFGenerator(allData: filteredData, userName: user.name, userGrade: user.grade, userClass: user.yourClass)
+            let pdfGenerator = MultiPagePDFGenerator(allData: filteredData, userName: user.name, userGrade: user.grade, userClass: user.yourClass, userAge: String(user.age), userSex: user.sex)
             let pdfPath = await pdfGenerator.generatePDF()
             
             await MainActor.run {
@@ -391,8 +445,8 @@ struct SettingView: View {
             }
             
         case .csv:
-            let exportData = ExportData()
-            let filename = "\(user.grade)年 \(user.yourClass)組\(user.name)の味わいカード"
+            let exportData = ExportData(userName: user.name, userGrade: user.grade, userClass: user.yourClass, userAge: String(user.age), userSex: user.sex)
+            let filename = "\(user.grade)年 \(user.yourClass)組\(user.name)の給食の記録"
             exportData.createCSV(filename: filename, datas: filteredData)
             
             let documentsPath = exportData.getDocumentsDirectory()

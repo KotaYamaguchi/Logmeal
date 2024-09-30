@@ -7,10 +7,11 @@ struct MultiPagePDFGenerator {
     let userName: String
     let userGrade: String
     let userClass: String
-
+    let userAge:String
+    let userSex:String
     func generatePDF() async -> URL? {
         let pdfMetaData = [
-            kCGPDFContextCreator: "味わいカード",
+            kCGPDFContextCreator: "\(userGrade)年 \(userClass)組\(userName):\(userAge),\(userSex)歳の給食の記録",
             kCGPDFContextAuthor: "飯村研究室"
         ]
         let format = UIGraphicsPDFRendererFormat()
@@ -56,7 +57,7 @@ struct MultiPagePDFGenerator {
         var currentY: CGFloat = topMargin
 
         // Draw title
-        drawText(dateFormat(date: data.saveDay) + "の味わいカード", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 30), font: titleFont)
+        drawText(dateFormat(date: data.saveDay) + "給食の記録", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 30), font: titleFont)
         currentY += 30
 
         // Draw user grade and class with name

@@ -3,11 +3,31 @@ import AVFoundation
 class SoundManager: ObservableObject {
     static let shared = SoundManager()
 
-    private var player: AVAudioPlayer?
-    @Published var soundVolume: Float = 1.0
-    @Published var isSoundOn: Bool = true
-    private init() {}
+       private var player: AVAudioPlayer?
+       @Published var soundVolume: Float {
+           didSet {
+               UserDefaults.standard.set(soundVolume, forKey: "soundVolume")
+           }
+       }
+       @Published var isSoundOn: Bool {
+           didSet {
+               UserDefaults.standard.set(isSoundOn, forKey: "isSoundOn")
+           }
+       }
 
+       private init() {
+           // Load saved settings
+           self.soundVolume = UserDefaults.standard.float(forKey: "soundVolume")
+           self.isSoundOn = UserDefaults.standard.bool(forKey: "isSoundOn")
+           
+           // Set default values if not previously saved
+           if self.soundVolume == 0 {
+               self.soundVolume = 1.0
+           }
+           if (UserDefaults.standard.object(forKey: "isSoundOn") == nil) {
+               self.isSoundOn = true
+           }
+       }
     func playSound(named soundName: String) {
         guard isSoundOn else { return }  // 効果音がOFFの場合、再生しない
         if let url = Bundle.main.url(forResource: soundName, withExtension: "mp3") {
@@ -40,14 +60,40 @@ class SoundManager: ObservableObject {
 class BGMManager: ObservableObject {
     static let shared = BGMManager()
 
-    @Published private var player: AVAudioPlayer?
-    @Published private var bgmPlayer: AVAudioPlayer?
-    var bgmVolume: Float = 0.5
-    @Published var isBGMOn: Bool = true
-    private init() {
-        prepareBGM(named: "bgm_home")
-    }
+        @Published private var player: AVAudioPlayer?
+        @Published private var bgmPlayer: AVAudioPlayer?
+        @Published var bgmVolume: Float {
+            didSet {
+                UserDefaults.standard.set(bgmVolume, forKey: "bgmVolume")
+            }
+        }
+        @Published var isBGMOn: Bool {
+            didSet {
+                UserDefaults.standard.set(isBGMOn, forKey: "isBGMOn")
+            }
+        }
 
+        private init() {
+            // Load saved settings
+            self.bgmVolume = UserDefaults.standard.float(forKey: "bgmVolume")
+            self.isBGMOn = UserDefaults.standard.bool(forKey: "isBGMOn")
+            
+            // Set default values if not previously saved
+            if self.bgmVolume == 0 {
+                self.bgmVolume = 0.5
+            }
+            if (UserDefaults.standard.object(forKey: "isBGMOn") == nil) {
+                self.isBGMOn = true
+            }
+
+            prepareBGM(named: "bgm_home")
+            
+            // Apply saved settings
+            setBGMVolume(bgmVolume)
+            if isBGMOn {
+                playBGM()
+            }
+        }
     func playSound(named soundName: String) {
         if let url = Bundle.main.url(forResource: soundName, withExtension: "mp3") {
             do {

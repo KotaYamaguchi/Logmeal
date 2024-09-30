@@ -11,8 +11,10 @@ struct LogmealApp: App {
                 .environmentObject(user)
                 .modelContainer(for:[AjiwaiCardData.self,ColumnData.self,MenuData.self])
                 .onAppear {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                        bgmManager.playBGM()  // アプリ起動時にBGMを再生
+                    if bgmManager.isBGMOn {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            bgmManager.playBGM()  // アプリ起動時にBGMを再生
+                        }
                     }
                 }
                 .onDisappear {
@@ -21,3 +23,4 @@ struct LogmealApp: App {
         }
     }
 }
+

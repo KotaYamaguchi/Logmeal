@@ -463,6 +463,7 @@ struct ChildHomeView: View {
                             .scaledToFit()
                             .frame(width: width * 0.8)
                     }
+                    .buttonStyle(PlainButtonStyle())
                     .fullScreenCover(isPresented:$showSettingView){
                         SettingView()
                     }

@@ -1,6 +1,18 @@
 import SwiftUI
 
 class ExportData {
+    let userName:String
+    let userGrade:String
+    let userClass:String
+    let userAge:String
+    let userSex:String
+    init(userName: String, userGrade: String, userClass: String, userAge: String, userSex: String) {
+        self.userName = userName
+        self.userGrade = userGrade
+        self.userClass = userClass
+        self.userAge = userAge
+        self.userSex = userSex
+    }
     private func dateFormat(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -37,7 +49,7 @@ class ExportData {
 
             let BOM = "\u{feff}"
             strm.write(BOM, maxLength: 3)
-            let header = "日付,献立,給食の感想,視覚,聴覚,嗅覚,味覚,触覚\r\n"
+            let header = "名前：\(userName),年齢：\(userAge),学年：\(userGrade),クラス：\(userClass),性別：\(userSex)\r\n日付,献立,給食の感想,視覚,聴覚,嗅覚,味覚,触覚\r\n"
             var row = ""
             for content in datas {
                 let escapedMenu = escapeForCSV(content.menu.joined(separator: "/"))

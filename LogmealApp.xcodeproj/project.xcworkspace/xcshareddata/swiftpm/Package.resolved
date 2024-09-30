@@ -1,15 +1,6 @@
 {
-  "originHash" : "81d4d6878f38b3ffeb7276a09039430f58fb7147c331bd94d678b00860b31648",
+  "originHash" : "48e62b9fedbe139ee1be9dc2e9e7514a4794e306d88defd0aef6b00730f5d912",
   "pins" : [
-    {
-      "identity" : "budoux.swift",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/griffin-stewie/BudouX.swift.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "89ca4c4b83719c84e60eb92e7d93e9fcc021f9c7"
-      }
-    },
     {
       "identity" : "codescanner",
       "kind" : "remoteSourceControl",
@@ -26,24 +17,6 @@
       "state" : {
         "revision" : "f45961f97bbae6fff6e2e64546fea0189425ad92",
         "version" : "1.1.0"
-      }
-    },
-    {
-      "identity" : "fscalendar",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/WenchaoD/FSCalendar.git",
-      "state" : {
-        "revision" : "0fbdec5172fccb90f707472eeaea4ffe095278f6",
-        "version" : "2.8.4"
-      }
-    },
-    {
-      "identity" : "qrscanner",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mercari/QRScanner.git",
-      "state" : {
-        "revision" : "b9bbcabf8ce54974b56a63f403abc43930684314",
-        "version" : "1.9.0"
       }
     },
     {

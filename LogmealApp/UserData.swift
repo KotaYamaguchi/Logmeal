@@ -5,6 +5,7 @@ class UserData:ObservableObject{
     @AppStorage("grade") var grade:String = ""
     @AppStorage("class") var yourClass:String = ""
     @AppStorage("age") var age:Int = 6
+    @AppStorage("sex") var sex:String = ""
     @AppStorage("isLogined") var isLogined:Bool = false
     @Published var isTeacher:Bool = false
     
@@ -39,6 +40,8 @@ class UserData:ObservableObject{
             }
         }
         
+    
+    
         func loadProducts(key: String) -> [Product] {
             if let savedData = UserDefaults.standard.data(forKey: key) {
                 let decoder = JSONDecoder()

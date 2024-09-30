@@ -1,6 +1,7 @@
 import SwiftUI
 import Network
 import WebKit
+import AVKit
 
 struct FirstLoginView: View {
     @EnvironmentObject var user: UserData
@@ -26,6 +27,7 @@ struct FirstLoginView: View {
     @StateObject private var bgmManager = BGMManager.shared
     @FocusState  var isActive:Bool
     @State private var rotationAngle: Double = 0 // 左右の傾き角度
+    @State private var player = AVPlayer(url: Bundle.main.url(forResource: "prologue", withExtension: "mp4")!)
 //https://youtu.be/6SwhhYdYSm4?feature=shared
     var body: some View {
         GeometryReader { geometry in
@@ -33,46 +35,7 @@ struct FirstLoginView: View {
                 if isSelectedCharacter {
                     CharacterSelectView(isSelectedCharacter: $isSelectedCharacter, showFillUserName: $showFillName)
                         .fullScreenCover(isPresented: $showYouTube) {
-                            if isConnected {
-                                    YoutubeView()
-                                        .frame(width: geometry.size.width * 0.9, height: geometry.size.height * 0.9)
-                                        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                                        .onDisappear {
-                                            isSelectedCharacter = true
-                                            resetCountdown()
-                                            bgmManager.playBGM()
-                                        }
-                                        .onAppear {
-                                            startCountdown()
-                                            bgmManager.pauseBGM()
-                                        }
-                            } else {
-                                VStack {
-                                    Text("インターネットに接続するとプロローグが再生されます。\nプロローグを再生せずに始める場合はボタンを押してください。")
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                                        .padding()
-                                    
-                                    Button {
-                                        withAnimation {
-                                            showYouTube = false
-                                        }
-                                        soundManager.playSound(named: "se_positive")
-                                    } label: {
-                                        Image("bt_base")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(height: 50)
-                                            .overlay {
-                                                Text("画面を閉じて次へ！")
-                                                    .font(.custom("GenJyuuGothicX-Bold", size: 13))
-                                                    .foregroundStyle(Color.buttonColor)
-                                            }
-                                    }
-                                }
-                                .onAppear {
-                                    monitorNetworkConnection()
-                                }
-                            }
+                            prologueView(geometry: geometry)
                         }
                 } else {
                     ZStack{
@@ -137,6 +100,78 @@ struct FirstLoginView: View {
         countdownTimer = nil
     }
 
+    @ViewBuilder private func prologueView(geometry:GeometryProxy) -> some View{
+        //        if isConnected {
+        //                YoutubeView()
+        //                    .frame(width: geometry.size.width * 0.9, height: geometry.size.height * 0.9)
+        //                    .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+        //                    .onDisappear {
+        //                        isSelectedCharacter = true
+        //                        resetCountdown()
+        //                        bgmManager.playBGM()
+        //                    }
+        //                    .onAppear {
+        //                        startCountdown()
+        //                        bgmManager.pauseBGM()
+        //                    }
+        //        } else {
+        //            VStack {
+        //                Text("インターネットに接続するとプロローグが再生されます。\nプロローグを再生せずに始める場合はボタンを押してください。")
+        //                    .font(.custom("GenJyuuGothicX-Bold", size: 17))
+        //                    .padding()
+        //
+        //                Button {
+        //                    withAnimation {
+        //                        showYouTube = false
+        //                    }
+        //                    soundManager.playSound(named: "se_positive")
+        //                } label: {
+        //                    Image("bt_base")
+        //                        .resizable()
+        //                        .scaledToFit()
+        //                        .frame(height: 50)
+        //                        .overlay {
+        //                            Text("画面を閉じて次へ！")
+        //                                .font(.custom("GenJyuuGothicX-Bold", size: 13))
+        //                                .foregroundStyle(Color.buttonColor)
+        //                        }
+        //                }
+        //                .buttonStyle(PlainButtonStyle())
+        //            }
+        //            .onAppear {
+        //                monitorNetworkConnection()
+        //            }
+        //        }
+        ZStack(alignment:.topLeading){
+            VideoPlayer(player: player)
+                .frame(width: geometry.size.width * 0.95, height: geometry.size.height * 0.95)
+                .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+                .onDisappear {
+                    player.pause()
+                    isSelectedCharacter = true
+                    resetCountdown()
+                    bgmManager.playBGM()
+                }
+                .onAppear {
+                    player.play()
+                    player.volume = 0.5
+                    startCountdown()
+                    bgmManager.pauseBGM()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime, object: player.currentItem), perform: { _ in
+                    showYouTube = false
+                })
+            Button {
+                showYouTube = false
+                resetCountdown()
+            } label: {
+                Image("bt_close")
+                    .resizable()
+                    .frame(width:50,height: 50)
+            }
+        }
+       
+    }
     @ViewBuilder func fillUserName() -> some View {
         GeometryReader{ let size = $0.size
             ZStack(alignment: .topLeading) {
@@ -444,7 +479,7 @@ struct FirstLoginView: View {
                     .frame(width: 50, height: 50)
             }
             .padding()
-            
+            .buttonStyle(PlainButtonStyle())
             if showButtonCount == 1 {
                 Button {
                     conversationCount = 1
@@ -555,6 +590,7 @@ struct YoutubeView: View {
                                 .resizable()
                                 .frame(width: 35,height: 35)
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
         }

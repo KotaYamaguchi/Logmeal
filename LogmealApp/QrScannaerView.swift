@@ -26,46 +26,56 @@ struct ScannerView: View {
     @State private var QRscanResults: Bool = false
     @State private var isReady:Bool = true
     private let soundManager = SoundManager.shared
+    @State private var escapeData:[[String]] = []
+
+    // QRコードを読み取った後のデータ保存関数
+    func saveToDatabase(dataArray: [[String]]) {
+        for data in dataArray {
+            guard data.count >= 3 else {
+                continue // 要素数が3未満の場合は無視
+            }
+            
+            // データを分割
+            let columnDay = data[0] // 最初の要素をcolumnDayに設定
+            let title = data[data.count - 2] // 後ろから2番目の要素をtitleに設定
+            let caption = data[data.count - 1] // 最後の要素をcaptionに設定
+            let menuItems = Array(data[1..<(data.count - 2)]) // 残りの要素をmenuに設定
+            
+            // ColumnDataを作成
+            let columnData = ColumnData(columnDay: columnDay, title: title, caption: caption)
+            // MenuDataを作成
+            let menuData = MenuData(day: columnDay, menu: menuItems)
+            
+            // データベースに保存
+            context.insert(columnData)
+            context.insert(menuData)
+        }
+
+        // データベース保存処理
+        do {
+            try context.save()
+            print("データベースに保存されました")
+        } catch {
+            print("データ保存エラー: \(error)")
+        }
+    }
+
     func fetchData() {
         sheetID = extractSheetID(from: sheetURL)
         Task {
-            do {
-                // Fetch keyOfDate
-                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "A2:A32")
-                keyOfDate = spreadSheetManager.spreadSheetResponse.values.flatMap { $0 }
-                
-                // Fetch valueOfDate
-                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "B2:G32")
-                valueOfDate = spreadSheetManager.spreadSheetResponse.values
-                
-                // Fetch titleOfColumn
-                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "H2:H32")
-                titleOfColumn = spreadSheetManager.spreadSheetResponse.values.flatMap { $0 }
-                
-                // Fetch captionOfColumn
-                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "I2:I32")
-                captionOfColumn = spreadSheetManager.spreadSheetResponse.values.flatMap { $0 }
-                
-                // Save MenuData
-                for (index, key) in keyOfDate.enumerated() {
-                    if index < valueOfDate.count {
-                        let menuData = MenuData(day: key, menu: valueOfDate[index])
-                        context.insert(menuData)
-                    }
-                }
-                
-                // Save ColumnData
-                for index in 0..<min(keyOfDate.count, titleOfColumn.count, captionOfColumn.count) {
-                    let columnData = ColumnData(columnDay: keyOfDate[index], title: titleOfColumn[index], caption: captionOfColumn[index])
-                    context.insert(columnData)
-                }
-                
-                try context.save()
-                
+            do{
+                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "A2:I32")
+                escapeData = spreadSheetManager.spreadSheetResponse.values
+                escapeData.removeAll{ $0.count == 1 } // 空のセルを削除
+                print(escapeData)
                 print("Success")
                 QRscanResults = true
                 showQRscanResults = true
-            } catch {
+                
+                // データ保存を呼び出す
+                saveToDatabase(dataArray: escapeData)
+                
+            }catch{
                 QRscanResults = false
                 showQRscanResults = true
                 print("Error: \(error)")
@@ -74,7 +84,7 @@ struct ScannerView: View {
     }
     
     func extractSheetID(from url: String) -> String {
-        // Regex to extract sheet ID from URL
+        // URLからシートIDを抽出する正規表現
         let pattern = "spreadsheets/d/([a-zA-Z0-9-_]+)"
         if let range = url.range(of: pattern, options: .regularExpression) {
             let sheetID = url[range]
@@ -85,7 +95,7 @@ struct ScannerView: View {
         }
         return "Invalid URL"
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             let size = geometry.size
@@ -95,7 +105,6 @@ struct ScannerView: View {
                         Picker("", selection: $selection) {
                             ForEach(1...12, id: \.self) { month in
                                 Text("\(month)月").tag("\(month)月")
-                                
                             }
                         }
                         .pickerStyle(.menu)
@@ -111,7 +120,7 @@ struct ScannerView: View {
                             .stroke(style: StrokeStyle())
                     }
                     ZStack {
-                        CodeScannerView(codeTypes: [.qr],showViewfinder:true) { result in
+                        CodeScannerView(codeTypes: [.qr], showViewfinder: true) { result in
                             if case let .success(scannedResult) = result {
                                 isScanning = false
                                 scannedCode = scannedResult.string
