@@ -9,13 +9,13 @@ struct CalendarDisplayView: View {
     private let calendar = Calendar(identifier: .gregorian)
     private let soundManager = SoundManager.shared
     let allData: [AjiwaiCardData]
-    
+    let onrecordData:[EscapeData]
     var body: some View {
         GeometryReader { geometry in
             let width = geometry.size.width
             let height = geometry.size.height
             ZStack {
-                CalendarView(baseDate: currentDate, selectedDate: $selectedDate, currentDate: $currentDate, width: width * 0.5, allData: allData)
+                CalendarView(baseDate: currentDate, selectedDate: $selectedDate, currentDate: $currentDate, width: width * 0.5, allData: allData, onrecordData: onrecordData)
                     .opacity(opacity)
                     .frame(width: width * 0.5, height: height * 0.8)
                     .position(x: width * 0.25, y: height * 0.5)
@@ -38,7 +38,28 @@ struct CalendarDisplayView: View {
                 }
                 .position(x: width * 0.495, y: height * 0.5)
                 .buttonStyle(PlainButtonStyle())
-                
+                HStack{
+                    Label {
+                        Text("一時保存の記録")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 13))
+                    } icon: {
+                        Image("mt_dot_blue")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30)
+                    }
+                    Label {
+                        Text("入力が完了した記録")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 13))
+                        
+                    } icon: {
+                        Image("mt_dotImage")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30)
+                    }
+                }
+                .position(x: width * 0.25, y: height * 0.85)
             }
             .frame(width: width * 0.5, height: height * 0.9)
         }
@@ -82,7 +103,7 @@ struct CalendarView: View {
     @Binding var currentDate:Date
     var width: CGFloat
     let allData: [AjiwaiCardData]
-    
+    let onrecordData:[EscapeData]
     private let calendar = Calendar(identifier: .gregorian)
     private let weeksInView = 6
     let subColors:[Color] = [
@@ -146,7 +167,7 @@ struct CalendarView: View {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 7), spacing: 0) {
                 ForEach(0..<(7 * weeksInView), id: \.self) { index in
                     let date = self.getDateForIndex(index)
-                    DayView(date: date, isCurrentMonth: isDateInCurrentMonth(date), selectedDate: $selectedDate, width: width, allData: allData)
+                    DayView(date: date, isCurrentMonth: isDateInCurrentMonth(date), selectedDate: $selectedDate, width: width, allData: allData, onrecordData: onrecordData)
                 }
             }
         }
@@ -220,6 +241,7 @@ struct DayView: View {
     @Binding var selectedDate: Date
     let width: CGFloat
     let allData: [AjiwaiCardData]
+    let onrecordData:[EscapeData]
     private let calendar = Calendar(identifier: .gregorian)
     
     private var fillColor:Color {
@@ -249,6 +271,13 @@ struct DayView: View {
                 Spacer()
                 if hasDataForDate(date) {
                     Image("mt_dotImage")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: width * 0.06)
+                        .padding(.bottom, 4)
+                        .offset(y: -width * 0.04)
+                }else if hasOnrecordDataForDate(date){
+                    Image("mt_dot_blue")
                         .resizable()
                         .scaledToFit()
                         .frame(width: width * 0.06)
@@ -287,6 +316,9 @@ struct DayView: View {
     
     private func hasDataForDate(_ date: Date) -> Bool {
         return allData.contains { Calendar.current.isDate($0.saveDay, inSameDayAs: date) }
+    }
+    private func hasOnrecordDataForDate(_ date: Date) -> Bool {
+        return onrecordData.contains { Calendar.current.isDate($0.saveDay, inSameDayAs: date) }
     }
 }
 

@@ -15,7 +15,7 @@ struct LookBackView: View {
     
     // カレンダー関連
     @State private var selectDate: Date = Date()
-    
+    @State private var escapedData: [EscapeData] = []
     // 味わいカード関連
     @State private var showDetail: Bool = false
     @State private var navigateToWritingView: Bool = false
@@ -72,6 +72,9 @@ struct LookBackView: View {
                 if !hasSeenTutorial {
                     showHowToUseView = true
                 }
+                if let data = user.loadEscapeData() {
+                    escapedData = data
+                }
             }
         }
     }
@@ -113,13 +116,13 @@ struct LookBackView: View {
         .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.05)
     }
     private func calenderView(geometry: GeometryProxy) -> some View {
-        CalendarDisplayView(selectedDate: $selectDate, allData: allData)
+        CalendarDisplayView(selectedDate: $selectDate, allData: allData, onrecordData: escapedData)
             .frame(width: geometry.size.width * 0.85, height: geometry.size.height)
             .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
     }
     
     private func ajiwaiCardPreview(geometry: GeometryProxy) -> some View {
-        AjiwaiCardDataPreview(selectedDate: selectDate, allData: allData, showDetail: $showDetail, navigateToWritingView: $navigateToWritingView)
+        AjiwaiCardDataPreview(geometry: geometry, selectedDate: selectDate, allData: allData, showDetail: $showDetail, navigateToWritingView: $navigateToWritingView)
             .position(x: geometry.size.width * 0.75, y: geometry.size.height * 0.5)
     }
     
@@ -195,6 +198,7 @@ struct LookBackView: View {
 // MARK: - AjiwaiCardDataPreview
 
 struct AjiwaiCardDataPreview: View {
+    let geometry:GeometryProxy
     //Environment
     @EnvironmentObject var user:UserData
     private let soundManager = SoundManager.shared
@@ -214,6 +218,7 @@ struct AjiwaiCardDataPreview: View {
        }
 //MARK: - Body
     var body: some View {
+        
         VStack{
             Spacer()
             if let data = filteredData {
@@ -246,14 +251,14 @@ struct AjiwaiCardDataPreview: View {
     private func succeedImageView(image:Image) -> some View{
         ZStack{
             Rectangle()
-                .frame(width: 400,height:300)
+                .frame(width: geometry.size.width*0.3,height:geometry.size.height*0.3)
                 .offset(y:-40)
                 .foregroundStyle(Color.white)
             image
                 .resizable()
                 .scaledToFit()
                 .clipShape(Rectangle())
-                .frame(width: 400,height:300)
+                .frame(width: geometry.size.width*0.3,height:geometry.size.height*0.3)
                 .offset(y:-40)
             imageFrameView()
             
@@ -268,19 +273,19 @@ struct AjiwaiCardDataPreview: View {
     private func placeholdarImageView() -> some View{
         Image("mt_No_Image")
             .resizable()
-            .frame(width: 400,height:300)
-            .offset(y:-40)
+            .frame(width: geometry.size.width*0.3,height:geometry.size.height*0.3)
+            .offset(y:-geometry.size.height*0.03)
     }
     private func imageFrameView() -> some View{
         Image("mt_calenderView_imageFrame_\(user.selectedCharacter)")
             .resizable()
-            .frame(width: 650,height:400)
+            .frame(width: geometry.size.width*0.5,height:geometry.size.height*0.4)
     }
     private func menuListPreview(data:AjiwaiCardData) -> some View{
         Image("mt_calenderView_menuList")
             .resizable()
             .scaledToFit()
-            .frame(width: 400)
+            .frame(width: geometry.size.width*0.3)
             .overlay{
                 VStack(alignment:.leading){
                     ForEach(data.menu, id: \.self) { content in
@@ -289,7 +294,7 @@ struct AjiwaiCardDataPreview: View {
                                 .font(.custom("GenJyuuGothicX-Bold", size: 15))
                                 .foregroundStyle(Color.black)
                             Rectangle()
-                                .frame(width: 300, height: 1)
+                                .frame(width: geometry.size.width*0.25,height: 1)
                                 .foregroundStyle(Color.gray)
                         }
                         .padding(.vertical,2)
@@ -302,14 +307,15 @@ struct AjiwaiCardDataPreview: View {
             showDetail = true
             soundManager.playSound(named: "se_positive")
         } label: {
-            Image("bt_base")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 50)
+            Text("詳しく見る")
+                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                .frame(width: 150, height: 40)
+                .background(Color.white)
+                .foregroundStyle( Color.buttonColor)
+                .clipShape(RoundedRectangle(cornerRadius: 15))
                 .overlay{
-                    Text("詳しく見る")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                        .foregroundStyle(Color.buttonColor)
+                    RoundedRectangle(cornerRadius: 15)
+                        .stroke(Color.buttonColor ,lineWidth: 4)
                 }
         }
         .buttonStyle(PlainButtonStyle())
@@ -329,21 +335,24 @@ struct AjiwaiCardDataPreview: View {
                     navigateToWritingView = true
                     soundManager.playSound(named: "se_positive")
                 } label: {
-                    Image("bt_base")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 70)
-                        .overlay {
-                            Text("この日のデータを\n記録する！")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                                .foregroundStyle(Color.buttonColor)
+                    Text("この日のデータを記録する")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                        .frame(width: 250, height: 50)
+                        .background(Color.white)
+                        .foregroundStyle( Color.buttonColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 15))
+                        .overlay{
+                            RoundedRectangle(cornerRadius: 15)
+                                .stroke(Color.buttonColor ,lineWidth: 4)
                         }
                 }
                 .buttonStyle(PlainButtonStyle())
+                Text("expやpointは1日1回しかゲットできません")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
             }
         }
     }
-
+    
 }
 
 import SwiftUI

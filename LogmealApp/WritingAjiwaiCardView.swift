@@ -3,6 +3,8 @@ import SwiftData
 import PhotosUI
 
 struct WritingAjiwaiCardView: View {
+    //一時保存
+    @State private var escapeData: AjiwaiCardData?
     // SwiftData
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
@@ -12,6 +14,7 @@ struct WritingAjiwaiCardView: View {
     // Environment
     @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     
     // Image
     let placeholderImage = UIImage(named: "mt_No_Image")
@@ -22,6 +25,7 @@ struct WritingAjiwaiCardView: View {
     // 味わいカード
     @State private var lunchComent: String = ""
     @State var uiimage: UIImage?
+    @State var imagePath:URL?
     @State var saveDay: Date
     @State private var fillMenuYourself = false
     
@@ -125,9 +129,26 @@ struct WritingAjiwaiCardView: View {
                 filereMenu()
             }
             .onChange(of: saveDay) { oldValue, newValue in
+                loadOnrecordData()
                 filereMenu()
             }
+            .onChange(of: scenePhase, { oldValue, phase in
+                switch phase {
+                case .active:
+                    print("The scene is in the foreground and interactive.")
+                    
+                case .inactive://ここでデータを保存する
+                    print("The scene is in the foreground but should pause its work.")
+                    
+                case .background:
+                    saveEscapedData()
+                    print("The scene isn’t currently visible in the UI.")
+                    
+                @unknown default: break
+                }
+            })
             .onAppear(perform: onAppear)
+            
         }
         .ignoresSafeArea(.keyboard)
         .alert("保存が完了しました", isPresented: $showSaveSuccess) {
@@ -135,7 +156,8 @@ struct WritingAjiwaiCardView: View {
                 if isFullScreen {
                     dismiss()
                     soundManager.playSound(named: "se_negative")
-                } else {
+                }else{
+                    user.onRecord = false
                     user.path.append(.reward)
                     soundManager.playSound(named: "se_positive")
                 }
@@ -229,30 +251,60 @@ struct WritingAjiwaiCardView: View {
         VStack {
             
             if let uiimage = self.uiimage {
-                        Image(uiImage: uiimage)
+                Image(uiImage: uiimage)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .frame(width: 340, height: 255)
+                    .rotationEffect(rotateAngle)
+                    .padding()
+                HStack {
+                    Button {
+                        if let rotatedImage = uiimage.rotate(degrees: 90) {
+                            self.uiimage = rotatedImage
+                        }
+                    } label: {
+                        Label("右に回す", systemImage: "rotate.right")
+                    }
+                    Button {
+                        if let rotatedImage = uiimage.rotate(degrees: -90) {
+                            self.uiimage = rotatedImage
+                        }
+                    } label: {
+                        Label("左に回す", systemImage: "rotate.left")
+                    }
+                }
+            }else if user.onRecord{
+                AsyncImage(url: imagePath) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                    case .success(let image):
+                        image
                             .resizable()
                             .scaledToFit()
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                             .frame(width: 340, height: 255)
                             .rotationEffect(rotateAngle)
                             .padding()
-                        HStack {
-                            Button {
-                                if let rotatedImage = uiimage.rotate(degrees: 90) {
-                                    self.uiimage = rotatedImage
-                                }
-                            } label: {
-                                Label("右に回す", systemImage: "rotate.right")
-                            }
-                            Button {
-                                if let rotatedImage = uiimage.rotate(degrees: -90) {
-                                    self.uiimage = rotatedImage
-                                }
-                            } label: {
-                                Label("左に回す", systemImage: "rotate.left")
-                            }
-                        }
-                    } else {
+                    case .failure(_):
+                       Image("mt_No_Image")
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .frame(width: 340, height: 255)
+                            .padding()
+                        
+                    @unknown default:
+                        Image("mt_No_Image")
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .frame(width: 340, height: 255)
+                            .padding()
+                    }
+                }
+            }else {
                 Image(uiImage: placeholderImage!)
                     .resizable()
                     .scaledToFit()
@@ -457,27 +509,45 @@ struct WritingAjiwaiCardView: View {
     }
     
     private func saveButton() -> some View {
-        Button {
-            showingSaveAlert = true
-            soundManager.playSound(named: "se_positive")
-        } label: {
-            Image("bt_base")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 50)
-                .opacity(isSave() ? 0.5 : 1.0)
-                .overlay {
-                    HStack {
-                        Image(systemName: "")
-                        Text("保存する")
-                            .foregroundStyle(Color.buttonColor)
-                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
+        HStack{
+            Button {
+                saveEscapedData()
+            } label: {
+                Text("一時保存")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                    .frame(width: 180, height: 50)
+                    .background(Color.white)
+                    .foregroundStyle( Color.skipColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                    .overlay{
+                        RoundedRectangle(cornerRadius: 15)
+                            .stroke(Color.skipColor ,lineWidth: 4)
                     }
-                }
+                
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding()
+            Button {
+                showingSaveAlert = true
+                soundManager.playSound(named: "se_positive")
+            } label: {
+                Text("保存する")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                    .frame(width: 180, height: 50)
+                    .background(Color.white)
+                    .foregroundStyle( Color.buttonColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                    .overlay{
+                        RoundedRectangle(cornerRadius: 15)
+                            .stroke(Color.buttonColor ,lineWidth: 4)
+                    }
+                    
+            }
+            .buttonStyle(PlainButtonStyle())
+            .disabled(isSave())
+            .padding()
+            
         }
-        .buttonStyle(PlainButtonStyle())
-        .disabled(isSave())
-        .padding()
     }
     
     private func saveConfirmationAlert() -> Alert {
@@ -531,19 +601,58 @@ struct WritingAjiwaiCardView: View {
             DispatchQueue.main.async {
                 isSaving = false
                 showSaveSuccess = true
-                
                 // データ保存フラグをtrueに設定
                 user.isDataSaved = true
-                gotEXP = Int.random(in: 10...15)
-                user.exp += gotEXP
-                user.gotEXP = gotEXP
-                user.appearExp += 10
-                if user.growthStage >= 3{
-                    user.point += 100
+                if user.checkTodayRewardLimit(){
+                    gotEXP = Int.random(in: 10...15)
+                    user.exp += gotEXP
+                    user.gotEXP = gotEXP
+                    user.appearExp += 10
+                    if user.growthStage >= 3{
+                            user.point += 100
+                    }
                 }
             }
         }
     }
+    private func saveEscapedData(){
+        isSaving = true
+        let imageToSave: UIImage
+        
+        if let uiimage = self.uiimage {
+            let resizedUIimage = resizeImage(image: uiimage)
+            imageToSave = resizedUIimage
+        } else if let placeholderUIImage = placeholderImage {
+            imageToSave = placeholderUIImage
+        } else {
+            print("画像の保存に失敗しました")
+            DispatchQueue.main.async {
+                isSaving = false
+                showSaveSuccess = false
+            }
+            return
+        }
+
+        let filePath = getDocumentPath(saveData: imageToSave, fileName: dateFormatter(date: saveDay))
+        
+        if var escapedDataArray: [EscapeData] = user.loadEscapeData(){
+            escapedDataArray.removeAll(where:{user.dateFormatter(date: $0.saveDay) == user.dateFormatter(date: self.saveDay)})
+            let newEscapeData = EscapeData(saveDay: self.saveDay,lunchComments: lunchComent,sight: feelingTexts[0],taste: feelingTexts[1],smell: feelingTexts[2],tactile: feelingTexts[3],hearing: feelingTexts[4],imagePath:  filePath,menu: menu)
+            escapedDataArray.append(newEscapeData)
+            user.saveEscapedData(data:escapedDataArray)
+        }else{
+            print("データの一時保存ができていません")
+        }
+        
+        DispatchQueue.main.async {
+            isSaving = false
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            dismiss()
+            user.onRecord = true
+        }
+    }
+    
     private func resizeImage(image:UIImage) -> UIImage{
         // 縦横の画素数を半分にする
         let width = image.size.width * 0.5
@@ -556,6 +665,7 @@ struct WritingAjiwaiCardView: View {
         
         return resizeImage!
     }
+    
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
@@ -576,7 +686,7 @@ struct WritingAjiwaiCardView: View {
             print("コンテキストの保存エラー: \(error)")
         }
     }
-    
+
     private func dateFormatter(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -592,8 +702,38 @@ struct WritingAjiwaiCardView: View {
             self.uiimage = uiImage
         }
     }
-    
+    private func loadOnrecordData(){
+        if let loadedEscapedData = user.loadEscapeData(){
+            if let filteredData = loadedEscapedData.first(where: { user.dateFormatter(date: $0.saveDay) == user.dateFormatter(date: self.saveDay) }){
+                saveDay = filteredData.saveDay
+                lunchComent = filteredData.lunchComments
+                feelingTexts[0] = filteredData.sight
+                feelingTexts[1] = filteredData.hearing
+                feelingTexts[2] = filteredData.smell
+                feelingTexts[3] = filteredData.taste
+                feelingTexts[4] = filteredData.tactile
+                menu = filteredData.menu
+                imagePath = filteredData.imagePath
+            }else{
+                print("フィルタリングができていません")
+            }
+        }else{
+            saveDay = saveDay
+            lunchComent = ""
+            feelingTexts[0] = ""
+            feelingTexts[1] = ""
+            feelingTexts[2] = ""
+            feelingTexts[3] = ""
+            feelingTexts[4] = ""
+            menu = []
+            imagePath = nil
+            print("データが読み込めていません")
+        }
+    }
     private func onAppear() {
+        if user.onRecord{
+            loadOnrecordData()
+        }
         filereMenu()
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
             if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
