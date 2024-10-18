@@ -12,7 +12,13 @@ struct ScannerView: View {
     @State private var sheetURL: String = ""
     @State private var sheetID: String = ""
     @StateObject private var spreadSheetManager = SpreadSheetManager()
-    @State private var selection: String = {
+    @State private var selectedYear: String = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy年"
+        dateFormatter.locale = Locale(identifier: "ja_JP")
+        return dateFormatter.string(from: Date())
+    }()
+    @State private var selectedMonth: String = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "M月"
         dateFormatter.locale = Locale(identifier: "ja_JP")
@@ -64,7 +70,8 @@ struct ScannerView: View {
         sheetID = extractSheetID(from: sheetURL)
         Task {
             do{
-                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: selection, cellRange: "A2:I32")
+                let sheetName = "\(selectedYear)\(selectedMonth)"
+                try await spreadSheetManager.fetchGoogleSheetData(spreadsheetId: sheetID, sheetName: sheetName, cellRange: "A2:I32")
                 escapeData = spreadSheetManager.spreadSheetResponse.values
                 escapeData.removeAll{ $0.count == 1 } // 空のセルを削除
                 print(escapeData)
@@ -102,7 +109,18 @@ struct ScannerView: View {
             ZStack{
                 VStack {
                     HStack {
-                        Picker("", selection: $selection) {
+                        Picker("", selection: $selectedYear) {
+                            ForEach(-1...1, id: \.self) { offset in
+                                let year = Calendar.current.component(.year, from: Date()) + offset
+                                let yearString = "\(year)年".replacingOccurrences(of: ",", with: "")
+                                Text(yearString).tag(yearString)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .font(.title)
+                        .tint(Color.black)
+
+                        Picker("", selection: $selectedMonth) {
                             ForEach(1...12, id: \.self) { month in
                                 Text("\(month)月").tag("\(month)月")
                             }
@@ -110,6 +128,7 @@ struct ScannerView: View {
                         .pickerStyle(.menu)
                         .font(.title)
                         .tint(Color.black)
+
                         Text("のメニューとコラムを取得します")
                             .font(.custom("GenJyuuGothicX-Bold", size: 17))
                             .foregroundStyle(Color.black)
@@ -155,9 +174,9 @@ struct ScannerView: View {
                     }
                 } message: {
                     if QRscanResults {
-                        Text("\(selection)のメニューとコラムが入力されました。")
+                        Text("\(selectedYear)\(selectedMonth)のメニューとコラムが入力されました。")
                     } else {
-                        Text("入力したい月が正しく選択されているか確認してください\nもしくはQRコードが正しいか確認してください")
+                        Text("入力したい年と月が正しく選択されているか確認してください\nもしくはQRコードが正しいか確認してください")
                     }
                 }
             }

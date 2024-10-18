@@ -21,7 +21,8 @@ struct FirstLoginView: View {
     @State private var showAlert: Bool = false
     @State private var showGenderSelect: Bool = false
     @State private var currentGenderButton: Int?
-    
+    @State private var nameTextColor: Color = Color.textColor
+    @State private var showNameAlert: Bool = false
     @State private var countdownTimer: Timer?
     @State private var countdownDuration: TimeInterval = 120.0
     private let soundManager = SoundManager.shared
@@ -32,6 +33,8 @@ struct FirstLoginView: View {
     @State private var rotationAngle: Double = 0 // 左右の傾き角度
     @State private var player = AVPlayer(url: Bundle.main.url(forResource: "prologue 2", withExtension: "mp4")!)
     //https://youtu.be/6SwhhYdYSm4?feature=shared
+    
+    @State private var bannedWords:[String] = ["死"]
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -200,6 +203,7 @@ struct FirstLoginView: View {
                 .position(x: size.width * 0.5, y: size.height * 0.2)
                 
                 TextField("あなたの名前を入力しよう", text: $selectedName)
+                    .foregroundStyle(nameTextColor)
                     .font(.custom("GenJyuuGothicX-Bold", size: 17))
                     .padding(10)
                     .background(Color(.systemGray6))
@@ -208,7 +212,22 @@ struct FirstLoginView: View {
                     .frame(width: size.width * 0.4)
                     .position(x: size.width * 0.5, y: size.height * 0.3)
                     .focused($isActive)
-                
+                    .onChange(of: selectedName) { oldValue, newValue in
+                        for word in bannedWords{
+                            if newValue == word{
+                                showNameAlert = true
+                                nameTextColor = .red
+                            }else{
+                                showNameAlert = false
+                                nameTextColor = .textColor
+                            }
+                        }
+                    }
+                if showNameAlert{
+                    Text("使用できない言葉が含まれています。")
+                        .foregroundStyle(.red)
+                        .position(x: size.width * 0.5, y: size.height * 0.4)
+                }
                 Button {
                     if selectedName.isEmpty {
                         showAlert = true
@@ -231,6 +250,7 @@ struct FirstLoginView: View {
                                 .foregroundStyle(Color.buttonColor)
                         }
                 }
+                .disabled(showNameAlert)
                 .opacity(selectedName.isEmpty ? 0.6 : 1)
                 .position(x: size.width * 0.5, y: size.height * 0.8)
                 .buttonStyle(PlainButtonStyle())

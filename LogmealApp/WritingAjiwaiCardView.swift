@@ -148,6 +148,9 @@ struct WritingAjiwaiCardView: View {
                 }
             })
             .onAppear(perform: onAppear)
+            .onAppear(){
+                print(geometry.size)
+            }
             
         }
         .ignoresSafeArea(.keyboard)
@@ -224,29 +227,35 @@ struct WritingAjiwaiCardView: View {
     }
     
     private func contentView(geometry: GeometryProxy) -> some View {
-            HStack {
+        HStack {
                 Spacer()
-                ScrollView{
-                    VStack {
-                        imageSelectionView()
-                        menuInputView()
-                        Spacer()
-                    }
-                }
-                .frame(width: 400, height: 600)
-                .background {
-                    Image("bg_MenuList")
-                }
+                leftContentView(geometry: geometry)
                 Spacer()
                 commentsAndFeelingsView(geometry: geometry)
                 Spacer()
-            }
-        
+        }
+        .position(x:geometry.size.width*0.5,y:geometry.size.height*0.53)
         .offset(y: focusedField != nil && focusedField! >= 0 ? -keyboardHeight : 0)
-        .frame(width: geometry.size.width, height: geometry.size.height)
     }
-    
-    private func imageSelectionView() -> some View {
+    private func leftContentView(geometry: GeometryProxy) -> some View {
+        Image("bg_MenuList")
+            .resizable()
+            .frame(width: geometry.size.width*0.4, height: geometry.size.height*0.8)
+            .overlay {
+                ScrollView{
+                    VStack(){
+                        Spacer()
+                        imageSelectionView(geometry: geometry)
+                        Spacer()
+                        menuInputView(geometry: geometry)
+                        Spacer()
+                    }
+                }
+                .frame(width: geometry.size.width*0.4, height: geometry.size.height*0.7)
+               
+            }
+    }
+    private func imageSelectionView(geometry: GeometryProxy) -> some View {
         
         VStack {
             
@@ -255,7 +264,7 @@ struct WritingAjiwaiCardView: View {
                     .resizable()
                     .scaledToFit()
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .frame(width: 340, height: 255)
+                    .frame(width: geometry.size.width*0.33)
                     .rotationEffect(rotateAngle)
                     .padding()
                 HStack {
@@ -274,42 +283,12 @@ struct WritingAjiwaiCardView: View {
                         Label("左に回す", systemImage: "rotate.left")
                     }
                 }
-            }else if user.onRecord{
-                AsyncImage(url: imagePath) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .frame(width: 340, height: 255)
-                            .rotationEffect(rotateAngle)
-                            .padding()
-                    case .failure(_):
-                       Image("mt_No_Image")
-                            .resizable()
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .frame(width: 340, height: 255)
-                            .padding()
-                        
-                    @unknown default:
-                        Image("mt_No_Image")
-                            .resizable()
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .frame(width: 340, height: 255)
-                            .padding()
-                    }
-                }
-            }else {
+            }else{
                 Image(uiImage: placeholderImage!)
                     .resizable()
                     .scaledToFit()
                     .clipShape(Rectangle())
-                    .frame(width: 340, height: 255)
+                    .frame(width: geometry.size.width*0.33)
                     .rotationEffect(rotateAngle)
                     .padding()
             }
@@ -326,23 +305,27 @@ struct WritingAjiwaiCardView: View {
             }
             .padding()
         }
+        
+        .frame(width: geometry.size.width*0.4)
     }
-    private func menuInputView() -> some View {
+    private func menuInputView(geometry: GeometryProxy) -> some View {
         VStack {
             Text("今日の献立")
                 .padding()
             
             if fillMenuYourself {
-                menuTextFieldsView()
+                menuTextFieldsView(geometry: geometry)
             } else {
                 menuSelectionButtons()
             }
         }
+//        .frame(width: geometry.size.width*0.4, height: geometry.size.height*0.25)
     }
     
-    private func menuTextFieldsView() -> some View {
+    private func menuTextFieldsView(geometry: GeometryProxy) -> some View {
         ScrollView {
-            VStack(alignment: .leading) {
+            
+            VStack{
                 ForEach($menu.indices, id: \.self) { index in
                     TextFieldWithCounterWithBorder(text: Binding(
                         get: { menu[index] },
@@ -351,23 +334,24 @@ struct WritingAjiwaiCardView: View {
                                 menu[index] = newValue
                             }
                         }
-                    ), maxLength: menuTextMaxLength)
+                    ), maxLength: menuTextMaxLength, geometry: geometry)
                     .padding(.vertical, 2)
                     .focused($focusedField, equals: index + 100)
                 }
-            }
-            Button{
-                menu.append("")
-                focusedField = (menu.count - 1) + 100 // 新しいフィールドにフォーカスを設定
-            }label:{
-                Label("メニュー項目を追加", systemImage: "plus.circle.fill")
-            }
-            Button {
-                // 空のフィールドを削除
-                menu.removeAll(where: { $0.isEmpty })
-                fillMenuYourself = false
-            } label: {
-                Text("閉じる")
+            
+                Button{
+                    menu.append("")
+                    focusedField = (menu.count - 1) + 100 // 新しいフィールドにフォーカスを設定
+                }label:{
+                    Label("メニュー項目を追加", systemImage: "plus.circle.fill")
+                }
+                Button {
+                    // 空のフィールドを削除
+                    menu.removeAll(where: { $0.isEmpty })
+                    fillMenuYourself = false
+                } label: {
+                    Text("閉じる")
+                }
             }
         }
     }
@@ -397,8 +381,14 @@ struct WritingAjiwaiCardView: View {
     }
     
     private func commentsAndFeelingsView(geometry: GeometryProxy) -> some View {
-        VStack {
+        ScrollView {
+            if lunchComent.count > lunchCommentMaxLength {
+                Text("文字が多すぎます。500文字以内で書いてください。")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 13))
+            }
             Image("mt_AjiwaiCard")
+                .resizable()
+                .frame(width: geometry.size.width*0.45, height: geometry.size.height*0.4)
                 .overlay {
                     VStack(alignment: .trailing) {
                         TextField("給食の感想を書こう！", text: Binding(
@@ -409,21 +399,22 @@ struct WritingAjiwaiCardView: View {
                                 }
                             }
                         ), axis: .vertical)
-                        .frame(width: 400, height: 200)
                         .focused($lunchComentFocusedField)
+                        .foregroundStyle(lunchComent.count > lunchCommentMaxLength ? .red : .black)
                         Text("\(lunchComent.count)/\(lunchCommentMaxLength)")
                             .font(.caption)
                             .foregroundColor(.gray)
                             .padding(.trailing, 5)
                             .offset(y: -10)
                     }
+                    .frame(width: geometry.size.width*0.35, height: geometry.size.height*0.3)
                 }
-            feelingsTextFields()
+            feelingsTextFields(geometry: geometry)
         }
-        .frame(width: 400, height: geometry.size.height)
+        .frame(width:geometry.size.width*0.4,height: geometry.size.height*0.8)
     }
     
-    private func feelingsTextFields() -> some View {
+    private func feelingsTextFields(geometry:GeometryProxy) -> some View {
         VStack {
             ForEach(0..<feelings.count, id: \.self) { index in
                 TextFieldWithCounter(text: Binding(
@@ -440,6 +431,7 @@ struct WritingAjiwaiCardView: View {
             }
             actionButtons()
         }
+        .frame(width: geometry.size.width*0.4, height: geometry.size.height*0.4)
     }
 
     private func dateBar(geometry: GeometryProxy) -> some View {
@@ -463,10 +455,11 @@ struct WritingAjiwaiCardView: View {
             }label: {
                 Image("bt_description")
                     .resizable()
-                    .frame(width:50,height: 50)
+                    .scaledToFit()
+                    .frame(width:geometry.size.width*0.045)
             }
             .buttonStyle(PlainButtonStyle())
-            .offset(x:-geometry.size.width*0.03)
+            .offset(x:-geometry.size.width*0.045)
         }
         .position(x: geometry.size.width * 0.88, y: geometry.size.height * 0.06)
     }
@@ -531,8 +524,8 @@ struct WritingAjiwaiCardView: View {
                 showingSaveAlert = true
                 soundManager.playSound(named: "se_positive")
             } label: {
-                Text("保存する")
-                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                Text(isSave() ? "給食の感想と\nメニューを入力しよう" : "保存する")
+                    .font(.custom("GenJyuuGothicX-Bold", size:isSave() ? 10 : 15))
                     .frame(width: 180, height: 50)
                     .background(Color.white)
                     .foregroundStyle( Color.buttonColor)
@@ -561,8 +554,18 @@ struct WritingAjiwaiCardView: View {
     
     // MARK: - Functions
     
+    func getImageByUrl(url: URL) -> UIImage{
+        do {
+            let data = try Data(contentsOf: url)
+            return UIImage(data: data)!
+        } catch let err {
+            print("Error : \(err.localizedDescription)")
+        }
+        return UIImage()
+    }
+    
     private func isSave() -> Bool {
-        return menu.isEmpty || lunchComent.isEmpty 
+        return menu.isEmpty || lunchComent.isEmpty || feelingTexts.isEmpty
     }
     
     private func filereMenu() {
@@ -733,6 +736,9 @@ struct WritingAjiwaiCardView: View {
     private func onAppear() {
         if user.onRecord{
             loadOnrecordData()
+            if let path = imagePath{
+                uiimage = getImageByUrl(url: path)
+            }
         }
         filereMenu()
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
@@ -759,7 +765,7 @@ struct WritingAjiwaiCardView: View {
 struct TextFieldWithCounterWithBorder: View {
     @Binding var text: String
     let maxLength: Int
-    
+    let geometry:GeometryProxy
     var body: some View {
         ZStack(alignment: .trailing) {
             TextField("メニューを入力...", text: $text)
@@ -770,6 +776,7 @@ struct TextFieldWithCounterWithBorder: View {
                 .foregroundColor(.gray)
                 .padding(.trailing, 5)
         }
+        .frame(width:geometry.size.width*0.35)
     }
 }
 

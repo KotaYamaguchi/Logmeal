@@ -11,58 +11,39 @@ struct CalendarDisplayView: View {
     let allData: [AjiwaiCardData]
     let onrecordData:[EscapeData]
     var body: some View {
-        GeometryReader { geometry in
-            let width = geometry.size.width
-            let height = geometry.size.height
-            ZStack {
-                CalendarView(baseDate: currentDate, selectedDate: $selectedDate, currentDate: $currentDate, width: width * 0.5, allData: allData, onrecordData: onrecordData)
-                    .opacity(opacity)
-                    .frame(width: width * 0.5, height: height * 0.8)
-                    .position(x: width * 0.25, y: height * 0.5)
-                    .padding(.horizontal)
-
-                Button{
-                    previousMonth()
-                    soundManager.playSound(named: "se_negative")
-                }label: {
-                    Image("bt_calendar_progress&back")
-                        .rotationEffect(Angle.degrees(180))
-                }
-                .buttonStyle(PlainButtonStyle())
-                .position(x: width * 0.035, y: height * 0.5)
-                Button{
-                    nextMonth()
-                    soundManager.playSound(named: "se_positive")
-                }label: {
-                    Image("bt_calendar_progress&back")
-                }
-                .position(x: width * 0.495, y: height * 0.5)
-                .buttonStyle(PlainButtonStyle())
-                HStack{
-                    Label {
-                        Text("一時保存の記録")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 13))
-                    } icon: {
-                        Image("mt_dot_blue")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30)
+        
+            GeometryReader { geometry in
+                let width = geometry.size.width
+                let height = geometry.size.height
+                ZStack(alignment:.bottom){
+                    CalendarView(baseDate: currentDate, selectedDate: $selectedDate, currentDate: $currentDate, width: width * 0.5, allData: allData, onrecordData: onrecordData)
+                        .opacity(opacity)
+                        .frame(width: width * 0.5, height: height * 0.8)
+                        .position(x: width * 0.25, y: height * 0.5)
+                        .padding(.horizontal)
+                    
+                    Button{
+                        previousMonth()
+                        soundManager.playSound(named: "se_negative")
+                    }label: {
+                        Image("bt_calendar_progress&back")
+                            .rotationEffect(Angle.degrees(180))
                     }
-                    Label {
-                        Text("入力が完了した記録")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 13))
-                        
-                    } icon: {
-                        Image("mt_dotImage")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 30)
+                    .buttonStyle(PlainButtonStyle())
+                    .position(x: width * 0.035, y: height * 0.5)
+                    Button{
+                        nextMonth()
+                        soundManager.playSound(named: "se_positive")
+                    }label: {
+                        Image("bt_calendar_progress&back")
                     }
+                    .position(x: width * 0.495, y: height * 0.5)
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .position(x: width * 0.25, y: height * 0.85)
+                .frame(width: width * 0.5, height: height * 0.9)
             }
-            .frame(width: width * 0.5, height: height * 0.9)
-        }
+            
+        
     }
     
     private var yearString: String {

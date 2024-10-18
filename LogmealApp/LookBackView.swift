@@ -36,12 +36,34 @@ struct LookBackView: View {
     // MARK: - body
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
+            ZStack(alignment: .bottomLeading){
                 backgroundView(geometry: geometry)
                 actionButton(geometry: geometry)
                 calenderView(geometry: geometry)
                 ajiwaiCardPreview(geometry: geometry)
-                
+                HStack{
+                    Label {
+                        Text("一時保存の記録")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 13))
+                    } icon: {
+                        Image("mt_dot_blue")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30)
+                    }
+                    Label {
+                        Text("入力が完了した記録")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 13))
+                        
+                    } icon: {
+                        Image("mt_dotImage")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30)
+                    }
+                }
+                .offset(x:geometry.size.width*0.17)
+                .padding(.vertical,geometry.size.height*0.04)
                 if user.isDataSaved {
                     animationView(geometry: geometry)
                         .onTapGesture {
