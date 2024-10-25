@@ -739,8 +739,9 @@ struct WritingAjiwaiCardView: View {
             if let path = imagePath{
                 uiimage = getImageByUrl(url: path)
             }
+        }else{
+            filereMenu()
         }
-        filereMenu()
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
             if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
                 let keyboardRectangle = keyboardFrame.cgRectValue
