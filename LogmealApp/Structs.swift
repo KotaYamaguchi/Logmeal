@@ -21,3 +21,15 @@ struct Profile: Identifiable {
     var mainStatus: String
     var subStatus: String
 }
+
+struct EscapeData:Codable{
+    var saveDay:Date
+    var lunchComments:String
+    var sight:String
+    var taste:String
+    var smell:String
+    var tactile:String
+    var hearing:String
+    var imagePath:URL
+    var menu:[String]
+}

@@ -102,11 +102,10 @@ struct RewardView: View {
     }
     private func navigationButton(geometry: GeometryProxy) -> some View {
         Button {
-            user.isDataSaved = false // フラグをリセット
+            user.isDataSaved = false // Reset the flag
             user.path.removeAll()
             user.path.append(.home)
             soundManager.playSound(named: "se_negative")
-            
         } label: {
             Image("bt_backHome")
                 .resizable()

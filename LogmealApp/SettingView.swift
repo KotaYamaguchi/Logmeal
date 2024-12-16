@@ -217,6 +217,7 @@ struct SettingView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 20))
                             }
                             .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal)
                             Button {
                                 showTutorialView = true
                                 soundManager.playSound(named: "se_positive")
@@ -229,6 +230,7 @@ struct SettingView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 20))
                             }
                             .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal)
                             Button {
                                 showYoutubelView = true
                                 soundManager.playSound(named: "se_positive")
@@ -241,6 +243,7 @@ struct SettingView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 20))
                             }
                             .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal)
                             Button {
                                 showQRscaner = true
                                 soundManager.playSound(named: "se_positive")
@@ -253,6 +256,7 @@ struct SettingView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 20))
                             }
                             .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal)
                             Button {
                                 showActionSheet = true
                                 soundManager.playSound(named: "se_positive")
@@ -266,6 +270,7 @@ struct SettingView: View {
                             }
                             .buttonStyle(PlainButtonStyle())
                             .disabled(allData.isEmpty)
+                            .padding(.horizontal)
                             .actionSheet(isPresented: $showActionSheet) {
                                 ActionSheet(title: Text("共有方法を選択してください"), buttons: [
                                     .default(Text("PDFで共有")) {
@@ -288,7 +293,7 @@ struct SettingView: View {
                                     }
                                 }label:{
                                     Text("メニューを削除する")
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 14))
                                         .frame(width: 150, height: 50)
                                         .background(Color.red)
                                         .foregroundStyle(Color.white)
@@ -303,7 +308,7 @@ struct SettingView: View {
                                     }
                                 }label:{
                                     Text("コラムを削除する")
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 14))
                                         .frame(width: 150, height: 50)
                                         .background(Color.red)
                                         .foregroundStyle(Color.white)
@@ -328,6 +333,7 @@ struct SettingView: View {
                             .buttonStyle(PlainButtonStyle())
                             
                         }
+                        .padding()
                     }
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)

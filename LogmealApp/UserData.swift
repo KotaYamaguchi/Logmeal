@@ -8,7 +8,21 @@ class UserData:ObservableObject{
     @AppStorage("sex") var gender:String = ""
     @AppStorage("isLogined") var isLogined:Bool = false
     @Published var isTeacher:Bool = false
-    
+    @AppStorage("lastPointAddedDate") var lastRewardGotDate: String = ""
+    @AppStorage("onRecord")var onRecord:Bool = false
+    func checkTodayRewardLimit() -> Bool{
+        let today = dateFormatter(date: Date())
+        // 最後にポイントを加算した日付が今日でない場合のみポイントを加算
+        if lastRewardGotDate != today {
+            lastRewardGotDate = today // 加算した日付を保存
+            print("ポイントが加算されました。現在のポイント: \(point)")
+            return true
+        } else {
+            print("本日は既にポイントを加算済みです。")
+            return false
+            
+        }
+    }
     @Published var isDataSaved: Bool = false
     //ナビゲーション管理用変数
     @Published var path: [Homepath] = []
@@ -25,32 +39,49 @@ class UserData:ObservableObject{
         
         return dateStr
     }
+    func saveEscapedData(data:[EscapeData]){
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(data) {
+            UserDefaults.standard.set(encoded, forKey: "escapedData")
+        }else{
+            print("一時保存に失敗しました")
+        }
+    }
+    func loadEscapeData() -> [EscapeData]? {
+        if let savedData = UserDefaults.standard.data(forKey: "escapedData") {
+            let decoder = JSONDecoder()
+            if let savedEscapeData = try? decoder.decode([EscapeData].self, from: savedData) {
+                return savedEscapeData
+            }
+        }
+        return []
+    }
     func purchaseProduct(_ product: Product) -> Bool {
-            if point >= product.price {
-                point -= product.price
-                return true
-            }
-            return false
+        if point >= product.price {
+            point -= product.price
+            return true
         }
-        
-        func saveProducts(products: [Product], key: String) {
-            let encoder = JSONEncoder()
-            if let encoded = try? encoder.encode(products) {
-                UserDefaults.standard.set(encoded, forKey: key)
-            }
+        return false
+    }
+    
+    func saveProducts(products: [Product], key: String) {
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(products) {
+            UserDefaults.standard.set(encoded, forKey: key)
         }
-        
+    }
     
     
-        func loadProducts(key: String) -> [Product] {
-            if let savedData = UserDefaults.standard.data(forKey: key) {
-                let decoder = JSONDecoder()
-                if let savedProducts = try? decoder.decode([Product].self, from: savedData) {
-                    return savedProducts
-                }
+    
+    func loadProducts(key: String) -> [Product] {
+        if let savedData = UserDefaults.standard.data(forKey: key) {
+            let decoder = JSONDecoder()
+            if let savedProducts = try? decoder.decode([Product].self, from: savedData) {
+                return savedProducts
             }
-            return []
         }
+        return []
+    }
     //GameData
     @AppStorage("selectedCharactar") var selectedCharacter:String = "Rabbit"
     @AppStorage("CharactarName") var characterName:String = "Rabbit"
@@ -106,7 +137,6 @@ import SwiftData
     var hearing:String
     var imagePath:URL
     var menu:[String]
-    
     init(saveDay: Date, lunchComments: String, sight: String, taste: String, smell: String, tactile: String, hearing: String, imagePath: URL, menu: [String]) {
         self.saveDay = saveDay
         self.lunchComments = lunchComments
@@ -142,3 +172,4 @@ import SwiftData
         self.menu = menu
     }
 }
+

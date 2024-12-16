@@ -21,7 +21,8 @@ struct FirstLoginView: View {
     @State private var showAlert: Bool = false
     @State private var showGenderSelect: Bool = false
     @State private var currentGenderButton: Int?
-    
+    @State private var nameTextColor: Color = Color.textColor
+    @State private var showNameAlert: Bool = false
     @State private var countdownTimer: Timer?
     @State private var countdownDuration: TimeInterval = 120.0
     private let soundManager = SoundManager.shared
@@ -32,6 +33,8 @@ struct FirstLoginView: View {
     @State private var rotationAngle: Double = 0 // 左右の傾き角度
     @State private var player = AVPlayer(url: Bundle.main.url(forResource: "prologue 2", withExtension: "mp4")!)
     //https://youtu.be/6SwhhYdYSm4?feature=shared
+    
+    @State private var bannedWords:[String] = ["死なす,死ね,しね,死,死ぬ,しぬ,殺す,殺,殺し,殺人,殺害,殺傷,ころす,ころし,きもい,きめえ,カス,変態,バカ,ファック,不細工,ブス,キチガイ,豚,くたばれ,エッチ,陰毛,いんもう,まんこ,ま○こ,マソコ,オメコ,ヴァギナ,クリトリス,ちんこ,ちんちん,チンポ,ペニス,きんたま,肉棒,勃起,ボッキ,精子,射精,ザーメン,●～,○～,セックス,体位,淫乱,初体験は,アナル,おっぱい,おっぱお,oppai,パイパイ,巨乳,貧乳,きょにゅう,ひんにゅう,きょにゅー,ひんにゅー,谷間,何カップ,手ぶら,ノーブラ,パンツ,乳首,ちくび,自慰,オナニ,オナ二,オナヌ,マスターベーション,しこって,しこしこ,脱げ,ぬげ,脱いで,喘いで,あえいで,クンニ,フェラ,まんぐり,パイズリ,ふうぞく,ふーぞく,風俗,ソープ,デリヘル,ヘルス,パンティ,姦,包茎,ほうけい,童貞,どうてい,どうてー,どーてー,性器,処女,やりまん,乱交,バイブ,ローター,パイパン,中出し,中田氏,スカトロ,糞,うんこ,パコパコ,ホモ,homo,きもい,きめえ,かす,変態,馬鹿,ばーか,baka,ファック,不細工,ぶさいく,ブス,基地外,気違い,ブタ,くたばれ,つまらない,つまんね,いらね,下手,潰せ,ビッチ,死す,死な,死ぬ,しぬ,死ね,しね,ﾀﾋね,氏ね,死の,死ん,殺,殺さ,殺し,殺せ,殺す,ころす,ころせ,殺そ,乞食,ばばあ,ばばぁ,BBA,くず,大麻,麻薬,レイプ,犯し,weed,(0|０)[0-9-０-９ー－]{9,},創価,■■■■■,☆☆☆☆,★★★★,整形,からきますた,反日,ௌ,BS,shii,SEX,S〇X,puss,dick,suck,jizz,sperm,semen,hentai,fuck f*ck,bitch,shine,nigger,nigro,tits,boob,boring,stupid,idiot,poop,ugly,shit,crap,butt,baka,heil,nazi,niga,moron,whore,weed,shii,まんこ,せっくす,裏筋,キンタマ,うんこ,くそ,クソ,糞,バカ,ちんこ,ちんちん,ぽこちん,ポコチン,カス,チンカス,オナニー,巨乳,あなる,マンコ,セックス,裏すじ,きんたま,おなにー,きょにゅう,アナル,sex,うらすじ,金玉,ウラスジ,オカマ,オナベ,オネエ,レズ,ホモ,障害者,めくら,おし,つんぼ,びっこ,知恵遅れ,ぎっちょ,どもり,かたわ,がちゃ目,痴呆,色盲,くろんぼ,支那,外人,土人,部落,キチガイ,ニガ,MDMA,覚醒剤,大麻,シャブ,コカイン,ヘロイン"]
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -200,6 +203,7 @@ struct FirstLoginView: View {
                 .position(x: size.width * 0.5, y: size.height * 0.2)
                 
                 TextField("あなたの名前を入力しよう", text: $selectedName)
+                    .foregroundStyle(nameTextColor)
                     .font(.custom("GenJyuuGothicX-Bold", size: 17))
                     .padding(10)
                     .background(Color(.systemGray6))
@@ -208,7 +212,286 @@ struct FirstLoginView: View {
                     .frame(width: size.width * 0.4)
                     .position(x: size.width * 0.5, y: size.height * 0.3)
                     .focused($isActive)
-                
+                    .onChange(of: selectedName) { oldValue, newValue in
+                        if newValue == "死なす" ||
+                            newValue == "死ね" ||
+                            newValue == "しね" ||
+                            newValue == "死" ||
+                            newValue == "死ぬ" ||
+                            newValue == "しぬ" ||
+                            newValue == "殺す" ||
+                            newValue == "殺" ||
+                            newValue == "殺し" ||
+                            newValue == "殺人" ||
+                            newValue == "殺害" ||
+                            newValue == "殺傷" ||
+                            newValue == "ころす" ||
+                            newValue == "ころし" ||
+                            newValue == "きもい" ||
+                            newValue == "きめえ" ||
+                            newValue == "カス" ||
+                            newValue == "変態" ||
+                            newValue == "バカ" ||
+                            newValue == "ファック" ||
+                            newValue == "不細工" ||
+                            newValue == "ブス" ||
+                            newValue == "キチガイ" ||
+                            newValue == "豚" ||
+                            newValue == "くたばれ" ||
+                            newValue == "エッチ" ||
+                            newValue == "陰毛" ||
+                            newValue == "いんもう" ||
+                            newValue == "まんこ" ||
+                            newValue == "ま○こ" ||
+                            newValue == "マソコ" ||
+                            newValue == "オメコ" ||
+                            newValue == "ヴァギナ" ||
+                            newValue == "クリトリス" ||
+                            newValue == "ちんこ" ||
+                            newValue == "ちんちん" ||
+                            newValue == "チンポ" ||
+                            newValue == "ペニス" ||
+                            newValue == "きんたま" ||
+                            newValue == "肉棒" ||
+                            newValue == "勃起" ||
+                            newValue == "ボッキ" ||
+                            newValue == "精子" ||
+                            newValue == "射精" ||
+                            newValue == "ザーメン" ||
+                            newValue == "●～" ||
+                            newValue == "○～" ||
+                            newValue == "セックス" ||
+                            newValue == "体位" ||
+                            newValue == "淫乱" ||
+                            newValue == "初体験は" ||
+                            newValue == "アナル" ||
+                            newValue == "おっぱい" ||
+                            newValue == "おっぱお" ||
+                            newValue == "oppai" ||
+                            newValue == "パイパイ" ||
+                            newValue == "巨乳" ||
+                            newValue == "貧乳" ||
+                            newValue == "きょにゅう" ||
+                            newValue == "ひんにゅう" ||
+                            newValue == "きょにゅー" ||
+                            newValue == "ひんにゅー" ||
+                            newValue == "谷間" ||
+                            newValue == "何カップ" ||
+                            newValue == "手ぶら" ||
+                            newValue == "ノーブラ" ||
+                            newValue == "パンツ" ||
+                            newValue == "乳首" ||
+                            newValue == "ちくび" ||
+                            newValue == "自慰" ||
+                            newValue == "オナニ" ||
+                            newValue == "オナ二" ||
+                            newValue == "オナヌ" ||
+                            newValue == "マスターベーション" ||
+                            newValue == "しこって" ||
+                            newValue == "しこしこ" ||
+                            newValue == "脱げ" ||
+                            newValue == "ぬげ" ||
+                            newValue == "脱いで" ||
+                            newValue == "喘いで" ||
+                            newValue == "あえいで" ||
+                            newValue == "クンニ" ||
+                            newValue == "フェラ" ||
+                            newValue == "まんぐり" ||
+                            newValue == "パイズリ" ||
+                            newValue == "ふうぞく" ||
+                            newValue == "ふーぞく" ||
+                            newValue == "風俗" ||
+                            newValue == "ソープ" ||
+                            newValue == "デリヘル" ||
+                            newValue == "ヘルス" ||
+                            newValue == "パンティ" ||
+                            newValue == "姦" ||
+                            newValue == "包茎" ||
+                            newValue == "ほうけい" ||
+                            newValue == "童貞" ||
+                            newValue == "どうてい" ||
+                            newValue == "どうてー" ||
+                            newValue == "どーてー" ||
+                            newValue == "性器" ||
+                            newValue == "処女" ||
+                            newValue == "やりまん" ||
+                            newValue == "乱交" ||
+                            newValue == "バイブ" ||
+                            newValue == "ローター" ||
+                            newValue == "パイパン" ||
+                            newValue == "中出し" ||
+                            newValue == "中田氏" ||
+                            newValue == "スカトロ" ||
+                            newValue == "糞" ||
+                            newValue == "うんこ" ||
+                            newValue == "パコパコ" ||
+                            newValue == "ホモ" ||
+                            newValue == "homo" ||
+                            newValue == "きもい" ||
+                            newValue == "きめえ" ||
+                            newValue == "かす" ||
+                            newValue == "変態" ||
+                            newValue == "馬鹿" ||
+                            newValue == "ばーか" ||
+                            newValue == "baka" ||
+                            newValue == "ファック" ||
+                            newValue == "不細工" ||
+                            newValue == "ぶさいく" ||
+                            newValue == "ブス" ||
+                            newValue == "基地外" ||
+                            newValue == "気違い" ||
+                            newValue == "ブタ" ||
+                            newValue == "くたばれ" ||
+                            newValue == "つまらない" ||
+                            newValue == "つまんね" ||
+                            newValue == "いらね" ||
+                            newValue == "下手" ||
+                            newValue == "潰せ" ||
+                            newValue == "ビッチ" ||
+                            newValue == "死す" ||
+                            newValue == "死な" ||
+                            newValue == "死ぬ" ||
+                            newValue == "しぬ" ||
+                            newValue == "死ね" ||
+                            newValue == "しね" ||
+                            newValue == "ﾀﾋね" ||
+                            newValue == "氏ね" ||
+                            newValue == "死の" ||
+                            newValue == "死ん" ||
+                            newValue == "殺" ||
+                            newValue == "殺さ" ||
+                            newValue == "殺し" ||
+                            newValue == "殺せ" ||
+                            newValue == "殺す" ||
+                            newValue == "ころす" ||
+                            newValue == "ころせ" ||
+                            newValue == "殺そ" ||
+                            newValue == "乞食" ||
+                            newValue == "ばばあ" ||
+                            newValue == "ばばぁ" ||
+                            newValue == "BBA" ||
+                            newValue == "くず" ||
+                            newValue == "大麻" ||
+                            newValue == "麻薬" ||
+                            newValue == "レイプ" ||
+                            newValue == "犯し" ||
+                            newValue == "weed" ||
+                            newValue == "(0|０)[0-9-０-９ー－]{9,}" ||
+                            newValue == "創価" ||
+                            newValue == "■■■■■" ||
+                            newValue == "☆☆☆☆" ||
+                            newValue == "★★★★" ||
+                            newValue == "整形" ||
+                            newValue == "からきますた" ||
+                            newValue == "反日" ||
+                            newValue == "ௌ" ||
+                            newValue == "BS" ||
+                            newValue == "shii" ||
+                            newValue == "SEX" ||
+                            newValue == "S〇X" ||
+                            newValue == "puss" ||
+                            newValue == "dick" ||
+                            newValue == "suck" ||
+                            newValue == "jizz" ||
+                            newValue == "sperm" ||
+                            newValue == "semen" ||
+                            newValue == "hentai" ||
+                            newValue == "fuck" ||
+                            newValue == "f*ck" ||
+                            newValue == "bitch" ||
+                            newValue == "shine" ||
+                            newValue == "nigger" ||
+                            newValue == "nigro" ||
+                            newValue == "tits" ||
+                            newValue == "boob" ||
+                            newValue == "boring" ||
+                            newValue == "stupid" ||
+                            newValue == "idiot" ||
+                            newValue == "poop" ||
+                            newValue == "ugly" ||
+                            newValue == "shit" ||
+                            newValue == "crap" ||
+                            newValue == "butt" ||
+                            newValue == "baka" ||
+                            newValue == "heil" ||
+                            newValue == "nazi" ||
+                            newValue == "niga" ||
+                            newValue == "moron" ||
+                            newValue == "whore" ||
+                            newValue == "weed" ||
+                            newValue == "shii" ||
+                            newValue == "まんこ" ||
+                            newValue == "せっくす" ||
+                            newValue == "裏筋" ||
+                            newValue == "キンタマ" ||
+                            newValue == "うんこ" ||
+                            newValue == "くそ" ||
+                            newValue == "クソ" ||
+                            newValue == "糞" ||
+                            newValue == "バカ" ||
+                            newValue == "ちんこ" ||
+                            newValue == "ちんちん" ||
+                            newValue == "ぽこちん" ||
+                            newValue == "ポコチン" ||
+                            newValue == "カス" ||
+                            newValue == "チンカス" ||
+                            newValue == "オナニー" ||
+                            newValue == "巨乳" ||
+                            newValue == "あなる" ||
+                            newValue == "マンコ" ||
+                            newValue == "セックス" ||
+                            newValue == "裏すじ" ||
+                            newValue == "きんたま" ||
+                            newValue == "おなにー" ||
+                            newValue == "きょにゅう" ||
+                            newValue == "アナル" ||
+                            newValue == "sex" ||
+                            newValue == "Sex" ||
+                            newValue == "うらすじ" ||
+                            newValue == "金玉" ||
+                            newValue == "ウラスジ" ||
+                            newValue == "オカマ" ||
+                            newValue == "オナベ" ||
+                            newValue == "オネエ" ||
+                            newValue == "レズ" ||
+                            newValue == "ホモ" ||
+                            newValue == "障害者" ||
+                            newValue == "めくら" ||
+                            newValue == "おし" ||
+                            newValue == "つんぼ" ||
+                            newValue == "びっこ" ||
+                            newValue == "知恵遅れ" ||
+                            newValue == "ぎっちょ" ||
+                            newValue == "どもり" ||
+                            newValue == "かたわ" ||
+                            newValue == "がちゃ目" ||
+                            newValue == "痴呆" ||
+                            newValue == "色盲" ||
+                            newValue == "くろんぼ" ||
+                            newValue == "支那" ||
+                            newValue == "外人" ||
+                            newValue == "土人" ||
+                            newValue == "部落" ||
+                            newValue == "キチガイ" ||
+                            newValue == "ニガ" ||
+                            newValue == "MDMA" ||
+                            newValue == "覚醒剤" ||
+                            newValue == "大麻" ||
+                            newValue == "シャブ" ||
+                            newValue == "コカイン" ||
+                            newValue == "ヘロイン"{
+                            showNameAlert = true
+                            nameTextColor = .red
+                        }else{
+                            showNameAlert = false
+                            nameTextColor = .black
+                        }
+                    }
+                if showNameAlert{
+                    Text("使用できない言葉が含まれています。")
+                        .foregroundStyle(.red)
+                        .position(x: size.width * 0.5, y: size.height * 0.4)
+                }
                 Button {
                     if selectedName.isEmpty {
                         showAlert = true
@@ -231,6 +514,7 @@ struct FirstLoginView: View {
                                 .foregroundStyle(Color.buttonColor)
                         }
                 }
+                .disabled(showNameAlert)
                 .opacity(selectedName.isEmpty ? 0.6 : 1)
                 .position(x: size.width * 0.5, y: size.height * 0.8)
                 .buttonStyle(PlainButtonStyle())

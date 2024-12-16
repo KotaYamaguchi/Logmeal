@@ -269,6 +269,8 @@ struct ChildHomeView: View {
                             }
                         }
                     }
+                }message: {
+                    Text("expやポイントは1日1回しかゲットできません")
                 }
                 .fullScreenCover(isPresented: $showCardDetail) {
                     if let data = selectedCardData {
