@@ -31,6 +31,11 @@ struct SettingView: View {
     @State private var toggleBgmButton: Bool = false
     @State private var bgmVolume: Float = BGMManager.shared.bgmVolume
     
+    @State private var showDeleteMenuAlert = false
+    @State private var showDeleteColumnAlert = false
+    
+    @State private var showCompletionAlert = false
+    @State private var completionMessage: String = ""
     
     enum FileType {
         case pdf, csv
@@ -284,14 +289,10 @@ struct SettingView: View {
                                     .cancel()
                                 ])
                             }
-                            HStack{
-                                Button{
-                                    do {
-                                        try deleteMenuData(modelContext: context)
-                                    } catch {
-                                        print("メニューの削除に失敗しました。")
-                                    }
-                                }label:{
+                            HStack {
+                                Button {
+                                    showDeleteMenuAlert = true
+                                } label: {
                                     Text("メニューを削除する")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 14))
                                         .frame(width: 150, height: 50)
@@ -300,13 +301,24 @@ struct SettingView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 20))
                                 }
                                 .buttonStyle(PlainButtonStyle())
-                                Button{
-                                    do {
-                                        try deleteColumnData(modelContext: context)
-                                    } catch {
-                                        print("コラムの削除に失敗しました。")
+                                .alert("確認", isPresented: $showDeleteMenuAlert) {
+                                    Button("キャンセル",role:.cancel) {}
+                                    Button("はい",role:.destructive) {
+                                        do {
+                                            try deleteMenuData(modelContext: context)
+                                            showCompletionAlert = true
+                                            completionMessage = "メニューの削除が完了しました"
+                                        } catch {
+                                            print("メニューの削除に失敗しました。")
+                                        }
                                     }
-                                }label:{
+                                }message: {
+                                    Text("メニューを削除しますか？この操作は取り消せません。")
+                                }
+                                
+                                Button {
+                                    showDeleteColumnAlert = true
+                                } label: {
                                     Text("コラムを削除する")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 14))
                                         .frame(width: 150, height: 50)
@@ -315,6 +327,20 @@ struct SettingView: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 20))
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                .alert("確認", isPresented: $showDeleteColumnAlert) {
+                                    Button("キャンセル",role:.cancel) {}
+                                    Button("はい",role:.destructive) {
+                                        do {
+                                            try deleteColumnData(modelContext: context)
+                                            showCompletionAlert = true
+                                            completionMessage = "コラムの削除が完了しました"
+                                        } catch {
+                                            print("コラムの削除に失敗しました。")
+                                        }
+                                    }
+                                }message: {
+                                    Text("コラムを削除しますか？この操作は取り消せません。")
+                                }
                             }
                             .padding(.top)
                             
@@ -428,6 +454,9 @@ struct SettingView: View {
                         .onDisappear() {
                             hasSeenTutorial = true
                         }
+                }
+                .alert(isPresented: $showCompletionAlert) {
+                    Alert(title: Text("完了"), message: Text(completionMessage), dismissButton: .default(Text("OK")))
                 }
             }
         }

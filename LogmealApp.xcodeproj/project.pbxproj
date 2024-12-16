@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		92123F3F2C36F70B00B2C25C /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 92123F3E2C36F70B00B2C25C /* ConfettiSwiftUI */; };
+		921F424C2D0FEFD50025F49D /* NewContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F424B2D0FEFD50025F49D /* NewContentView.swift */; };
+		921F424E2D0FF0010025F49D /* NewCharactarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F424D2D0FF0010025F49D /* NewCharactarView.swift */; };
+		921F42502D0FF01A0025F49D /* NewColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F424F2D0FF01A0025F49D /* NewColumnView.swift */; };
+		921F42522D0FF03C0025F49D /* NewSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F42512D0FF03C0025F49D /* NewSettingView.swift */; };
+		921F42542D0FF0650025F49D /* NewWritingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F42532D0FF0650025F49D /* NewWritingView.swift */; };
 		922331D52CA1766D00E081B6 /* NotificationClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922331D42CA1766D00E081B6 /* NotificationClass.swift */; };
 		9228A5352BD8C8D500E5128F /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 9228A5342BD8C8D500E5128F /* CodeScanner */; };
 		923BC75D2CAAE28200A4FA11 /* prologue 2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */; };
@@ -50,9 +55,15 @@
 		92EE828A2C74C1AD00080109 /* README_GenJyuu.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92EE82882C74C1AD00080109 /* README_GenJyuu.txt */; };
 		92EE828B2C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92EE82892C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt */; };
 		92EE828D2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 92EE828C2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf */; };
+		92FD5B252CFDAA1D0064AC10 /* NewHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92FD5B242CFDAA1D0064AC10 /* NewHomeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		921F424B2D0FEFD50025F49D /* NewContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewContentView.swift; sourceTree = "<group>"; };
+		921F424D2D0FF0010025F49D /* NewCharactarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCharactarView.swift; sourceTree = "<group>"; };
+		921F424F2D0FF01A0025F49D /* NewColumnView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewColumnView.swift; sourceTree = "<group>"; };
+		921F42512D0FF03C0025F49D /* NewSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSettingView.swift; sourceTree = "<group>"; };
+		921F42532D0FF0650025F49D /* NewWritingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewWritingView.swift; sourceTree = "<group>"; };
 		922331D42CA1766D00E081B6 /* NotificationClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationClass.swift; sourceTree = "<group>"; };
 		923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "prologue 2.mp4"; sourceTree = "<group>"; };
 		9241FED02BA884CE004E507B /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -94,6 +105,7 @@
 		92EE82882C74C1AD00080109 /* README_GenJyuu.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README_GenJyuu.txt; sourceTree = "<group>"; };
 		92EE82892C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SIL_Open_Font_License_1.1.txt; sourceTree = "<group>"; };
 		92EE828C2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "GenJyuuGothicX-Bold.ttf"; sourceTree = "<group>"; };
+		92FD5B242CFDAA1D0064AC10 /* NewHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewHomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,7 +153,7 @@
 		92BE0D642B2BFCF200CA50A8 /* LogmealApp */ = {
 			isa = PBXGroup;
 			children = (
-				92BE0D652B2BFCF200CA50A8 /* LogmealApp.swift */,
+				923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */,
 				924FB0C02C5E835D00BB3391 /* CalendarView.swift */,
 				924FB1202C6C783400BB3391 /* CharacterAnimationView.swift */,
 				924FB1022C5E840F00BB3391 /* CharacterSelectedView.swift */,
@@ -155,7 +167,15 @@
 				924FB0FC2C5E840200BB3391 /* FirstLoginView.swift */,
 				9281D8372C1ABBB600263877 /* GoogleSheetAPI.swift */,
 				924FB0B42C510C2900BB3391 /* LaunchScreen.swift */,
+				92BE0D652B2BFCF200CA50A8 /* LogmealApp.swift */,
 				924FB0E82C5E839A00BB3391 /* LookBackView.swift */,
+				92FD5B242CFDAA1D0064AC10 /* NewHomeView.swift */,
+				921F424B2D0FEFD50025F49D /* NewContentView.swift */,
+				921F424D2D0FF0010025F49D /* NewCharactarView.swift */,
+				921F424F2D0FF01A0025F49D /* NewColumnView.swift */,
+				921F42512D0FF03C0025F49D /* NewSettingView.swift */,
+				921F42532D0FF0650025F49D /* NewWritingView.swift */,
+				922331D42CA1766D00E081B6 /* NotificationClass.swift */,
 				92A2A0C92C0C5C73005C4998 /* PDFGenerater.swift */,
 				924FB0F82C5E83F400BB3391 /* QrScannaerView.swift */,
 				92615B002B68BEBC0072AC98 /* RewardView.swift */,
@@ -163,7 +183,6 @@
 				92DB8B312BF227B3001D3A1E /* ShareSheetView.swift */,
 				924FB1062C5E841A00BB3391 /* ShopView.swift */,
 				924FB0B62C51EEA000BB3391 /* SoundManager.swift */,
-				922331D42CA1766D00E081B6 /* NotificationClass.swift */,
 				924FB1042C5E841600BB3391 /* StatusBarVIew.swift */,
 				9241FED22BA9D123004E507B /* Structs.swift */,
 				927950D32C7CC46B0016C77D /* TutorialView.swift */,
@@ -173,7 +192,6 @@
 				92EE828C2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf */,
 				92EE82882C74C1AD00080109 /* README_GenJyuu.txt */,
 				92EE82892C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt */,
-				923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */,
 				924FB1082C5E842B00BB3391 /* Assets.xcassets */,
 				92BE0D6B2B2BFCF300CA50A8 /* Preview Content */,
 				927950C92C7C084B0016C77D /* Sounds */,
@@ -231,11 +249,11 @@
 			};
 			buildConfigurationList = 92BE0D5D2B2BFCF200CA50A8 /* Build configuration list for PBXProject "LogmealApp" */;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = ja;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				ja,
 			);
 			mainGroup = 92BE0D592B2BFCF200CA50A8;
 			packageReferences = (
@@ -285,13 +303,16 @@
 				927950D42C7CC46B0016C77D /* TutorialView.swift in Sources */,
 				92615B072B68C1F10072AC98 /* UserData.swift in Sources */,
 				924FB0F72C5E83EF00BB3391 /* SettingView.swift in Sources */,
+				921F42542D0FF0650025F49D /* NewWritingView.swift in Sources */,
 				924FB1052C5E841600BB3391 /* StatusBarVIew.swift in Sources */,
 				924FB0EB2C5E83AF00BB3391 /* WritingAjiwaiCardView.swift in Sources */,
 				924FB0B52C510C2900BB3391 /* LaunchScreen.swift in Sources */,
 				924FB0E92C5E839A00BB3391 /* LookBackView.swift in Sources */,
 				924FB10D2C5FA1E400BB3391 /* ExportData.swift in Sources */,
 				92BE0D682B2BFCF200CA50A8 /* ContentView.swift in Sources */,
+				921F42502D0FF01A0025F49D /* NewColumnView.swift in Sources */,
 				92A2A0CA2C0C5C73005C4998 /* PDFGenerater.swift in Sources */,
+				92FD5B252CFDAA1D0064AC10 /* NewHomeView.swift in Sources */,
 				9281D8382C1ABBB600263877 /* GoogleSheetAPI.swift in Sources */,
 				924FB0D62C5E835D00BB3391 /* CalendarView.swift in Sources */,
 				9241FED12BA884CE004E507B /* Extensions.swift in Sources */,
@@ -300,6 +321,7 @@
 				924FB0EF2C5E83D400BB3391 /* ChildHomeView.swift in Sources */,
 				924FB1072C5E841A00BB3391 /* ShopView.swift in Sources */,
 				9252F4182C2BAFD000A6A345 /* ColumnView.swift in Sources */,
+				921F424C2D0FEFD50025F49D /* NewContentView.swift in Sources */,
 				922331D52CA1766D00E081B6 /* NotificationClass.swift in Sources */,
 				924FB0FD2C5E840200BB3391 /* FirstLoginView.swift in Sources */,
 				92DB8B052BEB4BBA001D3A1E /* CharacterView.swift in Sources */,
@@ -307,6 +329,8 @@
 				92BE0D662B2BFCF200CA50A8 /* LogmealApp.swift in Sources */,
 				924FB1212C6C783400BB3391 /* CharacterAnimationView.swift in Sources */,
 				924FB1032C5E840F00BB3391 /* CharacterSelectedView.swift in Sources */,
+				921F42522D0FF03C0025F49D /* NewSettingView.swift in Sources */,
+				921F424E2D0FF0010025F49D /* NewCharactarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -458,7 +482,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.5;
+				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.kotaYamaguchi.Gohan-Navigation-ver-1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -496,7 +520,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.5;
+				MARKETING_VERSION = 1.0.6;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.kotaYamaguchi.Gohan-Navigation-ver-1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

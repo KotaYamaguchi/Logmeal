@@ -335,14 +335,14 @@ struct AjiwaiCardDataPreview: View {
         ZStack {
             Rectangle()
                 .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.3)
-                .offset(y: -40)
+                .offset(y: -geometry.size.height*0.049)
                 .foregroundStyle(Color.white)
             image
                 .resizable()
-                .scaledToFit()
-                .clipShape(Rectangle())
                 .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.3)
-                .offset(y: -40)
+                .scaledToFill()
+                .clipped()
+                .offset(y: -geometry.size.height*0.03)
             imageFrameView()
         }
     }

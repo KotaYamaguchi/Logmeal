@@ -640,7 +640,8 @@ struct WritingAjiwaiCardView: View {
         
         if var escapedDataArray: [EscapeData] = user.loadEscapeData(){
             escapedDataArray.removeAll(where:{user.dateFormatter(date: $0.saveDay) == user.dateFormatter(date: self.saveDay)})
-            let newEscapeData = EscapeData(saveDay: self.saveDay,lunchComments: lunchComent,sight: feelingTexts[0],taste: feelingTexts[1],smell: feelingTexts[2],tactile: feelingTexts[3],hearing: feelingTexts[4],imagePath:  filePath,menu: menu)
+            let newEscapeData = EscapeData(saveDay: self.saveDay,lunchComments: lunchComent,sight: feelingTexts[0],taste: feelingTexts[1],smell: feelingTexts[2],tactile: feelingTexts[3],hearing: feelingTexts[4],imagePath: filePath,menu: menu)
+            print(newEscapeData)
             escapedDataArray.append(newEscapeData)
             user.saveEscapedData(data:escapedDataArray)
         }else{
