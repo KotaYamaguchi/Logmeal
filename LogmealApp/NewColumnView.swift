@@ -3,9 +3,10 @@ import SwiftUI
 struct NewColumnView: View {
     @State private var searchText:String = ""
     @State private var isOpenSortMenu:Bool = false
+    @State private var sortTitle:String = "新しい順"
     var body: some View {
         ZStack{
-            Image("bg_NewColumnView_tomato")
+            Image("bg_NewColumnView_dog")
                 .resizable()
                 .ignoresSafeArea()
             VStack{
@@ -50,7 +51,7 @@ struct NewColumnView: View {
                                                 .stroke(lineWidth: 2)
                                                 .foregroundStyle(.gray)
                                             HStack{
-                                                Text("新しい順")
+                                                Text(sortTitle)
                                                 Image(systemName: isOpenSortMenu ?  "chevron.compact.up": "chevron.compact.down")
                                             }
                                             
@@ -84,6 +85,11 @@ struct NewColumnView: View {
             VStack{
                 Button{
                     
+                    withAnimation {
+                        sortTitle = "五十音順"
+                        isOpenSortMenu = false
+                    }
+                    
                 }label: {
                     Image("mt_AtoZ")
                         .resizable()
@@ -93,6 +99,10 @@ struct NewColumnView: View {
                 
                 Button{
                     
+                    withAnimation {
+                        sortTitle = "新しい順"
+                        isOpenSortMenu = false
+                    }
                 }label: {
                     Image("mt_newer")
                         .resizable()
@@ -102,6 +112,10 @@ struct NewColumnView: View {
                 
                 Button{
                     
+                    withAnimation {
+                        sortTitle = "古い順"
+                        isOpenSortMenu = false
+                    }
                 }label: {
                     Image("mt_older")
                         .resizable()
@@ -121,4 +135,7 @@ struct NewColumnView: View {
         }
         
     }
+}
+#Preview{
+    NewContentView()
 }

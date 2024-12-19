@@ -1,8 +1,8 @@
 import SwiftUI
 import PhotosUI
 
-struct NewWriteingView: View {
-    @Binding var showWritingView:Bool
+struct NewWritingView: View {
+    @Binding var showWritingView: Bool
     @State private var selectedPhotoItem: PhotosPickerItem? = nil
     @State private var uiImage: UIImage? = nil
     @State private var editedSight: String = ""
@@ -10,137 +10,220 @@ struct NewWriteingView: View {
     @State private var editedTactile: String = ""
     @State private var editedSmell: String = ""
     @State private var editedHearing: String = ""
-    @State private var editedMenu: [String] = ["", "", "", "", "", ""]
+    @State private var editedMenu: [String] = ["", "", "", ""]
+    @State private var showingCameraSheet = false
+    @State private var activeTab = 0
+    
+    let senseEmojis = ["👀", "👂", "👃", "👅", "✋"]
+    let sensePlaceholders = [
+        "どんな色やかたちだったかな？",
+        "どんな音がしたかな？",
+        "どんなにおいがしたかな？",
+        "どんな味がしたかな？",
+        "さわってみてどうだった？"
+    ]
     
     var body: some View {
-        NavigationStack{
-            ZStack{
+        NavigationStack {
+            ZStack {
                 Image("bg_AjiwaiCardView")
                     .resizable()
-                    .blur(radius: 5)
-                //                Color.gray.opacity(0.2)
-                
-                ScrollView{
-                    VStack(spacing:20){
-                        VStack{
-                            Text("きゅうしょくのしゃしん")
-                            if let image = uiImage{
+                    .colorMultiply(Color(red:235/255, green:235/255, blue:235/255))
+//                    .ignoresSafeArea(.keyboard)
+                    
+                ScrollView {
+                    VStack(spacing: 25) {
+                        // Photo Section
+                        VStack {
+                            Text("きょうのきゅうしょく 📸")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 24))
+                                .foregroundColor(.primary)
+                                .padding(.top)
+                            
+                            if let image = uiImage {
                                 Image(uiImage: image)
                                     .resizable()
-                                    .frame(width: 400, height: 300)
-                                    .padding(.bottom)
-                            }else{
-                                RoundedRectangle(cornerRadius: 20)
-                                    .frame(width: 400, height: 300)
-                                    .padding(.bottom)
-                            }
-                            HStack{
-                                PhotosPicker(selection: $selectedPhotoItem) {
-                                    Label("写真を選ぶ", systemImage: "photo")
+                                    .scaledToFit()
+                                    .frame(maxHeight: 300)
+                                    .cornerRadius(15)
+                                    .shadow(radius: 5)
+                                    .padding()
+                            } else {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 15)
+                                        .fill(Color.white)
+                                        .frame(height: 300)
+                                    RoundedRectangle(cornerRadius: 15)
+                                        .fill(Color.white)
+                                        .frame(width:400,height: 300)
+                                        .shadow(radius: 5)
+                                    
+                                    VStack {
+                                        Image(systemName: "camera.fill")
+                                            .font(.system(size: 40))
+                                            .foregroundColor(.gray)
+                                        Text("しゃしんをとろう！")
+                                            .foregroundColor(.gray)
+                                    }
+                                    
                                 }
-                                Button {
-                                    // 描画用のアクション
-                                } label: {
-                                    Text("きゅうしょくの絵をかく")
-                                }
+                                .padding()
                                 
                             }
-                        }
-                        .padding(30)
-                        .background{
-                            RoundedRectangle(cornerRadius: 15)
-                                .foregroundStyle(.white)
                             
-                        }
-                        .onChange(of: selectedPhotoItem) {_ , newItem in
-                            Task {
-                                if let data = try? await newItem?.loadTransferable(type: Data.self),
-                                   let uiImage = UIImage(data: data) {
-                                    self.uiImage = uiImage
+                            HStack(spacing: 20) {
+                                PhotosPicker(selection: $selectedPhotoItem) {
+                                    Label("しゃしんをえらぶ", systemImage: "photo.fill")
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .cornerRadius(10)
+                                }
+                                
+                                Button {
+                                    showingCameraSheet = true
+                                } label: {
+                                    Label("カメラをつかう", systemImage: "camera.fill")
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(Color.orange)
+                                        .cornerRadius(10)
                                 }
                             }
                         }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(.gray, lineWidth: 1)
+                                }
+                        )
                         
-                        
-                        VStack(alignment:.leading){
-                            Text("メニュー")
+                        // Menu Section
+                        VStack(alignment: .leading, spacing: 15) {
+                            Text("きょうのメニュー 🍱")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 24))
+                                .padding(.bottom, 5)
+                            
                             ForEach(editedMenu.indices, id: \.self) { index in
                                 HStack {
-                                    Image(systemName: "fork.knife")
+                                    Image(systemName: "fork.knife.circle.fill")
+                                        .font(.title2)
                                         .foregroundColor(.orange)
-                                    TextField("メニュー項目", text: $editedMenu[index])
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
-                                        .textFieldStyle(.roundedBorder)
+                                    TextField("なにをたべたかな？", text: $editedMenu[index])
+                                        .font(.system(size: 18))
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
                                 }
-                                .contextMenu {
-                                    Button(role: .destructive){
-                                        editedMenu.remove(at: index)
-                                        
-                                    } label: {
-                                        Label("メニューを削除", systemImage: "trash")
-                                            .tint(.red)
-                                    }
-                                }
+                                .padding(.horizontal)
                             }
-                            Button{
-                                editedMenu.append("")
+                            
+                            Button {
+                                withAnimation {
+                                    editedMenu.append("")
+                                }
                             } label: {
-                                Label("メニュー項目を追加", systemImage: "plus.circle.fill")
+                                Label("メニューをついか", systemImage: "plus.circle.fill")
+                                    .font(.headline)
+                                    .foregroundColor(.green)
                             }
-                            .foregroundColor(.green)
-                            .padding(.top)
+                            .padding()
                         }
-                        .padding(30)
-                        .background{
-                            RoundedRectangle(cornerRadius: 15)
-                                .foregroundStyle(.white)
-                            
-                        }
-                        .frame(width:1000)
-                        VStack(alignment:.leading){
-                            senseRow(icon: "eye.fill", title: "視覚", binding: $editedSight)
-                            senseRow(icon: "ear.fill", title: "聴覚", binding: $editedHearing)
-                            senseRow(icon: "nose.fill", title: "嗅覚", binding: $editedSmell)
-                            senseRow(icon: "mouth.fill", title: "味覚", binding: $editedTaste)
-                            senseRow(icon: "hand.point.up.fill", title: "触覚", binding: $editedTactile)
-                        }
-                        .frame(width:940)
-                        .padding(30)
-                        .background{
-                            RoundedRectangle(cornerRadius: 15)
-                                .foregroundStyle(.white)
-                            
-                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(.gray, lineWidth: 1)
+                                }
+                        )
                         
+                        // Senses Section
+                        VStack(alignment: .leading, spacing: 20) {
+                            Text("たべたときのかんそう ⭐️")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 24))
+                                .padding(.bottom, 5)
+                            
+                            ForEach(0..<5) { index in
+                                senseRow(
+                                    emoji: senseEmojis[index],
+                                    title: ["みため", "おと", "におい", "あじ", "さわりごこち"][index],
+                                    binding: [
+                                        $editedSight, $editedHearing, $editedSmell,
+                                        $editedTaste, $editedTactile
+                                    ][index],
+                                    placeholder: sensePlaceholders[index]
+                                )
+                            }
+                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.white)
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(.gray, lineWidth: 1)
+                                }
+                        )
                     }
+                    .padding()
                 }
-                .padding()
-                
             }
-            .navigationTitle("ごはんのきろく")
-            .toolbar{
-                ToolbarItem{
-                    Button(role:.destructive){
+            .navigationTitle("きょうのきゅうしょく")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("とじる",role:.cancel) {
                         showWritingView = false
-                    }label:{
-                        Text("とじる")
-                            .foregroundStyle(.red)
                     }
+                    .font(.headline)
+                    .foregroundColor(.red)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("かんせい！") {
+                        showWritingView = false
+                    }
+                    .font(.headline)
+                    .foregroundColor(.blue)
+                }
+            }
+        }
+        .fullScreenCover(isPresented: $showingCameraSheet) {
+            ImagePicker(image: $uiImage, sourceType: .camera)
+                .ignoresSafeArea()
+        }
+        .onChange(of: selectedPhotoItem) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data) {
+                    self.uiImage = uiImage
                 }
             }
         }
     }
-    private func senseRow(icon: String, title: String, binding: Binding<String>) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(.blue)
-                .frame(width: 30, height: 30)
-            Text(title)
-                .font(.custom("GenJyuuGothicX-Bold", size: 16))
-                .foregroundColor(.gray)
-            TextField(title, text: binding)
-                .font(.custom("GenJyuuGothicX-Bold", size: 17))
+    
+    private func senseRow(emoji: String, title: String, binding: Binding<String>, placeholder: String) -> some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Text(emoji)
+                    .font(.title)
+                Text(title)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 18))
+                    .foregroundColor(.primary)
+            }
+            
+            TextField(placeholder, text: binding)
+                .font(.system(size: 16))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.leading, 35)
         }
     }
+}
+
+#Preview {
+    NewWritingView(showWritingView: .constant(true))
 }

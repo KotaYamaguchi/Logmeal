@@ -8,10 +8,12 @@ struct NewContentView: View {
             NavigationSplitView {
                 leftSideSection()
                     .navigationSplitViewColumnWidth(min: 200, ideal: 300)
+                    .toolbar(removing: .sidebarToggle)
             } detail: {
                 rightSideSection()
             }
-            NewCharacterView(show: $showCharactarView)
+            // Remove the default sidebar toggle button
+            NewCharacterView(showCharacterView: $showCharactarView)
                 .scaleEffect(showCharactarView ? 1.0 : 0.0)
                 .ignoresSafeArea()
         }
@@ -32,9 +34,10 @@ struct NewContentView: View {
                     )
                     .background {
                         RoundedRectangle(cornerRadius: 10)
-                            .foregroundStyle(isShowSelectedView[index] ? Color.green : Color.clear)
+                            .foregroundStyle(isShowSelectedView[index] ? Color(red: 255/255, green: 235/255, blue: 200/255) : Color.clear)
                     }
                 }
+                Divider()
             }
             Spacer()
             Image("img_dog_yell")
@@ -50,7 +53,7 @@ struct NewContentView: View {
         }
         .padding(.top)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.red.opacity(0.1))
+        .background(Color(red: 255/255, green: 254/255, blue: 245/255))
     }
     
     private func headlineItem(text: String, icon: String, isSelected: Bool) -> some View {
@@ -58,9 +61,9 @@ struct NewContentView: View {
             Image(icon)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 50, height: 50)
+                .frame(width: 80, height: 80)
             Text(text)
-                .font(.system(size: 20))
+                .font(.system(size: 30))
             Spacer()
         }
         .padding()
