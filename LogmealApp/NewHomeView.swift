@@ -1,10 +1,14 @@
 import SwiftUI
 import PhotosUI
-
+import SwiftData
 
 
 struct NewHomeView: View {
     @State private var showWritingView = false
+    @EnvironmentObject var user: UserData
+    @Environment(\.modelContext) private var context
+    @Query private var allData: [AjiwaiCardData]
+    
     var body: some View {
         ZStack{
             Image("bg_HomeView_dog")
@@ -21,7 +25,7 @@ struct NewHomeView: View {
                             Circle()
                                 .stroke(Color(red:236/255, green:178/255, blue:183/255), lineWidth: 5)
                         }
-                        Text("熊本 太郎")
+                        Text("\(user.name)")
                             .font(.custom("GenJyuuGothicX-Bold", size: 25))
                 }
                     VStack{
@@ -56,10 +60,29 @@ struct NewHomeView: View {
                 .padding(.top,30)
                 ScrollView{
                     LazyVGrid(columns: [GridItem(),GridItem(),GridItem()],spacing: 5){
-                        ForEach(0..<30){ i in
-                            Rectangle()
-                                .frame(width:255,height: 190)
-                                .foregroundStyle(Color(red:206/255, green:206/255, blue:206/255))
+                        ForEach(0..<allData.count, id: \.self){ index in
+                            Button{
+                                
+                            }label:{
+                                AsyncImage(url:allData[index].imagePath){ phase in
+                                    switch phase{
+                                    case .empty:
+                                        ProgressView()
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .frame(width:255,height: 190)
+                                    case .failure(_):
+                                        Rectangle()
+                                            .frame(width:255,height: 190)
+                                            .foregroundStyle(Color(red:206/255, green:206/255, blue:206/255))
+                                    @unknown default:
+                                        Rectangle()
+                                            .frame(width:255,height: 190)
+                                            .foregroundStyle(Color(red:206/255, green:206/255, blue:206/255))
+                                    }
+                                }
+                            }
                         }
                     }
                     .frame(width:780)

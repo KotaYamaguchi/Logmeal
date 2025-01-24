@@ -416,40 +416,41 @@ import PhotosUI
 
 struct AjiwaiCardDetailView: View {
     @Environment(\.modelContext) private var context
-    @Environment(\.dismiss) private var dismiss
-    let selectedDate: Date
-    @Bindable var data: AjiwaiCardData
-    @State private var editedLunchComments: String
-    @State private var editedSight: String
-    @State private var editedTaste: String
-    @State private var editedTactile: String
-    @State private var editedSmell: String
-    @State private var editedHearing: String
-    @State private var editedMenu: [String]
-    @State private var editedImagePath: URL
-    @State private var rotationAngle: Angle = .degrees(0)
-    @State private var imagePortrait:Bool = false
-    @State private var selectedPhotoItem: PhotosPickerItem? = nil
-    @State private var uiimage: UIImage? = nil
-    @State private var showingSaveAlert = false
-    @State private var showingDeleteAlert = false
-    @State private var showCameraPicker = false
-    @State private var showingCameraView = false
-    @AppStorage("hasSeenCardEditViewTutorial") private var hasSeenTutorial = false
-    @State private var showHowToUseView = false
-    private let soundManager = SoundManager.shared
-    init(selectedDate: Date, data: AjiwaiCardData) {
-        self.selectedDate = selectedDate
-        self.data = data
-        _editedLunchComments = State(initialValue: data.lunchComments)
-        _editedSight = State(initialValue: data.sight)
-        _editedTaste = State(initialValue: data.taste)
-        _editedTactile = State(initialValue: data.tactile)
-        _editedSmell = State(initialValue: data.smell)
-        _editedHearing = State(initialValue: data.hearing)
-        _editedMenu = State(initialValue: data.menu)
-        _editedImagePath = State(initialValue: data.imagePath)
-    }
+        @Environment(\.dismiss) private var dismiss
+        let selectedDate: Date
+        @Bindable var data: AjiwaiCardData
+     
+        @State private var editedSight: String
+        @State private var editedTaste: String
+        @State private var editedTactile: String
+        @State private var editedSmell: String
+        @State private var editedHearing: String
+        @State private var editedMenu: [String]
+        @State private var editedImagePath: URL
+        @State private var rotationAngle: Angle = .degrees(0)
+        @State private var imagePortrait: Bool = false
+        @State private var selectedPhotoItem: PhotosPickerItem? = nil
+        @State private var uiimage: UIImage? = nil
+        @State private var showingSaveAlert = false
+        @State private var showingDeleteAlert = false
+        @State private var showCameraPicker = false
+        @State private var showingCameraView = false
+        @AppStorage("hasSeenCardEditViewTutorial") private var hasSeenTutorial = false
+        @State private var showHowToUseView = false
+        private let soundManager = SoundManager.shared
+
+        init(selectedDate: Date, data: AjiwaiCardData) {
+            self.selectedDate = selectedDate
+            self.data = data
+            _editedSight = State(initialValue: data.sight)
+            _editedTaste = State(initialValue: data.taste)
+            _editedTactile = State(initialValue: data.tactile)
+            _editedSmell = State(initialValue: data.smell)
+            _editedHearing = State(initialValue: data.hearing)
+            _editedMenu = State(initialValue: data.menu)
+            _editedImagePath = State(initialValue: data.imagePath)
+        }
+
     
     var body: some View {
         NavigationView {
@@ -630,7 +631,7 @@ struct AjiwaiCardDetailView: View {
         VStack(alignment: .leading) {
             Text("感想")
                 .font(.custom("GenJyuuGothicX-Bold", size: 15))
-            TextEditor(text: $editedLunchComments)
+            TextEditor(text: $editedSight)
                 .font(.custom("GenJyuuGothicX-Bold", size: 17))
                 .frame(height: 100)
                 .padding(5)
@@ -676,7 +677,7 @@ struct AjiwaiCardDetailView: View {
     }
     
     private func saveChanges() {
-        data.lunchComments = editedLunchComments
+//        data.lunchComments = editedLunchComments
         data.sight = editedSight
         data.taste = editedTaste
         data.tactile = editedTactile

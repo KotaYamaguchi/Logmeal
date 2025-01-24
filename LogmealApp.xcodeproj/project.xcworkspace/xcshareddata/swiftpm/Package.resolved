@@ -1,13 +1,13 @@
 {
-  "originHash" : "48e62b9fedbe139ee1be9dc2e9e7514a4794e306d88defd0aef6b00730f5d912",
+  "originHash" : "fa285eca8d1a7190005e67ff5e5aaec04444dd83f08db40b5e77eeea442c4463",
   "pins" : [
     {
       "identity" : "codescanner",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/twostraws/CodeScanner.git",
       "state" : {
-        "revision" : "944a6a1ca030dbd890e647a678e718fc2115d35c",
-        "version" : "2.4.1"
+        "revision" : "5e886430238944c7200fc9e10dbf2d9550dba865",
+        "version" : "2.5.2"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/simibac/ConfettiSwiftUI",
       "state" : {
-        "revision" : "f45961f97bbae6fff6e2e64546fea0189425ad92",
-        "version" : "1.1.0"
+        "revision" : "7ce83d0716d8c4326bdee20b99584b6d509c1315",
+        "version" : "2.0.1"
       }
     },
     {

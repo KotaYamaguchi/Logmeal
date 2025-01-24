@@ -96,7 +96,7 @@ struct MultiPagePDFGenerator {
         context.setStrokeColor(UIColor.gray.cgColor)
         context.setLineWidth(3)
         context.stroke(impressionRect)
-        drawText(data.lunchComments, in: context, rect: impressionRect.insetBy(dx: 10, dy: 10), font: bodyFont)
+//        drawText(data.lunchComments, in: context, rect: impressionRect.insetBy(dx: 10, dy: 10), font: bodyFont)
         currentY += 110
 
         // Draw senses title

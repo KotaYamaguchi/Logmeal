@@ -53,13 +53,13 @@ class ExportData {
             var row = ""
             for content in datas {
                 let escapedMenu = escapeForCSV(content.menu.joined(separator: "/"))
-                let escapedComments = escapeForCSV(content.lunchComments)
+//                let escapedComments = escapeForCSV(content.lunchComments)
                 let escapedSight = escapeForCSV(content.sight)
                 let escapedHearing = escapeForCSV(content.hearing)
                 let escapedSmell = escapeForCSV(content.smell)
                 let escapedTaste = escapeForCSV(content.taste)
                 let escapedTactile = escapeForCSV(content.tactile)
-                let joinedContent = "\(dateFormat(date: content.saveDay)),\(escapedMenu),\(escapedComments),\(escapedSight),\(escapedHearing),\(escapedSmell),\(escapedTaste),\(escapedTactile)\r\n"
+                let joinedContent = "\(dateFormat(date: content.saveDay)),\(escapedMenu),\(escapedSight),\(escapedHearing),\(escapedSmell),\(escapedTaste),\(escapedTactile)\r\n"
                 row += joinedContent
             }
             let csv = header + row

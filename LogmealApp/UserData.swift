@@ -90,7 +90,7 @@ class UserData:ObservableObject{
     @AppStorage("appearExp") var appearExp:Int = 0
     @AppStorage("point") var point:Int = 0
     @Published var levelTable = [0,10,20,30,50,70,90,110,130,150,170,200,220,250,290,350]
-    @AppStorage("growthStage") var growthStage = 1
+    @AppStorage("growthStage") var growthStage = 3
     @Published var gotEXP:Int = 0
 
     func checkLevel() -> Bool {
@@ -126,10 +126,15 @@ class UserData:ObservableObject{
 }
 
 import SwiftData
+enum TimeStamp:String, Codable{
+    case morning
+    case lunch
+    case dinner
+}
 
 @Model class AjiwaiCardData{
     @Attribute(.unique) var saveDay:Date
-    var lunchComments:String
+    var time:TimeStamp?
     var sight:String
     var taste:String
     var smell:String
@@ -137,9 +142,9 @@ import SwiftData
     var hearing:String
     var imagePath:URL
     var menu:[String]
-    init(saveDay: Date, lunchComments: String, sight: String, taste: String, smell: String, tactile: String, hearing: String, imagePath: URL, menu: [String]) {
+    init(saveDay: Date, times: TimeStamp? = nil, sight: String, taste: String, smell: String, tactile: String, hearing: String, imagePath: URL, menu: [String]) {
         self.saveDay = saveDay
-        self.lunchComments = lunchComments
+        self.time = times
         self.sight = sight
         self.taste = taste
         self.smell = smell

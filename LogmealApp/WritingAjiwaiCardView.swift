@@ -682,7 +682,7 @@ struct WritingAjiwaiCardView: View {
     }
     
     private func add(lunchComments: String, sight: String, hearing: String, smell: String, taste: String, tacticle: String, menu: [String], imagePath: URL) {
-        let newData = AjiwaiCardData(saveDay: saveDay, lunchComments: lunchComments, sight: sight, taste: taste, smell: smell, tactile: tacticle, hearing: hearing, imagePath: imagePath, menu: menu)
+        let newData = AjiwaiCardData(saveDay: saveDay, sight: sight, taste: taste, smell: smell, tactile: tacticle, hearing: hearing, imagePath: imagePath, menu: menu)
         context.insert(newData)
         do {
             try context.save()

@@ -119,19 +119,20 @@ struct RewardView: View {
     
     private func confettiView(geometry: GeometryProxy) -> some View {
         HStack {
-            confettiCannonView(imageName: "mt_cracker", scaleFlag: $scaleFlag, counter: $counter, rotation: .degrees(60), openingAngle: .degrees(0), closingAngle: .degrees(90))
+            confettiCannonView(imageName: "mt_cracker", scaleFlag: $scaleFlag, trigger: $counter, rotation: .degrees(60), openingAngle: .degrees(0), closingAngle: .degrees(90))
             Spacer().frame(width: geometry.size.width * 0.75)
-            confettiCannonView(imageName: "mt_cracker", scaleFlag: $scaleFlag, counter: $counter, rotation: .zero, openingAngle: .degrees(90), closingAngle: .degrees(180))
+            confettiCannonView(imageName: "mt_cracker", scaleFlag: $scaleFlag, trigger: $counter, rotation: .zero, openingAngle: .degrees(90), closingAngle: .degrees(180))
         }
         .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.9)
     }
 
-    private func confettiCannonView(imageName: String, scaleFlag: Binding<Bool>, counter: Binding<Int>, rotation: Angle, openingAngle: Angle, closingAngle: Angle) -> some View {
+    private func confettiCannonView(imageName: String, scaleFlag: Binding<Bool>, trigger: Binding<Int>, rotation: Angle, openingAngle: Angle, closingAngle: Angle) -> some View {
         Image(imageName)
             .scaleEffect(scaleFlag.wrappedValue ? 0.2 : 1)
             .rotationEffect(rotation)
-            .confettiCannon(counter: counter, num: 50, confettiSize: 10, rainHeight: 100, fadesOut: true, openingAngle: openingAngle, closingAngle: closingAngle, radius: 800)
+            .confettiCannon(trigger: trigger, num: 50, confettiSize: 10, rainHeight: 100, fadesOut: true, openingAngle: openingAngle, closingAngle: closingAngle, radius: 800)
     }
+
 
 }
 

@@ -7,14 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		92123F3F2C36F70B00B2C25C /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 92123F3E2C36F70B00B2C25C /* ConfettiSwiftUI */; };
 		921F424C2D0FEFD50025F49D /* NewContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F424B2D0FEFD50025F49D /* NewContentView.swift */; };
 		921F424E2D0FF0010025F49D /* NewCharactarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F424D2D0FF0010025F49D /* NewCharactarView.swift */; };
 		921F42502D0FF01A0025F49D /* NewColumnView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F424F2D0FF01A0025F49D /* NewColumnView.swift */; };
 		921F42522D0FF03C0025F49D /* NewSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F42512D0FF03C0025F49D /* NewSettingView.swift */; };
 		921F42542D0FF0650025F49D /* NewWritingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921F42532D0FF0650025F49D /* NewWritingView.swift */; };
 		922331D52CA1766D00E081B6 /* NotificationClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922331D42CA1766D00E081B6 /* NotificationClass.swift */; };
-		9228A5352BD8C8D500E5128F /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 9228A5342BD8C8D500E5128F /* CodeScanner */; };
 		923BC75D2CAAE28200A4FA11 /* prologue 2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */; };
 		9241FED12BA884CE004E507B /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9241FED02BA884CE004E507B /* Extensions.swift */; };
 		9241FED32BA9D123004E507B /* Structs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9241FED22BA9D123004E507B /* Structs.swift */; };
@@ -42,15 +40,18 @@
 		9263A6152C81C9D000D9E58F /* se_fire.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9263A6132C81C9D000D9E58F /* se_fire.mp3 */; };
 		9263A6162C81C9D000D9E58F /* se_door.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9263A6142C81C9D000D9E58F /* se_door.mp3 */; };
 		9263A6192C85EDA700D9E58F /* bgm_home.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9263A6182C85EDA700D9E58F /* bgm_home.mp3 */; };
+		9264F7512D16A2CA00465BB9 /* NewLogDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9264F7502D16A2CA00465BB9 /* NewLogDetailView.swift */; };
 		927950CF2C7C08A30016C77D /* se_negative.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 927950CD2C7C08A30016C77D /* se_negative.mp3 */; };
 		927950D02C7C08A30016C77D /* se_positive.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 927950CE2C7C08A30016C77D /* se_positive.mp3 */; };
 		927950D42C7CC46B0016C77D /* TutorialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 927950D32C7CC46B0016C77D /* TutorialView.swift */; };
+		927DD5652D3F76C0005296EE /* SwiftyGif in Frameworks */ = {isa = PBXBuildFile; productRef = 927DD5642D3F76C0005296EE /* SwiftyGif */; };
+		927DD56A2D3F76D9005296EE /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 927DD5692D3F76D9005296EE /* CodeScanner */; };
+		927DD56D2D3F76FA005296EE /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 927DD56C2D3F76FA005296EE /* ConfettiSwiftUI */; };
 		9281D8382C1ABBB600263877 /* GoogleSheetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9281D8372C1ABBB600263877 /* GoogleSheetAPI.swift */; };
 		92A2A0CA2C0C5C73005C4998 /* PDFGenerater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92A2A0C92C0C5C73005C4998 /* PDFGenerater.swift */; };
 		92BE0D662B2BFCF200CA50A8 /* LogmealApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BE0D652B2BFCF200CA50A8 /* LogmealApp.swift */; };
 		92BE0D682B2BFCF200CA50A8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92BE0D672B2BFCF200CA50A8 /* ContentView.swift */; };
 		92DB8B052BEB4BBA001D3A1E /* CharacterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92DB8B042BEB4BBA001D3A1E /* CharacterView.swift */; };
-		92DB8B2A2BF1E4DD001D3A1E /* SwiftyGif in Frameworks */ = {isa = PBXBuildFile; productRef = 92DB8B292BF1E4DD001D3A1E /* SwiftyGif */; };
 		92DB8B322BF227B3001D3A1E /* ShareSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92DB8B312BF227B3001D3A1E /* ShareSheetView.swift */; };
 		92EE828A2C74C1AD00080109 /* README_GenJyuu.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92EE82882C74C1AD00080109 /* README_GenJyuu.txt */; };
 		92EE828B2C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92EE82892C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt */; };
@@ -92,6 +93,7 @@
 		9263A6132C81C9D000D9E58F /* se_fire.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_fire.mp3; sourceTree = "<group>"; };
 		9263A6142C81C9D000D9E58F /* se_door.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_door.mp3; sourceTree = "<group>"; };
 		9263A6182C85EDA700D9E58F /* bgm_home.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bgm_home.mp3; sourceTree = "<group>"; };
+		9264F7502D16A2CA00465BB9 /* NewLogDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewLogDetailView.swift; sourceTree = "<group>"; };
 		927950CD2C7C08A30016C77D /* se_negative.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_negative.mp3; sourceTree = "<group>"; };
 		927950CE2C7C08A30016C77D /* se_positive.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = se_positive.mp3; sourceTree = "<group>"; };
 		927950D32C7CC46B0016C77D /* TutorialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialView.swift; sourceTree = "<group>"; };
@@ -113,9 +115,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9228A5352BD8C8D500E5128F /* CodeScanner in Frameworks */,
-				92123F3F2C36F70B00B2C25C /* ConfettiSwiftUI in Frameworks */,
-				92DB8B2A2BF1E4DD001D3A1E /* SwiftyGif in Frameworks */,
+				927DD56D2D3F76FA005296EE /* ConfettiSwiftUI in Frameworks */,
+				927DD56A2D3F76D9005296EE /* CodeScanner in Frameworks */,
+				927DD5652D3F76C0005296EE /* SwiftyGif in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,6 +173,7 @@
 				924FB0E82C5E839A00BB3391 /* LookBackView.swift */,
 				92FD5B242CFDAA1D0064AC10 /* NewHomeView.swift */,
 				921F424B2D0FEFD50025F49D /* NewContentView.swift */,
+				9264F7502D16A2CA00465BB9 /* NewLogDetailView.swift */,
 				921F424D2D0FF0010025F49D /* NewCharactarView.swift */,
 				921F424F2D0FF01A0025F49D /* NewColumnView.swift */,
 				921F42512D0FF03C0025F49D /* NewSettingView.swift */,
@@ -224,9 +227,9 @@
 			);
 			name = LogmealApp;
 			packageProductDependencies = (
-				9228A5342BD8C8D500E5128F /* CodeScanner */,
-				92DB8B292BF1E4DD001D3A1E /* SwiftyGif */,
-				92123F3E2C36F70B00B2C25C /* ConfettiSwiftUI */,
+				927DD5642D3F76C0005296EE /* SwiftyGif */,
+				927DD5692D3F76D9005296EE /* CodeScanner */,
+				927DD56C2D3F76FA005296EE /* ConfettiSwiftUI */,
 			);
 			productName = Gohan_Navigation_ver.1;
 			productReference = 92BE0D622B2BFCF200CA50A8 /* LogmealApp.app */;
@@ -257,9 +260,9 @@
 			);
 			mainGroup = 92BE0D592B2BFCF200CA50A8;
 			packageReferences = (
-				9228A5302BD8C68A00E5128F /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
-				9228A5332BD8C8D500E5128F /* XCRemoteSwiftPackageReference "CodeScanner" */,
-				92DB8B282BF1E4DD001D3A1E /* XCRemoteSwiftPackageReference "SwiftyGif" */,
+				927DD5632D3F76C0005296EE /* XCRemoteSwiftPackageReference "SwiftyGif" */,
+				927DD5682D3F76D9005296EE /* XCRemoteSwiftPackageReference "CodeScanner" */,
+				927DD56B2D3F76FA005296EE /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
 			);
 			productRefGroup = 92BE0D632B2BFCF200CA50A8 /* Products */;
 			projectDirPath = "";
@@ -327,6 +330,7 @@
 				92DB8B052BEB4BBA001D3A1E /* CharacterView.swift in Sources */,
 				924FB0B72C51EEA000BB3391 /* SoundManager.swift in Sources */,
 				92BE0D662B2BFCF200CA50A8 /* LogmealApp.swift in Sources */,
+				9264F7512D16A2CA00465BB9 /* NewLogDetailView.swift in Sources */,
 				924FB1212C6C783400BB3391 /* CharacterAnimationView.swift in Sources */,
 				924FB1032C5E840F00BB3391 /* CharacterSelectedView.swift in Sources */,
 				921F42522D0FF03C0025F49D /* NewSettingView.swift in Sources */,
@@ -556,47 +560,47 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		9228A5302BD8C68A00E5128F /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */ = {
+		927DD5632D3F76C0005296EE /* XCRemoteSwiftPackageReference "SwiftyGif" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/simibac/ConfettiSwiftUI";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.1.0;
-			};
-		};
-		9228A5332BD8C8D500E5128F /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/twostraws/CodeScanner.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.4.1;
-			};
-		};
-		92DB8B282BF1E4DD001D3A1E /* XCRemoteSwiftPackageReference "SwiftyGif" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/alexiscreuzot/SwiftyGif.git";
+			repositoryURL = "https://github.com/alexiscreuzot/SwiftyGif";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.4.5;
 			};
 		};
+		927DD5682D3F76D9005296EE /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.2;
+			};
+		};
+		927DD56B2D3F76FA005296EE /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/simibac/ConfettiSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		92123F3E2C36F70B00B2C25C /* ConfettiSwiftUI */ = {
+		927DD5642D3F76C0005296EE /* SwiftyGif */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9228A5302BD8C68A00E5128F /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */;
-			productName = ConfettiSwiftUI;
+			package = 927DD5632D3F76C0005296EE /* XCRemoteSwiftPackageReference "SwiftyGif" */;
+			productName = SwiftyGif;
 		};
-		9228A5342BD8C8D500E5128F /* CodeScanner */ = {
+		927DD5692D3F76D9005296EE /* CodeScanner */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9228A5332BD8C8D500E5128F /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			package = 927DD5682D3F76D9005296EE /* XCRemoteSwiftPackageReference "CodeScanner" */;
 			productName = CodeScanner;
 		};
-		92DB8B292BF1E4DD001D3A1E /* SwiftyGif */ = {
+		927DD56C2D3F76FA005296EE /* ConfettiSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 92DB8B282BF1E4DD001D3A1E /* XCRemoteSwiftPackageReference "SwiftyGif" */;
-			productName = SwiftyGif;
+			package = 927DD56B2D3F76FA005296EE /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */;
+			productName = ConfettiSwiftUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
