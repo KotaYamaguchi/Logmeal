@@ -5,8 +5,6 @@ struct NewColumnView: View {
     @State private var searchText:String = ""
     @State private var isOpenSortMenu:Bool = false
     @State private var sortTitle:String = "新しい順"
-    // 各カードの展開状態を ID に紐づけて管理
-    @State private var isExpandedColumn: [String: Bool] = [:]
     @Query private var allColumn: [ColumnData]
     var body: some View {
         ZStack{
@@ -62,7 +60,7 @@ struct NewColumnView: View {
                     }
                 }
                 ScrollView {
-                    ForEach(0..<allColumn.count) { index in
+                    ForEach(allColumn) { column in
                         ZStack(alignment: .topLeading) {
                             RoundedRectangle(cornerRadius: 10)
                                 .foregroundStyle(.white)
@@ -72,23 +70,23 @@ struct NewColumnView: View {
                                 }
                             HStack(alignment: .bottom) {
                                 VStack(alignment: .leading) {
-                                    Text(allColumn[index].title) // ColumnData の title を表示
+                                    Text(column.title) // ColumnData の title を表示
                                         .font(.custom("GenJyuuGothicX-Bold", size: 40))
                                         .padding(.bottom)
                                     
                                     
                                   
-                                    Text(allColumn[index].content) // ColumnData の content を表示
-                                        .lineLimit(isExpandedColumn[column.columnDay] ? nil : 2)
+                                    Text(column.caption) // ColumnData の content を表示
+                                        .lineLimit(column.isExpanded ? nil : 2)
                                         .font(.custom("GenJyuuGothicX-Bold", size: 17))
                                 }
                                 
                                 Button {
                                     withAnimation {
-                                        isExpandedColumn[allColumn[index].columnDay] = true
+                                        column.isExpanded = true
                                     }
                                 } label: {
-                                    Image(systemName: isExpandedColumn[allColumn[index].columnDay] ? "chevron.compact.up" : "chevron.compact.down")
+                                    Image(systemName: column.isExpanded ? "chevron.compact.up" : "chevron.compact.down")
                                         .font(.title)
                                 }
                             }
