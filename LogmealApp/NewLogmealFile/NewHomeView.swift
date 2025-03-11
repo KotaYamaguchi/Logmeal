@@ -31,21 +31,21 @@ struct NewHomeView: View {
                     VStack{
                         HStack{
                         VStack{
-                            Text("30")
+                            Text("\(allData.count)")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 55))
                             Text("ろぐ")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 30))
                         }
                         .padding(.horizontal,50)
                         VStack{
-                            Text("100")
+                            Text("\(user.point)")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 55))
                             Text("ポイント")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 30))
                         }
                         .padding(.horizontal,50)
                         VStack{
-                            Text("20")
+                            Text("\(user.level)")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 55))
                             Text("レベル")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 30))
@@ -107,4 +107,6 @@ struct NewHomeView: View {
 
 #Preview{
     NewContentView()
+        .environmentObject(UserData())
+        .modelContainer(for:AjiwaiCardData.self)
 }
