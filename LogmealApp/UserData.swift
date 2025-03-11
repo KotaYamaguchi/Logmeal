@@ -160,12 +160,13 @@ enum TimeStamp:String, Codable{
     var title: String
     var caption: String
     var isRead: Bool = false
-    
-    init(columnDay: String, title: String, caption: String, isRead: Bool = false) {
+    var isExpanded:Bool = false
+    init(columnDay: String, title: String, caption: String, isRead: Bool = false, isExpanded:Bool = false) {
         self.columnDay = columnDay
         self.title = title
         self.caption = caption
         self.isRead = isRead
+        self.isExpanded = isExpanded
     }
 }
 
