@@ -38,6 +38,7 @@ struct NewColumnView: View {
                                     .frame(width: 200,height: 50)
                                     .overlay {
                                         Text("今日のコラム")
+                                           
                                     }
                             }
                                 Button{
@@ -66,20 +67,34 @@ struct NewColumnView: View {
                 }
                 ScrollView{
                     ForEach(0..<10){ i in
-                        RoundedRectangle(cornerRadius: 10)
-                            .frame(width: .infinity,height: 200)
-                            .padding(.horizontal,50)
-                            .foregroundStyle(.white)
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(lineWidth: 1)
-                                    .frame(width: .infinity,height: 200)
-                                    .padding(.horizontal,50)
-                                
-                                
+                        ZStack(alignment:.topLeading){
+                            RoundedRectangle(cornerRadius: 10)
+                                .frame(width: .infinity,height: 160)
+                                .foregroundStyle(.white)
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(lineWidth: 1)
+                                        .frame(width: .infinity,height: 160)
+                                }
+                            HStack(alignment: .bottom){
+                                VStack(alignment: .leading){
+                                    Text("いわしで頭が良くなる！？")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 40))
+                                        .padding(.bottom)
+                                    Text("イワシを食べると頭がよくなる！？🐟💡実は、イワシには**DHA（ドコサヘキサエン酸）**という脳にとって大切な栄養が入っているよ！✨DHAは「考える力」や「記憶する力」をパワーアップしてくれるんだ！📚✅ **集中力がアップ！** 宿題やテストのときに役立つよ✏️ ✅ **記憶力がアップ！** 新しいことをどんどん覚えられる✨✅ **元気な体をつくる！** イワシにはカルシウムも入っているよ💪イワシの缶詰や焼き魚を食べて、スーパーキッズになっちゃおう！💪✨")
+                                        .lineLimit(2)
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                                }
+                                Button{
+                                    
+                                }label:{
+                                    Image(systemName: "chevron.compact.down")
+                                }
                             }
-                        
-                        
+                            .padding()
+                        }
+                        .padding(.horizontal,50)
+                            
                     }
                 }
                 .padding()
@@ -139,7 +154,7 @@ struct NewColumnView: View {
     }
 }
 #Preview{
-    NewContentView()
+    NewColumnView()
         .environmentObject(UserData())
         .modelContainer(for: [AjiwaiCardData.self,MenuData.self,ColumnData.self])
 }
