@@ -83,7 +83,7 @@ struct NewColumnView: View {
                                 
                                 Button {
                                     withAnimation {
-                                        column.isExpanded = true
+                                        column.isExpanded.toggle()
                                     }
                                 } label: {
                                     Image(systemName: column.isExpanded ? "chevron.compact.up" : "chevron.compact.down")
