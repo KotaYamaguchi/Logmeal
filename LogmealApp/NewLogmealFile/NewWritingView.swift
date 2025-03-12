@@ -3,6 +3,7 @@ import PhotosUI
 import SwiftData
 
 struct NewWritingView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
     @State private var timeStanp:TimeStamp? = nil
@@ -73,6 +74,15 @@ struct NewWritingView: View {
                     .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
                 VStack{
                     HStack{
+                        Button{
+                            dismiss()
+                        }label:{
+                            Image("bt_close")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width:geometry.size.width*0.05)
+                        }
+                        .padding(.horizontal)
                         Spacer()
                         dateBar(geometry: geometry)
                     }
