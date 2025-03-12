@@ -77,7 +77,7 @@ struct NewWritingView: View {
                         dateBar(geometry: geometry)
                     }
                     ScrollView{
-                        HStack{
+                        HStack(alignment:.top){
                             VStack{
                                 VStack{
                                     Text("今日の給食")
@@ -203,6 +203,52 @@ struct NewWritingView: View {
                 .frame(width: .infinity,height: .infinity)
                 .foregroundStyle(.white)
                 .shadow(radius: 10)
+                .overlay {
+                    VStack{
+                        
+                        HStack{
+                            ZStack{
+                                Circle()
+                                    .frame(width: 13)
+                                    .foregroundStyle(.gray)
+                                Circle()
+                                    .frame(width: 10)
+                                    .foregroundStyle(.white)
+                            }
+                            Spacer()
+                            ZStack{
+                                Circle()
+                                    .frame(width: 13)
+                                    .foregroundStyle(.gray)
+                                Circle()
+                                    .frame(width: 10)
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        Spacer()
+                        HStack{
+                            ZStack{
+                                Circle()
+                                    .frame(width: 13)
+                                    .foregroundStyle(.gray)
+                                Circle()
+                                    .frame(width: 10)
+                                    .foregroundStyle(.white)
+                            }
+                            Spacer()
+                            ZStack{
+                                Circle()
+                                    .frame(width: 13)
+                                    .foregroundStyle(.gray)
+                                Circle()
+                                    .frame(width: 10)
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        
+                    }
+                    .padding()
+                }
         }
     }
     private func dateBar(geometry: GeometryProxy) -> some View {
