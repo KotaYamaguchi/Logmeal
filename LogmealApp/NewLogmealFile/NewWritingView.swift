@@ -191,7 +191,7 @@ struct NewWritingView: View {
                                                 .frame(width:geometry.size.width*0.03)
                                             VStack(alignment:.leading){
                                                 TextField(sensePlaceholders[index],text:$editedSenseText[index],axis:.vertical)
-                                                    .frame(width:geometry.size.width*0.4,height:1)
+                                                    .frame(width:geometry.size.width*0.4)
                                                 Rectangle()
                                                     .frame(width:geometry.size.width*0.4,height:1)
                                                     .foregroundStyle(senseColors[index])
