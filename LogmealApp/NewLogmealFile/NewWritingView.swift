@@ -80,9 +80,9 @@ struct NewWritingView: View {
                         HStack(alignment:.top){
                             VStack{
                                 VStack{
-                                    Text("今日の給食")
+                                    Text("今日のごはん")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                                    Text("給食の写真を撮ろう！")
+                                    Text("ごはんの写真を撮ろう！")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                         .foregroundStyle(.secondary)
                                     Image("mt_No_Image")
@@ -99,7 +99,6 @@ struct NewWritingView: View {
                                             } icon: {
                                                 Image(systemName: "camera")
                                             }
-                                            
                                         }
                                         PhotosPicker(selection: $selectedPhotoItem) {
                                             Label("写真を選ぶ", systemImage: "photo")
@@ -114,14 +113,20 @@ struct NewWritingView: View {
                                 VStack{
                                     Text("今日のメニュー")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                                    Text("給食のメニューを書き込もう！")
+                                    Text("ごはんのメニューを書き込もう！")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                         .foregroundStyle(.secondary)
-                                    ForEach(0..<editedMenu.count,id:\.self){ index in
-                                        TextField("", text: $editedMenu[index])
-                                            .textFieldStyle(.roundedBorder)
-                                            .frame(width: geometry.size.width*0.4)
+                                    List{
+                                        ForEach(0..<editedMenu.count,id:\.self){ index in
+                                            TextField("", text: $editedMenu[index])
+                                                .textFieldStyle(.roundedBorder)
+                                                .frame(width: geometry.size.width*0.4)
+                                        }
+                                        .onDelete { (offsets) in
+                                            self.editedMenu.remove(atOffsets: offsets)
+                                        }
                                     }
+                                    .scrollContentBackground(.hidden)
                                     Button{
                                         editedMenu.append("")
                                     }label:{
@@ -139,7 +144,7 @@ struct NewWritingView: View {
                             }
                             VStack{
                                 VStack{
-                                    Text("給食はどうだった？")
+                                    Text("ごはんはどうだった？")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
                                     Text("食べた感想を教えてね！")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
@@ -164,7 +169,7 @@ struct NewWritingView: View {
                                                 .scaledToFit()
                                                 .frame(width:geometry.size.width*0.03)
                                             VStack(alignment:.leading){
-                                                TextField(sensePlaceholders[index],text:$editedSenseText[index])
+                                                TextField(sensePlaceholders[index],text:$editedSenseText[index],axis:.vertical)
                                                     .frame(width:geometry.size.width*0.4,height:1)
                                                 Rectangle()
                                                     .frame(width:geometry.size.width*0.4,height:1)
@@ -185,10 +190,83 @@ struct NewWritingView: View {
                         .padding()
                     }
                 }
+                VStack{
+                    Spacer()
+                    HStack{
+                        Spacer()
+                        Button{
+                            
+                        }label:{
+                            Text("ほぞんする")
+                                .font(.custom("GenJyuuGothicX-Bold",size:15))
+                                .frame(width: 180, height: 50)
+                                .background(Color.white)
+                                .foregroundStyle( Color.buttonColor)
+                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 15)
+                                        .stroke(Color.buttonColor ,lineWidth: 4)
+                                }
+                        }
+                    }
+                }
+                .padding()
             }
             .sheet(isPresented:$showDatePicker){
-                DatePicker("", selection: $currentDate)
-                    .datePickerStyle(.graphical)
+                VStack{
+                    DatePicker("", selection: $currentDate,displayedComponents: [.date])
+                        .datePickerStyle(.graphical)
+                    Divider()
+                    HStack{
+                        Spacer()
+                        Text("いつのごはん？")
+                            .font(.title2)
+                        Spacer()
+                        Button{
+                            timeStanp = .morning
+                        }label:{
+                            Text("あさ")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                                .padding()
+                                .background{
+                                    Circle()
+                                        .foregroundStyle(.cyan)
+                                }
+                        }
+                        Button{
+                            timeStanp = .lunch
+                        }label:{
+                            Text("ひる")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                                .padding()
+                                .background{
+                                    Circle()
+                                        .foregroundStyle(.cyan)
+                                }
+                        }
+                        Button{
+                            timeStanp = .morning
+                        }label:{
+                            Text("よる")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                                .padding()
+                                .background{
+                                    Circle()
+                                        .foregroundStyle(.cyan)
+                                }
+                        }
+                        Spacer()
+                    }
+                    Button{
+                        showDatePicker = false
+                    }label:{
+                        Text("とじる")
+                    }
+                }
+                .padding()
             }
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiImage, sourceType: .camera)
@@ -259,13 +337,36 @@ struct NewWritingView: View {
                 }
             } label: {
                 Image("mt_DateBar")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width:geometry.size.width*0.32)
                     .overlay {
-                        Text(dateFormatter(date: currentDate))
-                            .font(.custom("GenJyuuGothicX-Bold", size: 28))
-                            .foregroundStyle(.white)
+                        HStack{
+                            Text(dateFormatter(date: currentDate))
+                                .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                                .foregroundStyle(.white)
+                            Text("：")
+                                .foregroundStyle(.white)
+                                .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                            Text(changeTimeStamp())
+                                .foregroundStyle(.white)
+                                .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                        }
                     }
             }
             .buttonStyle(PlainButtonStyle())
+        }
+    }
+    private func changeTimeStamp() -> String{
+        switch timeStanp{
+        case .morning:
+            return "あさ"
+        case .lunch:
+            return "ひる"
+        case .dinner:
+            return "よる"
+        default:
+            return "あさ"
         }
     }
 }
