@@ -68,7 +68,7 @@ struct NewHomeView: View {
                     .padding(.top, geometry.size.height * 0.05)
                     
                     ScrollView {
-                        LazyVGrid(columns: [GridItem(), GridItem(), GridItem()], spacing: geometry.size.width * 0.005) {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: geometry.size.width * 0.02) {
                             ForEach(0..<allData.count, id: \.self) { index in
                                 Button {
                                     
@@ -80,14 +80,15 @@ struct NewHomeView: View {
                                         case .success(let image):
                                             image
                                                 .resizable()
-                                                .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.25)
+                                                .scaledToFit()
+                                                .frame(width: (geometry.size.width * 0.8) / 3)
                                         case .failure(_):
                                             Rectangle()
-                                                .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.25)
+                                                .frame(width: (geometry.size.width * 0.8) / 3, height: geometry.size.height * 0.25)
                                                 .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
                                         @unknown default:
                                             Rectangle()
-                                                .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.25)
+                                                .frame(width: (geometry.size.width * 0.8) / 3, height: geometry.size.height * 0.25)
                                                 .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
                                         }
                                     }
