@@ -85,11 +85,22 @@ struct NewWritingView: View {
                                     Text("ごはんの写真を撮ろう！")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                         .foregroundStyle(.secondary)
-                                    Image("mt_No_Image")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: geometry.size.width*0.38)
-                                        .padding()
+                                    if let image = uiImage {
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: geometry.size.width*0.38)
+                                            .cornerRadius(15)
+                                            .shadow(radius: 5)
+                                            .padding()
+                                    } else {
+                                        Image("mt_No_Image")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: geometry.size.width*0.38)
+                                            .padding()
+                                    }
+                                    
                                     HStack(spacing:30){
                                         Button{
                                             showCameraPicker = true
@@ -195,7 +206,20 @@ struct NewWritingView: View {
                     HStack{
                         Spacer()
                         Button{
-                            
+                            if let timeStanp = timeStanp, let uiImage = uiImage {
+                                saveCurrentData(
+                                    saveDay: currentDate,
+                                    times: timeStanp,
+                                    sight: editedSenses[0],
+                                    taste: editedSenses[3],
+                                    smell: editedSenses[2],
+                                    tactile: editedSenses[4],
+                                    hearing: editedSenses[1],
+                                    uiImage: uiImage,
+                                    menu: editedMenu
+                                )
+                                showWritingView = false
+                            }
                         }label:{
                             Text("ほぞんする")
                                 .font(.custom("GenJyuuGothicX-Bold",size:15))
@@ -272,7 +296,14 @@ struct NewWritingView: View {
                 ImagePicker(image: $uiImage, sourceType: .camera)
                     .ignoresSafeArea()
             }
-
+            .onChange(of: selectedPhotoItem) { _, newItem in
+                Task {
+                    if let data = try? await newItem?.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        self.uiImage = uiImage
+                    }
+                }
+            }
         }
     }
     @ViewBuilder private func backgroundCard(geometry:GeometryProxy) -> some View{
