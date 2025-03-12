@@ -2,7 +2,6 @@ import SwiftUI
 import PhotosUI
 import SwiftData
 
-
 struct NewHomeView: View {
     @State private var showWritingView = false
     @EnvironmentObject var user: UserData
@@ -10,103 +9,115 @@ struct NewHomeView: View {
     @Query private var allData: [AjiwaiCardData]
     
     var body: some View {
-        ZStack{
-            Image("bg_HomeView_dog")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-            VStack{
-                HStack{
-                    VStack{
-                    Image("no_user_image").resizable()
-                        .scaledToFit()
-                        .frame(width: 180)
-                        .overlay {
-                            Circle()
-                                .stroke(Color(red:236/255, green:178/255, blue:183/255), lineWidth: 5)
+        GeometryReader { geometry in
+            ZStack {
+                Image("bg_HomeView_dog")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
+                
+                VStack {
+                    HStack {
+                        Spacer()
+                        VStack {
+                            Image("no_user_image")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: geometry.size.width * 0.2)
+                                .overlay {
+                                    Circle()
+                                        .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
+                                }
+                            Text("\(user.name)")
+                                .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.03))
                         }
-                        Text("\(user.name)")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                }
-                    VStack{
-                        HStack{
-                        VStack{
-                            Text("\(allData.count)")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 55))
-                            Text("ろぐ")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 30))
-                        }
-                        .padding(.horizontal,50)
-                        VStack{
-                            Text("\(user.point)")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 55))
-                            Text("ポイント")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 30))
-                        }
-                        .padding(.horizontal,50)
-                        VStack{
-                            Text("\(user.level)")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 55))
-                            Text("レベル")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 30))
-                        }
-                        .padding(.horizontal,50)
-                        }
-                        RoundedRectangle(cornerRadius: 10)
-                            .frame(width:600,height: 3)
-                            .foregroundStyle(Color(red: 236/255, green: 178/255, blue: 183/255))
-                    }
-                }
-                .padding(.top,30)
-                ScrollView{
-                    LazyVGrid(columns: [GridItem(),GridItem(),GridItem()],spacing: 5){
-                        ForEach(0..<allData.count, id: \.self){ index in
-                            Button{
+                        VStack {
+                            HStack {
+                                VStack {
+                                    Text("\(allData.count)")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.06))
+                                    Text("ろぐ")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.04))
+                                }
+                                .padding(.horizontal, geometry.size.width * 0.05)
                                 
-                            }label:{
-                                AsyncImage(url:allData[index].imagePath){ phase in
-                                    switch phase{
-                                    case .empty:
-                                        ProgressView()
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .frame(width:255,height: 190)
-                                    case .failure(_):
-                                        Rectangle()
-                                            .frame(width:255,height: 190)
-                                            .foregroundStyle(Color(red:206/255, green:206/255, blue:206/255))
-                                    @unknown default:
-                                        Rectangle()
-                                            .frame(width:255,height: 190)
-                                            .foregroundStyle(Color(red:206/255, green:206/255, blue:206/255))
+                                VStack {
+                                    Text("\(user.point)")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.06))
+                                    Text("ポイント")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.04))
+                                }
+                                .padding(.horizontal, geometry.size.width * 0.05)
+                                
+                                VStack {
+                                    Text("\(user.level)")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.06))
+                                    Text("レベル")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.04))
+                                }
+                                .padding(.horizontal, geometry.size.width * 0.05)
+                            }
+                            
+                            RoundedRectangle(cornerRadius: 10)
+                                .frame(width: geometry.size.width * 0.8, height: 3)
+                                .foregroundStyle(Color(red: 236/255, green: 178/255, blue: 183/255))
+                        }
+                        Spacer()
+                    }
+                    .padding(.top, geometry.size.height * 0.05)
+                    
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(), GridItem(), GridItem()], spacing: geometry.size.width * 0.005) {
+                            ForEach(0..<allData.count, id: \.self) { index in
+                                Button {
+                                    
+                                } label: {
+                                    AsyncImage(url: allData[index].imagePath) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            ProgressView()
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.25)
+                                        case .failure(_):
+                                            Rectangle()
+                                                .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.25)
+                                                .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
+                                        @unknown default:
+                                            Rectangle()
+                                                .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.25)
+                                                .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
+                                        }
                                     }
                                 }
                             }
                         }
+                        .frame(width: geometry.size.width * 0.8)
+                        .padding(.horizontal)
                     }
-                    .frame(width:780)
-                    .padding(.horizontal)
                 }
+                
+                Button {
+                    showWritingView = true
+                } label: {
+                    Image("bt_add_log")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: geometry.size.width * 0.15)
+                }
+                .position(x: geometry.size.width * 0.85, y: geometry.size.height * 0.9)
             }
-            Button{
-                showWritingView = true
-            }label: {
-                Image("bt_add_log")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width:150)
+            .fullScreenCover(isPresented: $showWritingView) {
+                NewWritingView(showWritingView: $showWritingView)
             }
-            .position(x:820,y:690)
-        }
-        .fullScreenCover(isPresented: $showWritingView) {
-            NewWritingView(showWritingView: $showWritingView)
         }
     }
 }
 
-#Preview{
+#Preview {
     NewContentView()
         .environmentObject(UserData())
-        .modelContainer(for:AjiwaiCardData.self)
+        .modelContainer(for: AjiwaiCardData.self)
 }
