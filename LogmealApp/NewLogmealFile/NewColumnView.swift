@@ -8,8 +8,9 @@ struct NewColumnView: View {
     @Query private var allColumn: [ColumnData]
     var body: some View {
         ZStack{
-            Image("bg_NewColumnView_dog")
+            Image("bg_HomeView_dog")
                 .resizable()
+                .scaledToFill()
                 .ignoresSafeArea()
             VStack {
                 HStack {
