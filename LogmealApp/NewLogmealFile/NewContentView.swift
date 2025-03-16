@@ -7,15 +7,15 @@ struct NewContentView: View {
         ZStack{
             NavigationSplitView {
                 leftSideSection()
-                    .navigationSplitViewColumnWidth(min: 200, ideal: 300)
-                    .toolbar(removing: .sidebarToggle)
+//                    .navigationSplitViewColumnWidth(min: 200, ideal: 300)
+//                    .toolbar(removing: .sidebarToggle)
             } detail: {
                 rightSideSection()
             }
             // Remove the default sidebar toggle button
-            NewCharacterView(showCharacterView: $showCharactarView)
-                .scaleEffect(showCharactarView ? 1.0 : 0.0)
-                .ignoresSafeArea()
+//            NewCharacterView(showCharacterView: $showCharactarView)
+//                .scaleEffect(showCharactarView ? 1.0 : 0.0)
+//                .ignoresSafeArea()
         }
     }
     
