@@ -7,7 +7,8 @@ struct NewHomeView: View {
     @EnvironmentObject var user: UserData
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
-    
+    @State var selectedData:AjiwaiCardData? = nil
+    @State var showDetailView:Bool = false
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -66,38 +67,41 @@ struct NewHomeView: View {
                         Spacer()
                     }
                     .padding(.top, geometry.size.height * 0.05)
-                    
-                    ScrollView {
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: geometry.size.width * 0.02) {
-                            ForEach(0..<allData.count, id: \.self) { index in
-                                Button {
-                                    
-                                } label: {
-                                    AsyncImage(url: allData[index].imagePath) { phase in
-                                        switch phase {
-                                        case .empty:
-                                            ProgressView()
-                                        case .success(let image):
-                                            image
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: (geometry.size.width * 0.8) / 3)
-                                        case .failure(_):
-                                            Rectangle()
-                                                .frame(width: (geometry.size.width * 0.8) / 3, height: geometry.size.height * 0.25)
-                                                .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
-                                        @unknown default:
-                                            Rectangle()
-                                                .frame(width: (geometry.size.width * 0.8) / 3, height: geometry.size.height * 0.25)
-                                                .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
+                 
+                        ScrollView {
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: geometry.size.width * 0.02) {
+                                ForEach(0..<allData.count, id: \.self) { index in
+                                    Button {
+                                        if allData.indices.contains(index) {
+                                            selectedData = allData[index]
+                                        }
+                                    } label: {
+                                        AsyncImage(url: allData[index].imagePath) { phase in
+                                            switch phase {
+                                            case .empty:
+                                                ProgressView()
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width: (geometry.size.width * 0.8) / 3)
+                                            case .failure(_):
+                                                Rectangle()
+                                                    .frame(width: (geometry.size.width * 0.8) / 3, height: geometry.size.height * 0.25)
+                                                    .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
+                                            @unknown default:
+                                                Rectangle()
+                                                    .frame(width: (geometry.size.width * 0.8) / 3, height: geometry.size.height * 0.25)
+                                                    .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
+                                            }
                                         }
                                     }
+
                                 }
                             }
+                            .frame(width: geometry.size.width * 0.8)
+                            .padding(.horizontal)
                         }
-                        .frame(width: geometry.size.width * 0.8)
-                        .padding(.horizontal)
-                    }
                 }
                 
                 Button {
@@ -110,9 +114,23 @@ struct NewHomeView: View {
                 }
                 .position(x: geometry.size.width * 0.85, y: geometry.size.height * 0.9)
             }
+         
+            .onChange(of: selectedData, { oldValue, newValue in
+                showDetailView = true
+            })
             .fullScreenCover(isPresented: $showWritingView) {
                 NewWritingView(showWritingView: $showWritingView)
             }
+            .sheet(isPresented: $showDetailView) {
+                if let data = selectedData {
+                    NewLogDetailView(selectedData: data, showDetailView: $showDetailView)
+                        .onAppear {
+                            print("NewLogDetailView is opened with selectedData: \(data)")
+                        }
+                }
+            }
+
+            
         }
     }
 }
