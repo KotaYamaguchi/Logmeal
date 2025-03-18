@@ -294,6 +294,7 @@ struct NewLogDetailView: View {
 
         do {
             try context.save()
+            print("データの保存に成功しました")
         } catch {
             print("データの保存に失敗しました: \(error)")
         }

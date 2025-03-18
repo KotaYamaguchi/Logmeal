@@ -7,8 +7,7 @@ struct NewContentView: View {
         ZStack{
             NavigationSplitView {
                 leftSideSection()
-//                    .navigationSplitViewColumnWidth(min: 200, ideal: 300)
-//                    .toolbar(removing: .sidebarToggle)
+                    .toolbar(removing: .sidebarToggle)
             } detail: {
                 rightSideSection()
             }
