@@ -121,7 +121,7 @@ struct NewHomeView: View {
             .fullScreenCover(isPresented: $showWritingView) {
                 NewWritingView(showWritingView: $showWritingView)
             }
-            .sheet(isPresented: $showDetailView) {
+            .fullScreenCover(isPresented: $showDetailView) {
                 if let data = selectedData {
                     NewLogDetailView(selectedData: data, showDetailView: $showDetailView)
                         .onAppear {
