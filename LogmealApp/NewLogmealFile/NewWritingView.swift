@@ -124,7 +124,7 @@ struct NewWritingView: View {
                                         PhotosPicker(selection: $selectedPhotoItem) {
                                             Label("写真を選ぶ", systemImage: "photo")
                                         }
-                                       
+                                        
                                     }
                                 }
                                 .padding()
@@ -169,37 +169,46 @@ struct NewWritingView: View {
                                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
                                     Text("食べた感想を教えてね！")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                                    TextField("",text: $editedText,axis:.vertical)
-                                        .textFieldStyle(.roundedBorder)
-                                        .frame(width: geometry.size.width*0.4,height:geometry.size.height*0.15)
-                                        .padding()
+                                    Image("mt_AjiwaiCard")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: geometry.size.height*0.4)
+                                        .overlay{
+                                            
+                                            TextField("カレーの色が家のものと違って明るくて、甘い味でした。フルーツヨーグルトが...",text: $editedText,axis:.vertical)
+                                                .frame(width: geometry.size.width*0.34,height:geometry.size.height*0.15)
+                                        }
                                 }
                                 .padding()
                                 .background{
                                     backgroundCard(geometry: geometry)
                                 }
                                 VStack{
-                                    Text("五感で味わってみよう！")
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                                    Text("見た目や匂いについて詳しく書いてみよう！")
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                                    ForEach(0..<editedSenseText.count,id:\.self){ index in
-                                        HStack(alignment:.bottom){
-                                            Image("\(senseIcons[index])")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width:geometry.size.width*0.03)
-                                            VStack(alignment:.leading){
-                                                TextField(sensePlaceholders[index],text:$editedSenseText[index],axis:.vertical)
-                                                    .frame(width:geometry.size.width*0.4)
-                                                Rectangle()
-                                                    .frame(width:geometry.size.width*0.4,height:1)
-                                                    .foregroundStyle(senseColors[index])
+                                    VStack{
+                                        Text("五感で味わってみよう！")
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                                        Text("見た目や匂いについて詳しく書いてみよう！")
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                    }
+                                    VStack(spacing:10){
+                                        ForEach(0..<editedSenseText.count,id:\.self){ index in
+                                            HStack(alignment:.bottom){
+                                                Image("\(senseIcons[index])")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .frame(width:geometry.size.width*0.04)
+                                                VStack(alignment:.leading){
+                                                    TextField(sensePlaceholders[index],text:$editedSenseText[index],axis:.vertical)
+                                                        .frame(width:geometry.size.width*0.4)
+                                                    Rectangle()
+                                                        .frame(width:geometry.size.width*0.4,height:1)
+                                                        .foregroundStyle(senseColors[index])
+                                                }
+                                                
                                             }
+                                            .padding()
                                             
                                         }
-                                        .padding()
-                                        
                                     }
                                 }
                                 .padding()
@@ -319,7 +328,7 @@ struct NewWritingView: View {
     @ViewBuilder private func backgroundCard(geometry:GeometryProxy) -> some View{
         ZStack{
             RoundedRectangle(cornerRadius: 10)
-                .frame(width: .infinity,height: .infinity)
+                .frame(width: geometry.size.width*0.47,height: .infinity)
                 .foregroundStyle(.white)
                 .shadow(radius: 10)
                 .overlay {
