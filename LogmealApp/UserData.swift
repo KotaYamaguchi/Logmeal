@@ -142,7 +142,11 @@ enum TimeStamp:String, Codable{
     var hearing:String
     var imagePath:URL
     var menu:[String]
-    init(saveDay: Date, times: TimeStamp? = nil, sight: String, taste: String, smell: String, tactile: String, hearing: String, imagePath: URL, menu: [String]) {
+    
+    @Transient
+    var lunchComments:String = ""
+    
+    init(saveDay: Date, times: TimeStamp? = .lunch, sight: String, taste: String, smell: String, tactile: String, hearing: String, imagePath: URL, menu: [String]) {
         self.saveDay = saveDay
         self.time = times
         self.sight = sight
