@@ -169,9 +169,3 @@ struct ShareSheet: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
-
-#Preview{
-    ChildHomeView()
-        .environmentObject(UserData())
-        .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
-}

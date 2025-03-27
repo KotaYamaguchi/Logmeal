@@ -41,9 +41,3 @@ struct TutorialView: View {
     }
 }
 
-#Preview {
-    SettingView()
-        .modelContainer(for: [AjiwaiCardData.self, MenuData.self, ColumnData.self])
-        .environmentObject(UserData())
-}
-

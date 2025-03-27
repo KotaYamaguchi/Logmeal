@@ -10,13 +10,13 @@ import SwiftUI
 struct TitleView: View {
     @State private var textScaleEffectValue:Double = 1.0
     @State private var showMenu:Bool = false
+    @EnvironmentObject var user: UserData
     var body: some View {
         NavigationStack{
             GeometryReader{ geometry in
                 ZStack(alignment: .topTrailing) {
                     NavigationLink{
-                        NewContentView()
-                            .navigationBarBackButtonHidden(true)
+                        InitialScreenSelectorView()
                     }label: {
                         ZStack{
                             Image("bg_AjiwaiCardView")
