@@ -25,7 +25,7 @@ struct LaunchScreen: View {
                     }
                 }
             }else{
-                ContentView()
+                TitleView()
             }
         }
     }

@@ -245,7 +245,3 @@ struct CharacterSelectView: View {
     }
 }
 
-#Preview{
-    ContentView()
-        .environmentObject(UserData())
-}

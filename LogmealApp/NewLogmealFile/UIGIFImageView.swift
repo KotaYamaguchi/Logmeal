@@ -3,7 +3,6 @@
 import Foundation
 import UIKit
 import SwiftUI
-import SwiftUI
 import SwiftyGif
 
 class UIGIFImageView: UIView,SwiftyGifDelegate {

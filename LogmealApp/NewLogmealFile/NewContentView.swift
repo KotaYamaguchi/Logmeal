@@ -1,4 +1,5 @@
 import SwiftUI
+
 struct NewContentView: View {
     let headLineTitles: [String] = ["ホーム", "コラム", "せってい"]
     @State private var isShowSelectedView: [Bool] = [true, false, false] // 初期状態で1つ目を選択
@@ -11,10 +12,9 @@ struct NewContentView: View {
             } detail: {
                 rightSideSection()
             }
-            // Remove the default sidebar toggle button
-//            NewCharacterView(showCharacterView: $showCharactarView)
-//                .scaleEffect(showCharactarView ? 1.0 : 0.0)
-//                .ignoresSafeArea()
+            NewCharacterView(showCharacterView: $showCharactarView)
+                .scaleEffect(showCharactarView ? 1.0 : 0.0)
+                .ignoresSafeArea()
         }
     }
     
@@ -85,4 +85,6 @@ struct NewContentView: View {
 
 #Preview {
     NewContentView()
+        .environmentObject(UserData())
+        .modelContainer(for: [AjiwaiCardData.self,MenuData.self,ColumnData.self])
 }
