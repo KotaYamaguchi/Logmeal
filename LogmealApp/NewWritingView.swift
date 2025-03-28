@@ -169,25 +169,25 @@ struct NewWritingView: View {
                                 }
                             }
                             VStack{
-                                VStack{
-                                    Text("ごはんはどうだった？")
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                                    Text("食べた感想を教えてね！")
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                                    Image("mt_AjiwaiCard")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: geometry.size.height*0.4)
-                                        .overlay{
-                                            
-                                            TextField("カレーの色が家のものと違って明るくて、甘い味でした。フルーツヨーグルトが...",text: $editedText,axis:.vertical)
-                                                .frame(width: geometry.size.width*0.34,height:geometry.size.height*0.15)
-                                        }
-                                }
-                                .padding()
-                                .background{
-                                    backgroundCard(geometry: geometry)
-                                }
+//                                VStack{
+//                                    Text("ごはんはどうだった？")
+//                                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
+//                                    Text("食べた感想を教えてね！")
+//                                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+//                                    Image("mt_AjiwaiCard")
+//                                        .resizable()
+//                                        .scaledToFit()
+//                                        .frame(height: geometry.size.height*0.4)
+//                                        .overlay{
+//                                            
+//                                            TextField("カレーの色が家のものと違って明るくて、甘い味でした。フルーツヨーグルトが...",text: $editedText,axis:.vertical)
+//                                                .frame(width: geometry.size.width*0.34,height:geometry.size.height*0.15)
+//                                        }
+//                                }
+//                                .padding()
+//                                .background{
+//                                    backgroundCard(geometry: geometry)
+//                                }
                                 VStack{
                                     VStack{
                                         Text("五感で味わってみよう！")

@@ -13,26 +13,13 @@ struct NewLogDetailView: View {
     @State private var timeStanp:TimeStamp? = nil
     @State private var currentDate: Date = Date()
     @Binding var showDetailView: Bool
-    @State var editedText: String
-    @State var editedSenseText: [String]
-    @State var editedMenu: [String]
+    @State var editedText: String = ""
+    @State var editedSenseText: [String] = []
+    @State var editedMenu: [String] = []
     @State var uiImage: UIImage?
     @State private var showDatePicker: Bool = false
     private let senseIcons = ["mt_Eye_icon", "mt_Ear_icon", "mt_Nose_icon", "mt_Tongue_icon", "mt_Hand_Icon"]
-    
-    init(selectedData: AjiwaiCardData, showDetailView: Binding<Bool>) {
-        self.selectedData = selectedData
-        self._showDetailView = showDetailView
-        self._editedText = State(initialValue: selectedData.taste)
-        self._editedSenseText = State(initialValue: [selectedData.sight, selectedData.hearing, selectedData.smell, selectedData.taste, selectedData.tactile])
-        self._editedMenu = State(initialValue: selectedData.menu)
-        if let imageData = try? Data(contentsOf: selectedData.imagePath),
-           let image = UIImage(data: imageData) {
-            self.uiImage = image
-        } else {
-            self.uiImage = nil
-        }
-    }
+
     private func dateFormatter(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -49,7 +36,7 @@ struct NewLogDetailView: View {
                     .scaledToFill()
                     .blur(radius: 3)
                     .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-
+                
                 VStack {
                     HStack {
                         Button {
@@ -60,36 +47,17 @@ struct NewLogDetailView: View {
                                 .scaledToFit()
                                 .frame(width: geometry.size.width * 0.05)
                         }
-
-                        Spacer()
-
-                        Button {
-                            if isEditing {
-                                saveEdits()
-                            }
-                            isEditing.toggle()
-                        } label: {
-                            Text(isEditing ? "保存" : "編集")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                                .padding(.horizontal)
-                                .padding(.vertical, 5)
-                                .background(Color.blue.opacity(0.7))
-                                .foregroundColor(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                    }
-                    .padding(.horizontal)
-                    HStack{
                         Spacer()
                         dateBar(geometry: geometry)
                     }
+                    .padding(.horizontal)
                     ScrollView {
                         HStack(alignment: .top) {
                             VStack {
                                 VStack {
                                     Text("今日のごはん")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
-
+                                    
                                     if let image = uiImage {
                                         Image(uiImage: image)
                                             .resizable()
@@ -127,11 +95,11 @@ struct NewLogDetailView: View {
                                 .background {
                                     backgroundCard(geometry: geometry)
                                 }
-
+                                
                                 VStack {
                                     Text("今日のメニュー")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
-
+                                    
                                     List {
                                         ForEach(0..<editedMenu.count, id: \.self) { index in
                                             if isEditing {
@@ -149,34 +117,34 @@ struct NewLogDetailView: View {
                                     backgroundCard(geometry: geometry)
                                 }
                             }
-
+                            
                             VStack {
-                                VStack {
-                                    Text("ごはんはどうだった？")
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
-
-                                    if isEditing {
-                                        TextField("", text: $editedText, axis: .vertical)
-                                            .frame(width: geometry.size.width * 0.34, height: geometry.size.height * 0.15)
-                                            .textFieldStyle(.roundedBorder)
-                                            .padding()
-                                    } else {
-                                        Text(editedText)
-                                            .frame(width: geometry.size.width * 0.34, height: geometry.size.height * 0.15)
-                                            .padding()
-                                    }
-                                }
-                                .padding()
-                                .background {
-                                    backgroundCard(geometry: geometry)
-                                }
-
+//                                VStack {
+//                                    Text("ごはんはどうだった？")
+//                                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
+//                                    
+//                                    if isEditing {
+//                                        TextField("", text: $editedText, axis: .vertical)
+//                                            .frame(width: geometry.size.width * 0.34, height: geometry.size.height * 0.15)
+//                                            .textFieldStyle(.roundedBorder)
+//                                            .padding()
+//                                    } else {
+//                                        Text(editedText)
+//                                            .frame(width: geometry.size.width * 0.34, height: geometry.size.height * 0.15)
+//                                            .padding()
+//                                    }
+//                                }
+//                                .padding()
+//                                .background {
+//                                    backgroundCard(geometry: geometry)
+//                                }
+                                
                                 VStack {
                                     VStack {
                                         Text("五感で味わってみよう！")
                                             .font(.custom("GenJyuuGothicX-Bold", size: 25))
                                     }
-
+                                    
                                     VStack(spacing: 10) {
                                         ForEach(0..<editedSenseText.count, id: \.self) { index in
                                             HStack(alignment: .bottom) {
@@ -184,7 +152,7 @@ struct NewLogDetailView: View {
                                                     .resizable()
                                                     .scaledToFit()
                                                     .frame(width: geometry.size.width * 0.04)
-
+                                                
                                                 VStack(alignment: .leading) {
                                                     if isEditing {
                                                         TextField("", text: $editedSenseText[index])
@@ -211,6 +179,39 @@ struct NewLogDetailView: View {
                         }
                         .padding()
                     }
+                }
+                VStack{
+                    Spacer()
+                    HStack{
+                        Spacer()
+                        if isEditing{
+                            Button{
+                                
+                            }label:{
+                                Text("保存する")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 5)
+                                    .background(Color.blue.opacity(0.7))
+                                    .foregroundColor(.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                        }
+                        Button {
+                            withAnimation {
+                                isEditing.toggle()
+                            }
+                        } label: {
+                            Text(isEditing ? "キャンセル" : "編集")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                .padding(.horizontal)
+                                .padding(.vertical, 5)
+                                .background(Color.blue.opacity(0.7))
+                                .foregroundColor(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                    }
+                    .padding(.horizontal)
                 }
             }
             .sheet(isPresented:$showDatePicker){
@@ -280,6 +281,9 @@ struct NewLogDetailView: View {
                         self.uiImage = uiImage
                     }
                 }
+            }
+            .onAppear(){
+                
             }
         }
     }
