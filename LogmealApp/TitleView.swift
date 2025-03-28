@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TitleView: View {
     @State private var textScaleEffectValue:Double = 1.0
     @State private var showMenu:Bool = false
     @EnvironmentObject var user: UserData
+    @Query private var allData: [AjiwaiCardData]
+    @Environment(\.modelContext) private var context
     var body: some View {
         NavigationStack{
             GeometryReader{ geometry in
@@ -74,7 +77,13 @@ struct TitleView: View {
                 }
                 Section {
                     Button {
-                     
+                        let appDomain = Bundle.main.bundleIdentifier
+                         UserDefaults.standard.removePersistentDomain(forName: appDomain!)
+                        do{
+                            try context.delete(model:AjiwaiCardData.self,includeSubclasses: true)
+                        }catch{
+                            print("error:\(error.localizedDescription)")
+                        }
                     } label: {
                         Text("データを全て消す")
                             .foregroundStyle(Color.blue)
