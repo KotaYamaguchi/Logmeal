@@ -18,6 +18,8 @@ struct NewWritingView: View {
     @State private var showCameraPicker = false
     @State private var showingSaveAlert = false
     @State private var showDatePicker:Bool = false
+    @State private var saveResultMessage: String? = nil
+    @State private var showSaveResultAlert: Bool = false
     private let senseIcons = ["mt_Eye_icon", "mt_Ear_icon", "mt_Nose_icon", "mt_Tongue_icon", "mt_Hand_Icon"]
     private let senseTitles = ["みため", "おと", "におい", "あじ", "さわりごこち"]
     private let sensePlaceholders = [
@@ -49,9 +51,12 @@ struct NewWritingView: View {
         
         do {
             try context.save()
+            saveResultMessage = "保存に成功しました！"
         } catch {
             print("コンテキストの保存エラー: \(error)")
+            saveResultMessage = "保存に失敗しました…"
         }
+        showSaveResultAlert = true
     }
     
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
@@ -237,19 +242,28 @@ struct NewWritingView: View {
                                     uiImage: uiImage,
                                     menu: editedMenu
                                 )
-                                showWritingView = false
                             }
-                        }label:{
+                        } label:{
                             Text("ほぞんする")
                                 .font(.custom("GenJyuuGothicX-Bold",size:15))
                                 .frame(width: 180, height: 50)
                                 .background(Color.white)
-                                .foregroundStyle( Color.buttonColor)
+                                .foregroundStyle(Color.buttonColor)
                                 .clipShape(RoundedRectangle(cornerRadius: 15))
                                 .overlay{
                                     RoundedRectangle(cornerRadius: 15)
                                         .stroke(Color.buttonColor ,lineWidth: 4)
                                 }
+                        }
+                        .alert(isPresented: $showSaveResultAlert) {
+                            Alert(
+                                title: Text(saveResultMessage ?? ""),
+                                dismissButton: .default(Text("OK")) {
+                                    if saveResultMessage == "保存に成功しました！" {
+                                        showWritingView = false
+                                    }
+                                }
+                            )
                         }
                     }
                 }
