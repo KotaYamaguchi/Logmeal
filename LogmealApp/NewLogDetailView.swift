@@ -9,12 +9,13 @@ struct NewLogDetailView: View {
     @State private var isEditing: Bool = false
     @State private var showCameraPicker = false
     @State private var selectedPhotoItem: PhotosPickerItem? = nil
-    let selectedData: AjiwaiCardData
+    let dataIndex: Int
+    @Query private var allData: [AjiwaiCardData]
     @State private var timeStanp:TimeStamp? = nil
     @State private var currentDate: Date = Date()
     @Binding var showDetailView: Bool
     @State var editedText: String = ""
-    @State var editedSenseText: [String] = []
+    @State var editedSenseText: [String] = ["","","","",""]
     @State var editedMenu: [String] = []
     @State var uiImage: UIImage?
     @State private var showDatePicker: Bool = false
@@ -57,21 +58,18 @@ struct NewLogDetailView: View {
                                 VStack {
                                     Text("今日のごはん")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                                    
                                     if let image = uiImage {
                                         Image(uiImage: image)
                                             .resizable()
+                                            .frame(width: geometry.size.width*0.4,height:geometry.size.height*0.4)
                                             .scaledToFit()
-                                            .frame(width: geometry.size.width * 0.38)
-                                            .cornerRadius(15)
-                                            .shadow(radius: 5)
-                                            .padding()
+                                            .clipped()
                                     } else {
                                         Image("mt_No_Image")
                                             .resizable()
+                                            .frame(width: geometry.size.width*0.4,height:geometry.size.height*0.4)
                                             .scaledToFit()
-                                            .frame(width: geometry.size.width * 0.38)
-                                            .padding()
+                                            .clipped()
                                     }
                                     if isEditing{
                                         HStack(spacing:30){
@@ -92,10 +90,6 @@ struct NewLogDetailView: View {
                                     }
                                 }
                                 .padding()
-                                .background {
-                                    backgroundCard(geometry: geometry)
-                                }
-                                
                                 VStack {
                                     Text("今日のメニュー")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
@@ -113,11 +107,10 @@ struct NewLogDetailView: View {
                                     .scrollContentBackground(.hidden)
                                 }
                                 .padding()
-                                .background {
-                                    backgroundCard(geometry: geometry)
-                                }
                             }
-                            
+                            .background {
+                                backgroundCard(geometry: geometry)
+                            }
                             VStack {
 //                                VStack {
 //                                    Text("ごはんはどうだった？")
@@ -140,11 +133,8 @@ struct NewLogDetailView: View {
 //                                }
                                 
                                 VStack {
-                                    VStack {
                                         Text("五感で味わってみよう！")
                                             .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                                    }
-                                    
                                     VStack(spacing: 10) {
                                         ForEach(0..<editedSenseText.count, id: \.self) { index in
                                             HStack(alignment: .bottom) {
@@ -186,7 +176,9 @@ struct NewLogDetailView: View {
                         Spacer()
                         if isEditing{
                             Button{
-                                
+                                if let uiimage = self.uiImage, let time = self.timeStanp{
+                                    saveEdits()
+                                }
                             }label:{
                                 Text("保存する")
                                     .font(.custom("GenJyuuGothicX-Bold", size: 20))
@@ -282,25 +274,42 @@ struct NewLogDetailView: View {
                     }
                 }
             }
-            .onAppear(){
-                
+            .onAppear {
+                let selected = allData[dataIndex]
+                currentDate = selected.saveDay
+                timeStanp = selected.time
+                editedText = selected.taste
+                editedSenseText = [
+                    selected.sight,
+                    selected.hearing,
+                    selected.smell,
+                    selected.taste,
+                    selected.tactile
+                ]
+                editedMenu = selected.menu
+
+                if let imageData = try? Data(contentsOf: selected.imagePath),
+                   let loadedImage = UIImage(data: imageData) {
+                    uiImage = loadedImage
+                }
             }
         }
     }
     private func saveEdits() {
-        selectedData.taste = editedText
-        selectedData.sight = editedSenseText[0]
-        selectedData.hearing = editedSenseText[1]
-        selectedData.smell = editedSenseText[2]
-        selectedData.taste = editedSenseText[3]
-        selectedData.tactile = editedSenseText[4]
-        selectedData.menu = editedMenu
+        var selected = allData[dataIndex]
+        selected.taste = editedText
+        selected.sight = editedSenseText[0]
+        selected.hearing = editedSenseText[1]
+        selected.smell = editedSenseText[2]
+        selected.taste = editedSenseText[3]
+        selected.tactile = editedSenseText[4]
+        selected.menu = editedMenu
 
         do {
             try context.save()
-            print("データの保存に成功しました")
+            print("保存成功")
         } catch {
-            print("データの保存に失敗しました: \(error)")
+            print("保存失敗: \(error)")
         }
     }
     @ViewBuilder private func backgroundCard(geometry: GeometryProxy) -> some View {
