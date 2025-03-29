@@ -43,19 +43,41 @@ struct NewWritingView: View {
         formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: date)
     }
-    func saveCurrentData(saveDay: Date, times: TimeStamp, sight: String, taste: String, smell: String, tactile: String, hearing: String, uiImage: UIImage, menu: [String]){
+    func saveCurrentData(
+        saveDay: Date,
+        times: TimeStamp,
+        sight: String,
+        taste: String,
+        smell: String,
+        tactile: String,
+        hearing: String,
+        uiImage: UIImage,
+        menu: [String]
+    ) {
         let imagePath: URL = getDocumentPath(saveData: uiImage, fileName: dateFormatter(date: saveDay))
-        let newData = AjiwaiCardData(saveDay: saveDay, times: times, sight: sight, taste: taste, smell: smell, tactile: tactile, hearing: hearing, imagePath: imagePath, menu: menu)
-        
+        let newData = AjiwaiCardData(
+            saveDay: saveDay,
+            times: times,
+            sight: sight,
+            taste: taste,
+            smell: smell,
+            tactile: tactile,
+            hearing: hearing,
+            imagePath: imagePath,
+            menu: menu
+        )
+
+        // ⬇︎ 追加：SwiftDataに挿入
         context.insert(newData)
-        
+
         do {
-            try context.save()
+            try context.save()  // ⬅︎ 実際に保存
             saveResultMessage = "保存に成功しました！"
         } catch {
-            print("コンテキストの保存エラー: \(error)")
+            print("保存に失敗しました: \(error)")
             saveResultMessage = "保存に失敗しました…"
         }
+
         showSaveResultAlert = true
     }
     
@@ -91,6 +113,38 @@ struct NewWritingView: View {
                         Spacer()
                         dateBar(geometry: geometry)
                     }
+                    HStack{
+                        Spacer()
+                        HStack{
+                            Text("いつのごはん？")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                                .padding(.leading)
+
+                            HStack(spacing: 20) {
+                                ForEach([TimeStamp.morning, .lunch, .dinner], id: \.self) { time in
+                                    Button {
+                                        timeStanp = time
+                                    } label: {
+                                        HStack {
+                                            
+                                            Text(labelFor(time: time))
+                                                .font(.title2)
+                                                .bold()
+                                        }
+                                        .padding(.vertical, 10)
+                                        .padding(.horizontal, 16)
+                                        .foregroundColor(.white)
+                                        .background(
+                                            Capsule()
+                                                .foregroundStyle(timeStanp == time ? Color.cyan : Color.gray.opacity(0.4))
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top)
                     ScrollView{
                         HStack(alignment:.top){
                             VStack{
@@ -167,6 +221,7 @@ struct NewWritingView: View {
                                 .background{
                                     backgroundCard(geometry: geometry)
                                 }
+                                
                             }
                             VStack{
 //                                VStack{
@@ -179,7 +234,7 @@ struct NewWritingView: View {
 //                                        .scaledToFit()
 //                                        .frame(height: geometry.size.height*0.4)
 //                                        .overlay{
-//                                            
+//
 //                                            TextField("カレーの色が家のものと違って明るくて、甘い味でした。フルーツヨーグルトが...",text: $editedText,axis:.vertical)
 //                                                .frame(width: geometry.size.width*0.34,height:geometry.size.height*0.15)
 //                                        }
@@ -220,7 +275,9 @@ struct NewWritingView: View {
                                 .background{
                                     backgroundCard(geometry: geometry)
                                 }
+                                
                             }
+                            
                         }
                         .padding()
                     }
@@ -269,62 +326,7 @@ struct NewWritingView: View {
                 }
                 .padding()
             }
-            .sheet(isPresented:$showDatePicker){
-                VStack{
-                    DatePicker("", selection: $currentDate,displayedComponents: [.date])
-                        .datePickerStyle(.graphical)
-                    Divider()
-                    HStack{
-                        Spacer()
-                        Text("いつのごはん？")
-                            .font(.title2)
-                        Spacer()
-                        Button{
-                            timeStanp = .morning
-                        }label:{
-                            Text("あさ")
-                                .font(.title2)
-                                .foregroundStyle(.white)
-                                .padding()
-                                .background{
-                                    Circle()
-                                        .foregroundStyle(.cyan)
-                                }
-                        }
-                        Button{
-                            timeStanp = .lunch
-                        }label:{
-                            Text("ひる")
-                                .font(.title2)
-                                .foregroundStyle(.white)
-                                .padding()
-                                .background{
-                                    Circle()
-                                        .foregroundStyle(.cyan)
-                                }
-                        }
-                        Button{
-                            timeStanp = .morning
-                        }label:{
-                            Text("よる")
-                                .font(.title2)
-                                .foregroundStyle(.white)
-                                .padding()
-                                .background{
-                                    Circle()
-                                        .foregroundStyle(.cyan)
-                                }
-                        }
-                        Spacer()
-                    }
-                    Button{
-                        showDatePicker = false
-                    }label:{
-                        Text("とじる")
-                    }
-                }
-                .padding()
-            }
+            
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiImage, sourceType: .camera)
                     .ignoresSafeArea()
@@ -404,21 +406,34 @@ struct NewWritingView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width:geometry.size.width*0.32)
+                    .shadow(radius: 3,y:10)
                     .overlay {
-                        HStack{
+                        HStack {
                             Text(dateFormatter(date: currentDate))
-                                .font(.custom("GenJyuuGothicX-Bold", size: 28))
-                                .foregroundStyle(.white)
                             Text("：")
-                                .foregroundStyle(.white)
-                                .font(.custom("GenJyuuGothicX-Bold", size: 28))
                             Text(changeTimeStamp())
-                                .foregroundStyle(.white)
-                                .font(.custom("GenJyuuGothicX-Bold", size: 28))
                         }
+                        .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                        .foregroundColor(.white)
                     }
             }
             .buttonStyle(PlainButtonStyle())
+            .popover(isPresented: $showDatePicker) {
+                VStack {
+                    Rectangle()
+                        .foregroundStyle(.white)
+                        .frame(width:450,height: 450)
+                        .overlay {
+                            VStack{
+                                Text("日にちをえらぼう！")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                DatePicker("日付を選んでね", selection: $currentDate, displayedComponents: [.date])
+                                    .datePickerStyle(.graphical)
+                                    .labelsHidden()
+                            }
+                        }
+                }
+            }
         }
     }
     private func changeTimeStamp() -> String{
@@ -433,8 +448,26 @@ struct NewWritingView: View {
             return "あさ"
         }
     }
+
+    private func labelFor(time: TimeStamp) -> String {
+        switch time {
+        case .morning:
+            return "あさ"
+        case .lunch:
+            return "ひる"
+        case .dinner:
+            return "よる"
+        }
+    }
 }
 
 #Preview {
     NewWritingView(showWritingView: .constant(true))
+        .environmentObject(UserData())
+        .modelContainer(for: AjiwaiCardData.self)
+}
+#Preview {
+    NewContentView()
+        .environmentObject(UserData())
+        .modelContainer(for: AjiwaiCardData.self)
 }
