@@ -395,6 +395,7 @@ struct NewWritingView: View {
                 }
         }
     }
+    
     private func dateBar(geometry: GeometryProxy) -> some View {
         VStack(alignment:.trailing){
             Button {
@@ -418,22 +419,9 @@ struct NewWritingView: View {
                     }
             }
             .buttonStyle(PlainButtonStyle())
-            .popover(isPresented: $showDatePicker) {
-                VStack {
-                    Rectangle()
-                        .foregroundStyle(.white)
-                        .frame(width:450,height: 450)
-                        .overlay {
-                            VStack{
-                                Text("日にちをえらぼう！")
-                                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                                DatePicker("日付を選んでね", selection: $currentDate, displayedComponents: [.date])
-                                    .datePickerStyle(.graphical)
-                                    .labelsHidden()
-                            }
-                        }
-                }
-            }
+        .popover(isPresented: $showDatePicker) {
+            calendarPopoverContent()
+        }
         }
     }
     private func changeTimeStamp() -> String{
@@ -445,7 +433,7 @@ struct NewWritingView: View {
         case .dinner:
             return "よる"
         default:
-            return "あさ"
+            return "ー"
         }
     }
 
@@ -458,6 +446,24 @@ struct NewWritingView: View {
         case .dinner:
             return "よる"
         }
+    }
+    
+    @ViewBuilder
+    private func calendarPopoverContent() -> some View {
+        VStack {
+            Rectangle()
+                .foregroundStyle(.white)
+                .frame(width: 450, height: 40)
+                .overlay {
+                    Text("日にちをえらぼう！")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                }
+            DatePicker("日付を選んでね", selection: $currentDate, displayedComponents: [.date])
+                .datePickerStyle(.graphical)
+                .labelsHidden()
+                .padding()
+        }
+        .frame(width: 450)
     }
 }
 
