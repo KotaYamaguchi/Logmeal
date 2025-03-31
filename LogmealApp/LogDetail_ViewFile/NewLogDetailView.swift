@@ -176,7 +176,7 @@ struct NewLogDetailView: View {
                         Spacer()
                         if isEditing{
                             Button{
-                                if let uiimage = self.uiImage, let time = self.timeStanp{
+                                if let uiimage = self.uiImage,let time = self.timeStanp{
                                     saveEdits()
                                 }
                             }label:{
@@ -241,7 +241,7 @@ struct NewLogDetailView: View {
                                 }
                         }
                         Button{
-                            timeStanp = .morning
+                            timeStanp = .dinner
                         }label:{
                             Text("よる")
                                 .font(.title2)
@@ -275,20 +275,19 @@ struct NewLogDetailView: View {
                 }
             }
             .onAppear {
-                let selected = allData[dataIndex]
-                currentDate = selected.saveDay
-                timeStanp = selected.time
-                editedText = selected.taste
+                currentDate = allData[dataIndex].saveDay
+                timeStanp = allData[dataIndex].time
+                editedText = allData[dataIndex].taste
                 editedSenseText = [
-                    selected.sight,
-                    selected.hearing,
-                    selected.smell,
-                    selected.taste,
-                    selected.tactile
+                    allData[dataIndex].sight,
+                    allData[dataIndex].hearing,
+                    allData[dataIndex].smell,
+                    allData[dataIndex].taste,
+                    allData[dataIndex].tactile
                 ]
-                editedMenu = selected.menu
+                editedMenu = allData[dataIndex].menu
 
-                if let imageData = try? Data(contentsOf: selected.imagePath),
+                if let imageData = try? Data(contentsOf: allData[dataIndex].imagePath),
                    let loadedImage = UIImage(data: imageData) {
                     uiImage = loadedImage
                 }
@@ -296,22 +295,47 @@ struct NewLogDetailView: View {
         }
     }
     private func saveEdits() {
-        var selected = allData[dataIndex]
-        selected.taste = editedText
-        selected.sight = editedSenseText[0]
-        selected.hearing = editedSenseText[1]
-        selected.smell = editedSenseText[2]
-        selected.taste = editedSenseText[3]
-        selected.tactile = editedSenseText[4]
-        selected.menu = editedMenu
-
-        do {
-            try context.save()
-            print("保存成功")
-        } catch {
-            print("保存失敗: \(error)")
+        if let image = self.uiImage{
+            let oldImagePath = allData[dataIndex].imagePath
+            let NewImagePath = saveImageToDocumentsDirectory(image: image)
+            
+            allData[dataIndex].saveDay = currentDate
+            allData[dataIndex].time = timeStanp
+            allData[dataIndex].sight = editedSenseText[0]
+            allData[dataIndex].hearing = editedSenseText[1]
+            allData[dataIndex].smell = editedSenseText[2]
+            allData[dataIndex].taste = editedSenseText[3]
+            allData[dataIndex].tactile = editedSenseText[4]
+            allData[dataIndex].menu = editedMenu
+            allData[dataIndex].imagePath = NewImagePath
+            deleteOldImage(imagePath: oldImagePath)
+            
+            do {
+                try context.save()
+                print("保存成功")
+            } catch {
+                print("保存失敗: \(error)")
+            }
         }
     }
+    private func deleteOldImage(imagePath: URL){
+        do{
+            try FileManager.default.removeItem(at:imagePath)
+        }catch{
+            print(error.localizedDescription)
+        }
+    }
+    private func saveImageToDocumentsDirectory(image: UIImage) -> URL {
+           let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+           let fileName = UUID().uuidString + ".jpg"
+           let fileURL = documentDirectory.appendingPathComponent(fileName)
+           
+        if let data = image.jpegData(compressionQuality: 1.0) {
+               try? data.write(to: fileURL)
+           }
+           
+           return fileURL
+       }
     @ViewBuilder private func backgroundCard(geometry: GeometryProxy) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
