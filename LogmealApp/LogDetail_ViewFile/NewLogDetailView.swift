@@ -381,7 +381,7 @@ struct NewLogDetailView: View {
         case .dinner:
             return "よる"
         default:
-            return "あさ"
+            return "ー"
         }
     }
 }
