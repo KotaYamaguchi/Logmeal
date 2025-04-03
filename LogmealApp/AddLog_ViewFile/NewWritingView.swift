@@ -13,7 +13,7 @@ struct NewWritingView: View {
     @State private var uiImage: UIImage? = nil
     @State private var editedText: String = ""
     @State private var editedSenseText: [String] = ["","","","",""]
-    @State private var editedMenu: [String] = ["ご飯", "味噌汁", "鯖の味噌煮", "コールスロー"]
+    @State private var editedMenu: [String] = ["","","",""]
     @State private var editedSenses: [String] = Array(repeating: "", count: 5)
     @State private var showCameraPicker = false
     @State private var showingSaveAlert = false
@@ -73,6 +73,9 @@ struct NewWritingView: View {
         do {
             try context.save()  // ⬅︎ 実際に保存
             saveResultMessage = "保存に成功しました！"
+            print("メニュー = \(newData.menu)")
+            print("五感(聴覚) = \(newData.hearing)")
+            
         } catch {
             print("保存に失敗しました: \(error)")
             saveResultMessage = "保存に失敗しました…"
@@ -291,14 +294,15 @@ struct NewWritingView: View {
                                 saveCurrentData(
                                     saveDay: currentDate,
                                     times: timeStanp,
-                                    sight: editedSenses[0],
-                                    taste: editedSenses[3],
-                                    smell: editedSenses[2],
-                                    tactile: editedSenses[4],
-                                    hearing: editedSenses[1],
+                                    sight: editedSenseText[0],
+                                    taste: editedSenseText[3],
+                                    smell: editedSenseText[2],
+                                    tactile: editedSenseText[4],
+                                    hearing: editedSenseText[1],
                                     uiImage: uiImage,
                                     menu: editedMenu
                                 )
+
                             }
                         } label:{
                             Text("ほぞんする")

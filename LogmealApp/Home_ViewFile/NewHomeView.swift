@@ -20,6 +20,9 @@ struct NewHomeView: View {
                 }
                 addLogButton(geometry: geometry)
             }
+            .onAppear(){
+                print("ーーーーーーーーーーーーアプリを起動しました！ーーーーーーーーーーーー")
+            }
             .onChange(of: selectedIndex) { _, newValue in
                 showDetailView = (newValue != nil)
             }
