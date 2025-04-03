@@ -98,6 +98,7 @@
 			isa = PBXGroup;
 			children = (
 				922970312D958C3E00ADD160 /* LogmealApp.swift */,
+				927EAFEE2D98372D0067A465 /* LogDetail_ViewFile */,
 				927EAFF72D9839180067A465 /* AddLog_ViewFile */,
 				927EAFF62D9839040067A465 /* Column_ViewFile */,
 				927EAFF52D9838E80067A465 /* Root_ViewFile */,
@@ -106,7 +107,6 @@
 				927EAFF22D98381D0067A465 /* Helper_ViewFile */,
 				927EAFF12D9837BB0067A465 /* AppContents_File */,
 				927EAFEF2D9837730067A465 /* Home_ViewFile */,
-				927EAFEE2D98372D0067A465 /* LogDetail_ViewFile */,
 				923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */,
 				92EE828C2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf */,
 				92EE82882C74C1AD00080109 /* README_GenJyuu.txt */,
