@@ -29,7 +29,6 @@ struct NewLogDetailView: View {
                 backgroundImage(geometry: geometry)
                 contentLayout(geometry: geometry)
             }
-            .sheet(isPresented: $showDatePicker) { datePickerSheet }
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiImage, sourceType: .camera)
                     .ignoresSafeArea()
@@ -60,7 +59,9 @@ struct NewLogDetailView: View {
     private func contentLayout(geometry: GeometryProxy) -> some View {
         VStack {
             HeaderBarView(geometry: geometry, currentDate: $currentDate, timeStanp: $timeStanp, showDatePicker: $showDatePicker)
-            
+            if isEditing{
+                timeStampSection
+            }
             ScrollView {
                 HStack(alignment: .top) {
                     VStack {
@@ -79,31 +80,45 @@ struct NewLogDetailView: View {
                 .padding(.horizontal)
         }
     }
-    
-    private var datePickerSheet: some View {
+    private func labelFor(time: TimeStamp) -> String {
+        switch time {
+        case .morning:
+            return "あさ"
+        case .lunch:
+            return "ひる"
+        case .dinner:
+            return "よる"
+        }
+    }
+    private var timeStampSection: some View {
         VStack {
-            DatePicker("", selection: $currentDate, displayedComponents: [.date])
-                .datePickerStyle(.graphical)
-            Divider()
-            HStack {
+            HStack{
                 Spacer()
-                Text("いつのごはん？").font(.title2)
-                Spacer()
-                ForEach([TimeStamp.morning, TimeStamp.lunch, TimeStamp.dinner], id: \.self) { stamp in
-                    Button {
-                        timeStanp = stamp
-                    } label: {
-                        Text("\(stamp)")
-                            .font(.title2)
-                            .foregroundStyle(.white)
-                            .padding()
-                            .background(Circle().foregroundStyle(.cyan))
+                Text("いつのごはん？")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                    .padding(.leading)
+
+                HStack(spacing: 20) {
+                    ForEach([TimeStamp.morning, .lunch, .dinner], id: \.self) { time in
+                        Button {
+                            timeStanp = time
+                        } label: {
+                            HStack {
+                                
+                                Text(labelFor(time: time))
+                                    .font(.title2)
+                                    .bold()
+                            }
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 16)
+                            .foregroundColor(.white)
+                            .background(
+                                Capsule()
+                                    .foregroundStyle(timeStanp == time ? Color.cyan : Color.gray.opacity(0.4))
+                            )
+                        }
                     }
                 }
-                Spacer()
-            }
-            Button("とじる") {
-                showDatePicker = false
             }
         }
         .padding()
@@ -208,10 +223,29 @@ struct HeaderBarView: View {
                     }
             }
             .buttonStyle(PlainButtonStyle())
+            .popover(isPresented: $showDatePicker) {
+                calendarPopoverContent()
+            }
         }
         .padding(.horizontal)
     }
-    
+    @ViewBuilder
+    private func calendarPopoverContent() -> some View {
+        VStack {
+            Rectangle()
+                .foregroundStyle(.white)
+                .frame(width: 450, height: 40)
+                .overlay {
+                    Text("日にちをえらぼう！")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                }
+            DatePicker("日付を選んでね", selection: $currentDate, displayedComponents: [.date])
+                .datePickerStyle(.graphical)
+                .labelsHidden()
+                .padding()
+        }
+        .frame(width: 450)
+    }
     private func dateFormatter(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
