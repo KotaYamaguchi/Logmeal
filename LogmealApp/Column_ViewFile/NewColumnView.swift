@@ -5,6 +5,7 @@ struct NewColumnView: View {
     @State private var searchText: String = ""
     @State private var isOpenSortMenu: Bool = false
     @State private var sortTitle: String = "新しい順"
+    @State private var showQRscanner:Bool = false
     @Query private var allColumn: [ColumnData]
     // ソート済みのカラムリスト
     private var sortedColumns: [ColumnData] {
@@ -29,7 +30,12 @@ struct NewColumnView: View {
             }
         }
     }
-    
+    // 今日の日付を "yyyy-MM-dd" 形式で取得
+    private func formattedToday() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -37,6 +43,7 @@ struct NewColumnView: View {
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
+                ScrollViewReader{ proxy in
                 ZStack{
                     VStack {
                         HStack {
@@ -71,7 +78,15 @@ struct NewColumnView: View {
                                     }
                                 
                                 HStack {
-                                    Button {} label: {
+                                    Button {
+                                        if let todayColumn = sortedColumns.first(where: {
+                                            $0.columnDay == formattedToday()
+                                        }) {
+                                            withAnimation {
+                                                proxy.scrollTo(todayColumn.id, anchor: .top)
+                                            }
+                                        }
+                                    } label: {
                                         RoundedRectangle(cornerRadius: 30)
                                             .foregroundStyle(Color(red: 243/255, green: 180/255, blue: 187/255))
                                             .frame(width: geometry.size.width * 0.2, height: geometry.size.height * 0.06)
@@ -137,6 +152,7 @@ struct NewColumnView: View {
                                     .padding()
                                 }
                                 .padding(.horizontal, geometry.size.width * 0.05)
+                                .id(column.id)
                             }
                         }
                         .padding()
@@ -187,15 +203,65 @@ struct NewColumnView: View {
                     .position(x: geometry.size.width * 0.92, y: geometry.size.height * 0.15)
                     .offset(y: isOpenSortMenu ? geometry.size.height * 0.1 : geometry.size.height * 0.07)
                     .opacity(isOpenSortMenu ? 1.0 : 0)
+                    Button{
+                        showQRscanner = true
+                    }label:{
+                        Circle()
+                            .foregroundStyle(.cyan)
+                            .frame(width:100)
+                            .overlay{
+                                Image(systemName:"plus")
+                                    .font(.system(size: 60))
+                                    .foregroundStyle(.white)
+                            }
+                    }
+                    .position(x:geometry.size.width*0.95,y:geometry.size.height*0.9)
                 }
-                
+            }
             }
             .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
+            .sheet(isPresented:$showQRscanner){
+                ScannerView(isPresentingScanner: $showQRscanner)
+            }
         }
     }
 }
 #Preview{
-    NewHomeView()
+    NewContentView()
         .environmentObject(UserData())
         .modelContainer(for: [AjiwaiCardData.self,MenuData.self,ColumnData.self])
+}
+
+#Preview {
+    let previewContainer = try! ModelContainer(
+        for: ColumnData.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    
+    // 今日の日付をフォーマット
+    let today: String = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }()
+    
+    let sampleData: [ColumnData] = [
+        ColumnData(columnDay: "2025-04-01", title: "春の味覚", caption: "春の食材を楽しもう"),
+        ColumnData(columnDay: "2025-04-02", title: "栄養バランス", caption: "色とりどりの野菜を取り入れよう"),
+        ColumnData(columnDay: "2025-04-03", title: "食育ってなに？", caption: "食育の意味を考えよう"),
+        ColumnData(columnDay: "2025-04-04", title: "和食の魅力", caption: "味噌汁とご飯の組み合わせ"),
+        ColumnData(columnDay: "2025-04-05", title: "朝ごはんの大切さ", caption: "一日の元気は朝ごはんから"),
+        ColumnData(columnDay: today, title: "今日のおすすめ", caption: "今日の給食に使われている旬の野菜！"),
+        ColumnData(columnDay: "2025-04-07", title: "噛む力", caption: "よく噛むことで脳が活性化"),
+        ColumnData(columnDay: "2025-04-08", title: "水分補給", caption: "ジュースよりお水やお茶を"),
+        ColumnData(columnDay: "2025-04-09", title: "おやつの選び方", caption: "体に優しいおやつとは？"),
+        ColumnData(columnDay: "2025-04-10", title: "マナーを学ぼう", caption: "いただきますの意味")
+    ]
+    
+    for column in sampleData {
+        previewContainer.mainContext.insert(column)
+    }
+    
+    return NewColumnView()
+        .modelContainer(previewContainer)
 }
