@@ -24,7 +24,7 @@ struct NewSettingView: View {
                         .frame(width:550)
                     settingRow(destination: NewProfileEditView(userData: userData), imageName: "mt_newSettingView_profile")
                     settingRow(destination: soundSettingView(), imageName: "mt_newSettingView_sound")
-                    settingRow(destination: dataShareView(), imageName: "mt_newSettingView_share")
+                    settingRow(destination: ShareExportView(), imageName: "mt_newSettingView_share")
                     settingRow(destination: otherSettingView(), imageName: "mt_newSettingView_others")
                     Spacer()
                     Image("mt_newSettingView_aboutTheApp")
@@ -61,7 +61,7 @@ struct NewSettingView: View {
                     RoundedRectangle(cornerRadius: 20)
                         .frame(width: 600, height: 350)
                         .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
-                        
+                    
                     RoundedRectangle(cornerRadius: 20)
                         .frame(width: 550, height: 300)
                         .foregroundStyle(.white)
@@ -158,24 +158,10 @@ struct NewSettingView: View {
             }
         }
     }
-    private func dataShareView() -> some View{
-        VStack{
-            
-        }
-    }
+
     private func otherSettingView() -> some View{
         VStack{
             
-        }
-    }
-    private func showPrologueVideo() -> some View{
-        VStack{
-            
-        }
-    }
-    private func howUseAppView() -> some View{
-        VStack{
-            TutorialView(imageArray: tutorialImage)
         }
     }
 }
@@ -290,9 +276,192 @@ struct NewProfileEditView: View {
     }
 }
 
+import SwiftUI
+import SwiftData
+
+struct ShareExportView: View {
+    @Environment(\.modelContext) private var context
+    @Query private var allData: [AjiwaiCardData]
+    @EnvironmentObject var user: UserData
+    
+    @State private var pdfURL: URL?
+    @State private var showShareSheet = false
+    @State private var isGenerating = false
+    @State private var showActionSheet = false
+    @State private var showDatePicker = false
+    @State private var selectedFileType: FileType = .pdf
+    @State private var startDate: Date = Date()
+    @State private var endDate: Date = Date()
+
+    enum FileType {
+        case pdf, csv
+    }
+    
+    var body: some View {
+        ZStack{
+            Image("bg_newSettingView.png")
+                .resizable()
+                .ignoresSafeArea()
+            RoundedRectangle(cornerRadius: 20)
+                .frame(width: 350, height: 200)
+                .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
+        VStack(spacing: 20) {
+            Button{
+                selectedFileType = .pdf
+                showDatePicker = true
+            }label:{
+                Text("PDFで共有")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                    .frame(width: 300, height: 50)
+                    .background(Color.white)
+                    .foregroundStyle(Color.black)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+            }
+            .disabled(allData.isEmpty)
+            Button{
+                selectedFileType = .csv
+                showDatePicker = true
+            }label:{
+                Text("CSVで共有")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                    .frame(width: 300, height: 50)
+                    .background(Color.white)
+                    .foregroundStyle(Color.black)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+            }
+            .disabled(allData.isEmpty)
+        }
+        .padding()
+        .sheet(isPresented: $showDatePicker) {
+            VStack {
+                HStack {
+                    VStack {
+                        Text("この日から")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                        DatePicker("開始日", selection: $startDate, displayedComponents: .date)
+                            .datePickerStyle(GraphicalDatePickerStyle())
+                            .padding()
+                    }
+                    Divider()
+                        .frame(height: 400)
+                    VStack {
+                        Text("この日まで")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                        DatePicker("終了日", selection: $endDate, displayedComponents: .date)
+                            .datePickerStyle(GraphicalDatePickerStyle())
+                            .padding()
+                    }
+                }
+                Button("データを共有する") {
+                    
+                    showDatePicker = false
+                    isGenerating = true
+                    Task {
+                        await generateAndShareFile()
+                    }
+                }
+                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                .frame(width: 220, height: 50)
+                .background(Color.cyan)
+                .foregroundStyle(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .buttonStyle(PlainButtonStyle())
+                Button("キャンセル") {
+                    showDatePicker = false
+                    
+                }
+                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                .frame(width: 220, height: 50)
+                .background(Color.gray)
+                .foregroundStyle(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let url = pdfURL {
+                ShareSheet(activityItems: [url])
+                    .onAppear() {
+                        isGenerating = false
+                    }
+            }
+        }
+        .overlay {
+            if isGenerating {
+                ZStack {
+                    Color.gray.opacity(0.5).ignoresSafeArea()
+                    ProgressView("共有の準備中...")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 17))
+                        .padding()
+                        .background(Color.black.opacity(0.7))
+                        .tint(.white)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+            }
+        }
+    }
+    }
+
+    @MainActor
+    func generateAndShareFile() async {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: startDate)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endDate))!
+
+        let filteredData = allData
+            .filter { $0.saveDay >= startOfDay && $0.saveDay < endOfDay }
+            .sorted(by: { $0.saveDay < $1.saveDay })
+
+        switch selectedFileType {
+        case .pdf:
+            let pdfGenerator = MultiPagePDFGenerator(
+                allData: filteredData,
+                userName: user.name,
+                userGrade: user.grade,
+                userClass: user.yourClass,
+                userAge: String(user.age),
+                userSex: user.gender
+            )
+            let pdfPath = await pdfGenerator.generatePDF()
+
+            await MainActor.run {
+                self.pdfURL = pdfPath
+                self.isGenerating = false
+                self.showShareSheet = true
+            }
+
+        case .csv:
+            let exportData = ExportData(
+                userName: user.name,
+                userGrade: user.grade,
+                userClass: user.yourClass,
+                userAge: String(user.age),
+                userSex: user.gender
+            )
+            let filename = "\(user.grade)年 \(user.yourClass)組\(user.name)の給食の記録"
+            exportData.createCSV(filename: filename, datas: filteredData)
+
+            let documentsPath = exportData.getDocumentsDirectory()
+            let csvPath = documentsPath.appendingPathComponent("\(filename).csv")
+
+            await MainActor.run {
+                self.pdfURL = csvPath
+                self.isGenerating = false
+                self.showShareSheet = true
+            }
+        }
+    }
+}
+
 
 #Preview{
     NewContentView()
+        .environmentObject(UserData())
+        .modelContainer(for: AjiwaiCardData.self)
+}
+#Preview{
+    ShareExportView()
         .environmentObject(UserData())
         .modelContainer(for: AjiwaiCardData.self)
 }
