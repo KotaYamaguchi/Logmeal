@@ -49,114 +49,113 @@ struct NewSettingView: View {
         }
     }
     private func soundSettingView() -> some View{
-        VStack{
-            VStack {
-                Text("BGMの音量")
-                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                HStack {
-                    Button {
-                        bgmVolume = max(bgmVolume - 0.1, 0)
-                        bgmManager.setBGMVolume(bgmVolume)
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .font(.title)
-                            .foregroundStyle(.orange)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    Slider(value: $bgmVolume, in: 0...1, onEditingChanged: { editing in
-                        if !editing {
-                            bgmManager.setBGMVolume(bgmVolume)
-                        }
-                    })
-                    .tint(.orange)
-                    .padding(.horizontal)
-                    Button {
-                        bgmVolume = min(bgmVolume + 0.1, 1)
-                        bgmManager.setBGMVolume(bgmVolume)
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title)
-                            .foregroundStyle(.orange)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    Button {
-                        bgmManager.toggleBGM()
-                    } label: {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .frame(width: 65, height: 35)
-                                .foregroundStyle(Color(red: 0.42, green: 0.4, blue: 0.4))
-                                .offset(y: 5)
-                            RoundedRectangle(cornerRadius: 10)
-                                .frame(width: 65, height: 35)
-                                .foregroundStyle(bgmManager.isBGMOn ? .orange : .gray)
-                                .overlay {
-                                    Text(bgmManager.isBGMOn ? "ON" : "OFF")
-                                        .font(.title)
-                                        .foregroundStyle(.white)
-                                }
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
-            .padding()
-            // SE音量調整スライダー
-            VStack {
-                Text("効果音の音量")
-                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                HStack {
-                    Button {
-                        soundManager.soundVolume = max(soundManager.soundVolume - 0.1, 0)
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .font(.title)
-                            .foregroundStyle(.orange)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    Slider(value: Binding(
-                        get: { soundManager.soundVolume },
-                        set: { newVolume in
-                            soundManager.setSoundVolume(newVolume)
-                        }
-                    ), in: 0...1, onEditingChanged: { editing in
-                        if !editing {
-                            soundManager.setSoundVolume(soundManager.soundVolume)
-                        }
-                    })
-                    .tint(.orange)
-                    .padding(.horizontal)
-                    Button {
-                        soundManager.soundVolume = min(soundManager.soundVolume + 0.1, 1)
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title)
-                            .foregroundStyle(.orange)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    Button{
-                        soundManager.toggleSound()
+        ZStack{
+            Image("bg_newSettingView.png")
+                .resizable()
+                .ignoresSafeArea()
+            
+            VStack(alignment:.leading){
+                Text("サウンド")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 30))
+                ZStack{
+                    RoundedRectangle(cornerRadius: 20)
+                        .frame(width: 600, height: 350)
+                        .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
                         
-                    }label:{
-                        ZStack{
-                            RoundedRectangle(cornerRadius: 10)
-                                .frame(width: 65, height: 35)
-                                .foregroundStyle(Color(red: 0.42, green: 0.4, blue: 0.4))
-                                .offset(y:5)
-                            RoundedRectangle(cornerRadius: 10)
-                                .frame(width: 65, height: 35)
-                                .foregroundStyle( soundManager.isSoundOn ? .orange : .gray)
-                                .overlay{
-                                    Text( soundManager.isSoundOn ? "ON" : "OFF")
-                                        .font(.title)
-                                        .foregroundStyle(.white)
+                    RoundedRectangle(cornerRadius: 20)
+                        .frame(width: 550, height: 300)
+                        .foregroundStyle(.white)
+                    VStack(alignment:.leading){
+                        //BGM変更スライダー
+                        VStack(alignment:.leading){
+                            HStack{
+                                Text("BGMの音量")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                    .foregroundStyle(bgmManager.isBGMOn ? .black : .gray)
+                                Spacer()
+                                
+                                Image(systemName: "speaker.wave.2")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(bgmManager.isBGMOn ? .black : .gray)
+                                Button {
+                                    bgmManager.toggleBGM()
+                                } label: {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .frame(width: 65, height: 35)
+                                            .foregroundStyle(Color(red: 0.42, green: 0.4, blue: 0.4))
+                                            .offset(y: 5)
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .frame(width: 65, height: 35)
+                                            .foregroundStyle(bgmManager.isBGMOn ? .orange : .gray)
+                                            .overlay {
+                                                Text(bgmManager.isBGMOn ? "ON" : "OFF")
+                                                    .font(.title)
+                                                    .foregroundStyle(.white)
+                                            }
+                                    }
                                 }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                            Slider(value: $bgmVolume, in: 0...1, step: 0.1,onEditingChanged: { editing in
+                                if !editing {
+                                    bgmManager.setBGMVolume(bgmVolume)
+                                }
+                            })
+                            .tint(bgmManager.isBGMOn ? .orange : .gray)
+                            .disabled(!bgmManager.isBGMOn)
+                            .padding(.horizontal)
                         }
+                        .padding()
+                        // SE音量調整スライダー
+                        VStack(alignment:.leading){
+                            HStack{
+                                Text("効果音の音量")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                    .foregroundStyle(soundManager.isSoundOn ? .black : .gray)
+                                Spacer()
+                                Image(systemName: "speaker.wave.2")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(soundManager.isSoundOn ? .black : .gray)
+                                Button{
+                                    soundManager.toggleSound()
+                                }label:{
+                                    ZStack{
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .frame(width: 65, height: 35)
+                                            .foregroundStyle(Color(red: 0.42, green: 0.4, blue: 0.4))
+                                            .offset(y:5)
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .frame(width: 65, height: 35)
+                                            .foregroundStyle( soundManager.isSoundOn ? .orange : .gray)
+                                            .overlay{
+                                                Text( soundManager.isSoundOn ? "ON" : "OFF")
+                                                    .font(.title)
+                                                    .foregroundStyle(.white)
+                                            }
+                                    }
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                            }
+                            
+                            Slider(value: Binding(
+                                get: { soundManager.soundVolume },
+                                set: { newVolume in
+                                    soundManager.setSoundVolume(newVolume)
+                                }
+                            ), in: 0...1, step:0.1, onEditingChanged: { editing in
+                                if !editing {
+                                    soundManager.setSoundVolume(soundManager.soundVolume)
+                                }
+                            })
+                            .tint(soundManager.isSoundOn ? .orange : .gray)
+                            .disabled(!soundManager.isSoundOn)
+                        }
+                        .padding()
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .frame(width: 500, height: 300)
                 }
             }
-            .padding()
         }
     }
     private func dataShareView() -> some View{
@@ -294,4 +293,6 @@ struct NewProfileEditView: View {
 
 #Preview{
     NewContentView()
+        .environmentObject(UserData())
+        .modelContainer(for: AjiwaiCardData.self)
 }
