@@ -158,7 +158,6 @@ struct NewSettingView: View {
             }
         }
     }
-
     private func otherSettingView() -> some View{
         VStack{
             
