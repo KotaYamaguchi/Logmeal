@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ProfileSettingView: View {
     @EnvironmentObject var userData:UserData
-    @State private var isFirst:Bool = false
+    @State var isFirst:Bool
     @State private var userName: String = ""
     @State private var userGrade: String = ""
     @State private var userClass: String = ""
@@ -429,6 +429,6 @@ struct ProfileSettingView: View {
 }
 
 #Preview{
-    ProfileSettingView()
+    ProfileSettingView(isFirst: false)
         .environmentObject(UserData())
 }

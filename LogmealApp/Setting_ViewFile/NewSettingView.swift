@@ -22,7 +22,7 @@ struct NewSettingView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width:550)
-                    settingRow(destination: ProfileSettingView(), imageName: "mt_newSettingView_profile")
+                    settingRow(destination: ProfileSettingView(isFirst: false), imageName: "mt_newSettingView_profile")
                     settingRow(destination: soundSettingView(), imageName: "mt_newSettingView_sound")
                     settingRow(destination: ShareExportView(), imageName: "mt_newSettingView_share")
                     settingRow(destination: otherSettingView(), imageName: "mt_newSettingView_others")
