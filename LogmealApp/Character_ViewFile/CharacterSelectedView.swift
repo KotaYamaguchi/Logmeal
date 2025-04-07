@@ -5,7 +5,6 @@ struct CharacterSelectView: View {
     @State private var selectedCharacter: Profile? = nil
     @State private var isDetailViewPresented = false
     @Binding var isSelectedCharacter: Bool
-    @Binding var showFillUserName: Bool
     @State private var focusedIndex: Int? = nil
     @State private var hasBeenTapped = false
     private let soundManager = SoundManager.shared
@@ -200,7 +199,6 @@ struct CharacterSelectView: View {
                                 soundManager.playSound(named: "se_positive")
                                 withAnimation {
                                     isSelectedCharacter = false
-                                    showFillUserName = true
                                 }
                                 print(user.characterName)
                             }
