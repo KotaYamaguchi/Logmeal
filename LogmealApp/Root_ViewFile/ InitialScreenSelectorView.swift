@@ -5,7 +5,6 @@ struct InitialScreenSelectorView: View {
     var body: some View {
         if user.isLogined{
             NewContentView()
-                .navigationBarBackButtonHidden(true)
         }else{
             FirstLoginView()
         }

@@ -8,7 +8,7 @@ struct NewSettingView: View {
     @State private var bgmVolume: Float = BGMManager.shared.bgmVolume
     @EnvironmentObject var userData: UserData
     var body: some View {
-        NavigationStack {
+        NavigationStack{
             ZStack{
                 Image("bg_newSettingView.png")
                     .resizable()
@@ -26,6 +26,13 @@ struct NewSettingView: View {
                     settingRow(destination: soundSettingView(), imageName: "mt_newSettingView_sound")
                     settingRow(destination: ShareExportView(), imageName: "mt_newSettingView_share")
                     settingRow(destination: otherSettingView(), imageName: "mt_newSettingView_others")
+                    Button{
+                        withAnimation {
+                            userData.isTitle = true
+                        }
+                    }label:{
+                        rowDesignWithoutImage()
+                    }
                     Spacer()
                     Image("mt_newSettingView_aboutTheApp")
                         .resizable()
@@ -37,6 +44,22 @@ struct NewSettingView: View {
                 }
             }
         }
+    }
+    private func rowDesignWithoutImage() -> some View{
+            Rectangle()
+                .foregroundStyle(.white)
+                .frame(width:550,height: 50)
+                .overlay{
+                    HStack(spacing:30){
+                        Image(systemName: "arrowshape.turn.up.backward")
+                            .font(.system(size: 30))
+                        Text("タイトルに戻る")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                        Spacer()
+                        
+                    }
+                    .padding(.horizontal)
+                }
     }
     private func settingRow(destination:some View,imageName: String) -> some View {
         NavigationLink{
@@ -460,7 +483,7 @@ struct ShareExportView: View {
         .modelContainer(for: AjiwaiCardData.self)
 }
 #Preview{
-    ShareExportView()
+    NewSettingView()
         .environmentObject(UserData())
         .modelContainer(for: AjiwaiCardData.self)
 }

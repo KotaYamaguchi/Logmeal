@@ -436,5 +436,5 @@ struct FooterButtonsView: View {
 #Preview {
     NewContentView()
         .environmentObject(UserData())
-        .modelContainer(for: AjiwaiCardData.self)
+        .modelContainer(for: [AjiwaiCardData.self,ColumnData.self,MenuData.self])
 }

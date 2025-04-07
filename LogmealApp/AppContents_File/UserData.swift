@@ -10,6 +10,7 @@ class UserData:ObservableObject{
     @Published var isTeacher:Bool = false
     @AppStorage("lastPointAddedDate") var lastRewardGotDate: String = ""
     @AppStorage("onRecord")var onRecord:Bool = false
+    @Published var isTitle:Bool = true
     func checkTodayRewardLimit() -> Bool{
         let today = dateFormatter(date: Date())
         // 最後にポイントを加算した日付が今日でない場合のみポイントを加算

@@ -16,11 +16,9 @@ struct TitleView: View {
     @Environment(\.modelContext) private var context
     var body: some View {
         NavigationStack{
-            GeometryReader{ geometry in
-                ZStack(alignment: .topTrailing) {
-                    NavigationLink{
-                        InitialScreenSelectorView()
-                    }label: {
+            if user.isTitle{
+                GeometryReader{ geometry in
+                    ZStack(alignment: .topTrailing) {
                         ZStack{
                             Image("bg_AjiwaiCardView")
                                 .resizable()
@@ -34,29 +32,38 @@ struct TitleView: View {
                                 .scaledToFill()
                                 .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
                         }
+                        
+                        
+                        Button {
+                            showMenu = true
+                        } label: {
+                            Image(systemName: "info.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundStyle(Color.pink)
+                        }
+                        .padding(.all)
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Text("画面をタップしてゲームを始めよう")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                            .foregroundStyle(.gray)
+                            .padding(.top, 30)
+                            .scaleEffect(textScaleEffectValue)
+                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.8)
                     }
-                    
-                    Button {
-                        showMenu = true
-                    } label: {
-                        Image(systemName: "info.circle.fill")
-                            .font(.system(size: 40))
-                            .foregroundStyle(Color.pink)
+                    .onTapGesture {
+                        withAnimation {
+                            user.isTitle = false
+                        }
                     }
-                    .padding(.all)
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    Text("画面をタップしてゲームを始めよう")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                        .foregroundStyle(.gray)
-                        .padding(.top, 30)
-                        .scaleEffect(textScaleEffectValue)
-                        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.8)
+                    .sheet(isPresented:$showMenu){
+                        appSettingView(geometry: geometry)
+                    }
                 }
-                .sheet(isPresented:$showMenu){
-                    appSettingView(geometry: geometry)
-                }
+            }else{
+                InitialScreenSelectorView()
             }
+            
         }
     }
     @ViewBuilder private func appSettingView(geometry:GeometryProxy) -> some View {
@@ -245,4 +252,6 @@ struct TitleView: View {
 
 #Preview {
     TitleView()
+        .environmentObject(UserData())
+        .modelContainer(for:AjiwaiCardData.self)
 }
