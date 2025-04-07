@@ -22,7 +22,7 @@ struct NewSettingView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width:550)
-                    settingRow(destination: NewProfileEditView(userData: userData), imageName: "mt_newSettingView_profile")
+                    settingRow(destination: ProfileSettingView(), imageName: "mt_newSettingView_profile")
                     settingRow(destination: soundSettingView(), imageName: "mt_newSettingView_sound")
                     settingRow(destination: ShareExportView(), imageName: "mt_newSettingView_share")
                     settingRow(destination: otherSettingView(), imageName: "mt_newSettingView_others")
@@ -188,115 +188,7 @@ struct NewSettingView: View {
     }
 }
 
-struct NewProfileEditView: View {
-    @ObservedObject var userData:UserData
-    
-    @State private var userName: String = ""
-    @State private var userGrade: Int = 1
-    @State private var userClass: Int = 1
-    @State private var userAge: Int = 6
-    var body: some View {
-        ZStack {
-            Image("bg_newSettingView.png")
-                .resizable()
-                .ignoresSafeArea()
-            
-            RoundedRectangle(cornerRadius: 20)
-                .frame(width: 650, height: 750)
-                .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
-                .shadow(radius: 5)
-            
-            VStack{
-                Image("mt_newSettingView_userImage")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 300)
-                    .padding(.bottom)
-                Image("mt_newSettingView_profileHeadline")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
-                
-                // 名前入力
-                Image("mt_newSettingView_name")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
-                    .overlay {
-                        HStack {
-                            Spacer()
-                            TextField("ここに名前を入力してください", text: $userName)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .frame(width: 400)
-                                .padding(.horizontal)
-                                .multilineTextAlignment(TextAlignment.trailing)
-                        }
-                    }
-                
-                // 学年選択
-                Image("mt_newSettingView_grade")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
-                    .overlay {
-                        HStack {
-                            Spacer()
-                            
-                            Picker("選択してください", selection: $userGrade) {
-                                ForEach(1...6, id: \.self) { grade in
-                                    Text("\(grade)年").tag(grade)
-                                }
-                            }
-                            .pickerStyle(MenuPickerStyle())
-                            .frame(width: 150)
-                        }
-                        .padding(.horizontal)
-                    }
-                
-                // クラス選択
-                Image("mt_newSettingView_class")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
-                    .overlay {
-                        HStack {
-                            Spacer()
-                            
-                            Picker("選択してください", selection: $userClass) {
-                                ForEach(1...10, id: \.self) { classNum in
-                                    Text("\(classNum)組").tag(classNum)
-                                }
-                            }
-                            .pickerStyle(MenuPickerStyle())
-                            .frame(width: 150)
-                        }
-                        .padding(.horizontal)
-                    }
-                
-                // 年齢選択
-                Image("mt_newSettingView_age")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
-                    .overlay {
-                        HStack {
-                            Spacer()
-                            
-                            Picker("選択してください", selection: $userAge) {
-                                ForEach(6...18, id: \.self) { age in
-                                    Text("\(age)歳").tag(age)
-                                }
-                            }
-                            .pickerStyle(MenuPickerStyle())
-                            .frame(width: 150)
-                        }
-                        .padding(.horizontal)
-                    }
-            }
-            .padding()
-        }
-    }
-}
+
 
 import SwiftUI
 import SwiftData
