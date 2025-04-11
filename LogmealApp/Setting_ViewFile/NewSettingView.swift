@@ -22,10 +22,26 @@ struct NewSettingView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width:550)
-                    settingRow(destination: ProfileSettingView(isFirst: false), imageName: "mt_newSettingView_profile")
-                    settingRow(destination: soundSettingView(), imageName: "mt_newSettingView_sound")
-                    settingRow(destination: ShareExportView(), imageName: "mt_newSettingView_share")
-                    settingRow(destination: otherSettingView(), imageName: "mt_newSettingView_others")
+                    NavigationLink{
+                        ProfileSettingView(isFirst: false)
+                    }label: {
+                        settingRow(imageName: "mt_newSettingView_profile")
+                    }
+                    NavigationLink{
+                        soundSettingView()
+                    }label: {
+                        settingRow(imageName: "mt_newSettingView_sound")
+                    }
+                    NavigationLink{
+                        ShareExportView()
+                    }label: {
+                        settingRow(imageName: "mt_newSettingView_share")
+                    }
+                    NavigationLink{
+                        otherSettingView()
+                    }label: {
+                        settingRow(imageName: "mt_newSettingView_others")
+                    }
                     Button{
                         withAnimation {
                             userData.isTitle = true
@@ -38,8 +54,16 @@ struct NewSettingView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width:550)
-                    settingRow(destination: YoutubeView(), imageName: "mt_newSettingView_prologue")
-                    settingRow(destination:TutorialView(imageArray: tutorialImage), imageName: "mt_newSettingView_houUseApp")
+                    NavigationLink{
+                        YoutubeView()
+                    }label: {
+                        settingRow(imageName: "mt_newSettingView_prologue")
+                    }
+                    NavigationLink{
+                        TutorialView(imageArray: tutorialImage)
+                    }label: {
+                        settingRow(imageName: "mt_newSettingView_houUseApp")
+                    }
                     Spacer()
                 }
             }
@@ -61,15 +85,12 @@ struct NewSettingView: View {
                     .padding(.horizontal)
                 }
     }
-    private func settingRow(destination:some View,imageName: String) -> some View {
-        NavigationLink{
-            destination
-        }label: {
+    private func settingRow(imageName: String) -> some View {
             Image(imageName)
                 .resizable()
                 .scaledToFit()
                 .frame(width:550)
-        }
+        
     }
     private func soundSettingView() -> some View{
         ZStack{
