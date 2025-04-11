@@ -9,6 +9,7 @@ import SwiftUI
 
 struct NewShopView:View {
     @State private var isFrontItemsBord:Bool = true
+    @State private var showPurchaseAlert:Bool = true
     var body: some View {
         ZStack{
             Image("bg_shop_Dog")
@@ -36,29 +37,33 @@ struct NewShopView:View {
                                 Button{
                                     isFrontItemsBord = true
                                 }label: {
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .frame(width:180,height: 90)
-                                        .foregroundStyle(.red)
+                                    Image("shop_top_label")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width:195)
                                 }
                                 .disabled(isFrontItemsBord)
                                 Button{
                                     isFrontItemsBord = false
                                 }label: {
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .frame(width:180,height: 90)
-                                        .foregroundStyle(.blue)
+                                    Image("shop_top_label_dog")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width:195)
                                 }
                                 .disabled(!isFrontItemsBord)
                             }
-                            .offset(y:20)
-                            RoundedRectangle(cornerRadius: 40)
-                                .frame(width:450,height: 500)
-                                .foregroundStyle(isFrontItemsBord ? .red : .blue)
-                        }
-    
-                                                   
-                        Button{
+                            .offset(y:5)
+                            Image(isFrontItemsBord ?"shop_main_bord" : "shop_main_bord_dog")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width:460)
                             
+                        }
+                        
+                        
+                        Button{
+                            showPurchaseAlert = true
                         }label:{
                             RoundedRectangle(cornerRadius: 50)
                                 .frame(width:400,height:70)
@@ -70,11 +75,68 @@ struct NewShopView:View {
                                         .foregroundStyle(.white)
                                         .font(.custom("GenJyuuGothicX-Bold", size: 45))
                                 }
-
+                            
                         }
                     }
                 }
                 Spacer()
+            }
+            if showPurchaseAlert{
+                Color.gray.opacity(0.6)
+                    .ignoresSafeArea()
+                VStack(spacing:0){
+                    ZStack{
+                        UnevenRoundedRectangle(topLeadingRadius: 40, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 40, style: .continuous)
+                            .frame(width:400,height: 80)
+                            .foregroundStyle(.white)
+                        UnevenRoundedRectangle(topLeadingRadius: 40, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 40, style: .continuous)
+                            .stroke(lineWidth: 2)
+                            .frame(width:400,height: 80)
+                            .foregroundStyle(.gray)
+                    }
+                    .overlay{
+                        Text("購入しますか？")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 30))
+                    }
+                    HStack(spacing:0){
+                        Button{
+                            //購入時の処理を行う
+                            showPurchaseAlert = false
+                        }label:{
+                            ZStack{
+                                UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 40, bottomTrailingRadius: 0, topTrailingRadius: 0, style: .continuous)
+                                    .frame(width:200,height: 80)
+                                    .foregroundStyle(.white)
+                                UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 40, bottomTrailingRadius: 0, topTrailingRadius: 0, style: .continuous)
+                                    .stroke(lineWidth: 2)
+                                    .frame(width:200,height: 80)
+                                    .foregroundStyle(.gray)
+                            }
+                            .overlay{
+                                Text("する")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 30))
+                            }
+                        }
+                        Button{
+                            showPurchaseAlert = false
+                        }label:{
+                            ZStack{
+                                UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: 40, topTrailingRadius: 0, style: .continuous)
+                                    .frame(width:200,height: 80)
+                                    .foregroundStyle(.white)
+                                UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: 40, topTrailingRadius: 0, style: .continuous)
+                                    .stroke(lineWidth: 2)
+                                    .frame(width:200,height: 80)
+                                    .foregroundStyle(.gray)
+                            }
+                            .overlay{
+                                Text("しない")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 30))
+                            }
+                        }
+                    }
+                }
+                
             }
         }
     }
@@ -84,3 +146,5 @@ struct NewShopView:View {
 #Preview{
     NewShopView()
 }
+
+
