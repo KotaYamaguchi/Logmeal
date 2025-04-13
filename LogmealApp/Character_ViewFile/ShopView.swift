@@ -12,7 +12,20 @@ struct NewShopView:View {
     @State private var isFrontItemsBord:Bool = true
     @State private var showPurchaseAlert:Bool = false
     @State private var products:[Product] = []
+    @State private var boughtProducts:[Product] = [
+        Product(name: "Dog3_animation_applause", price: 200, img: "img_dog_applause", isBought: false),
+        Product(name: "Dog3_animation_bow", price: 400, img: "img_dog_bow", isBought: false),
+        Product(name: "Dog3_animation_byebye", price: 600, img: "img_dog_byebye", isBought: false),
+        Product(name: "Dog3_animation_eat", price: 800, img: "img_dog_eat", isBought: false),
+        Product(name: "Dog3_animation_question", price: 1000, img: "img_dog_question", isBought: false),
+        Product(name: "Dog3_animation_sit", price: 300, img: "img_dog_sit", isBought: false),
+        Product(name: "Dog3_animation_sleep", price: 500, img: "img_dog_sleep", isBought: false),
+        Product(name: "Dog3_animation_surprised", price: 700, img: "img_dog_surprised", isBought: false),
+        Product(name: "Dog3_animation_yawn", price: 900, img: "img_dog_yawn", isBought: false),
+        Product(name: "Dog3_animation_yell", price: 150, img: "img_dog_yell", isBought: false)
+    ]
     @State private var selectedItemIndex:Int? = nil
+    @State private var displayImage = ""
     var body: some View {
         ZStack{
             Image("bg_shop_Dog")
@@ -21,10 +34,18 @@ struct NewShopView:View {
                 .scaleEffect(1.1)
             HStack{
                 Spacer()
-                Image("img_dog_applause")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width:400)
+                //選択したものによって表示を変える
+                if displayImage.isEmpty{
+                    Text("右側の一覧から\n買いたい商品を選んでね")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                }else{
+                    Image(displayImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width:400)
+                }
+                
                 Spacer()
                 VStack(alignment:.trailing){
                     Image("shop_point_display")
@@ -81,21 +102,23 @@ struct NewShopView:View {
                             
                         }
                         
-                        
-                        Button{
-                            showPurchaseAlert = true
-                        }label:{
-                            RoundedRectangle(cornerRadius: 50)
-                                .frame(width:400,height:70)
-                                .foregroundStyle(.red)
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 50)
-                                        .stroke(.white,lineWidth: 5)
-                                    Text("買う")
-                                        .foregroundStyle(.white)
-                                        .font(.custom("GenJyuuGothicX-Bold", size: 45))
-                                }
-                            
+                        if isFrontItemsBord{
+                            Button{
+                                showPurchaseAlert = true
+                            }label:{
+                                RoundedRectangle(cornerRadius: 50)
+                                    .frame(width:400,height:70)
+                                    .foregroundStyle(Color(red: 225/255, green: 108/255, blue: 68/255))
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 50)
+                                            .stroke(.white,lineWidth: 5)
+                                        Text("買う")
+                                            .foregroundStyle(.white)
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 45))
+                                    }
+                                
+                            }
+                            .disabled(selectedItemIndex == nil)
                         }
                     }
                 }
@@ -170,6 +193,7 @@ struct NewShopView:View {
                     ForEach(Array(zip(products.indices, products)), id: \.1.id) { index, product in
                         Button{
                             selectedItemIndex = index
+                            displayImage = product.img
                         }label:{
                             HStack{
                                 Image(product.img)
@@ -188,15 +212,23 @@ struct NewShopView:View {
                                     }
                                 }
                             }
-                            .overlay{
+                            .padding()
+                            .background{
                                 if selectedItemIndex == index{
-                                    Color.pink.opacity(0.2)
+                                    Color(red: 248/255, green: 201/255, blue: 201/255)
+                                        .ignoresSafeArea()
                                 }
                             }
                         }
                         .overlay{
                             if products[index].isBought{
                                 Color.gray.opacity(0.6)
+                                    .overlay{
+                                        Text("SOLD OUT")
+                                            .font(.largeTitle)
+                                            .fontWeight(.heavy)
+                                            .foregroundStyle(.red)
+                                    }
                             }
                         }
                     }
@@ -252,7 +284,44 @@ struct NewShopView:View {
             }
     }
     @ViewBuilder private func isBoughtItemArray() -> some View{
-        
+        ZStack{
+            List{
+                ForEach(Array(zip(boughtProducts.indices, boughtProducts)), id: \.1.id) { index, product in
+                    Button{
+                        selectedItemIndex = index
+                        displayImage = product.img
+                    }label:{
+                        HStack{
+                            Image(product.img)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width:50)
+                            Spacer()
+                            VStack(alignment:.trailing){
+                                VStack(alignment:.leading){
+                                    Text("つままれる")
+                                    Text("ポチッとつまんで、キャラクターと遊ぼう！")
+                                }
+                                HStack{
+                                    Text("120")
+                                    Text("pt")
+                                }
+                            }
+                        }
+                        .padding()
+                        .background{
+                            if selectedItemIndex == index{
+                                Color.white
+                                    .ignoresSafeArea()
+                            }
+                        }
+                    }
+                }
+                .listRowBackground(Color.clear)
+            }
+            .scrollContentBackground(.hidden)
+        }
+        .frame(width:.infinity,height: .infinity)
     }
 }
 
