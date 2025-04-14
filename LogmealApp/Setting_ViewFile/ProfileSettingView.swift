@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct ProfileSettingView: View {
     @EnvironmentObject var userData:UserData
@@ -7,6 +8,8 @@ struct ProfileSettingView: View {
     @State private var userGrade: String = ""
     @State private var userClass: String = ""
     @State private var userAge: Int = 6
+    @State private var selectedPhotoItem: PhotosPickerItem? = nil
+    @State private var userImage:UIImage? = nil
     @State private var showNameAlert = false
     @State private var nameTextColor = Color.black
     let gradeArray = ["1","2","3","4","5","6"]
@@ -280,10 +283,13 @@ struct ProfileSettingView: View {
         "ヘロイン"
     ]
     private func saveNewProfile(){
-        userData.name = self.userName
-        userData.age = self.userAge
-        userData.yourClass = self.userClass
-        userData.grade = self.userGrade
+        if let userImage = self.userImage{
+            userData.name = self.userName
+            userData.age = self.userAge
+            userData.yourClass = self.userClass
+            userData.grade = self.userGrade
+            userData.userImage = getDocumentPath(saveData: userImage, fileName: "userImage")
+        }
     }
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -302,32 +308,31 @@ struct ProfileSettingView: View {
                     .resizable()
                     .ignoresSafeArea()
             }
-            ZStack(alignment: .topTrailing){
+            ZStack{
                 RoundedRectangle(cornerRadius: 20)
-                    .frame(width: 650, height: 750)
+                    .frame(width: 650, height: 780)
                     .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
                     .shadow(radius: 5)
-                if !isFirst{
-                    Button{
-                        saveNewProfile()
-                    }label:{
-                        Text("保存")
-                            .font(.headline)
-                            .padding()
-                            .frame(width:100,height: 40)
-                            .foregroundStyle(.white)
-                            .background(RoundedRectangle(cornerRadius: 10))
-                    }
-                    .padding()
-                }
-                
             }
             VStack{
-                Image("mt_newSettingView_userImage")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 300)
-                    .padding(.bottom)
+                PhotosPicker(selection: $selectedPhotoItem) {
+                    if let userImage = self.userImage{
+                        Image(uiImage: userImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width:350)
+                            .clipShape(Circle())
+                    }else{
+                        Image("mt_newSettingView_userImage")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 350)
+                            .clipShape(Circle())
+                    }
+                }
+                PhotosPicker(selection: $selectedPhotoItem) {
+                    Label("写真を選ぶ", systemImage: "photo")
+                }
                 Image("mt_newSettingView_profileHeadline")
                     .resizable()
                     .scaledToFit()
@@ -424,21 +429,54 @@ struct ProfileSettingView: View {
                     }
             }
             .padding()
+            VStack{
+                Spacer()
+                HStack{
+                    Spacer()
+                    if !isFirst{
+                        Button{
+                            saveNewProfile()
+                        }label:{
+                            Text("保存する")
+                                .font(.headline)
+                                .padding()
+                                .frame(width:150,height: 60)
+                                .foregroundStyle(.white)
+                                .background(RoundedRectangle(cornerRadius: 10))
+                        }
+                        .padding()
+                    }
+                }
+            }
+            .padding(.horizontal)
         }
         .onAppear(){
             userName = userData.name
             userGrade = userData.grade
             userAge = userData.age
             userClass = userData.yourClass
+            
             print(userData.name)
             print(userData.age)
             print(userData.grade)
             print(userData.yourClass)
+        }
+        .onChange(of: selectedPhotoItem) { oldValue, newValue in
+            Task {
+                if let data = try? await newValue?.loadTransferable(type: Data.self),
+                   let userImage = UIImage(data: data) {
+                    self.userImage = userImage
+                }
+            }
         }
     }
 }
 
 #Preview{
     ProfileSettingView(isFirst: false)
+        .environmentObject(UserData())
+}
+#Preview{
+    NewContentView()
         .environmentObject(UserData())
 }
