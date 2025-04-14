@@ -49,19 +49,42 @@ struct NewHomeView: View {
     }
 
     private func userInfoPanel(geometry: GeometryProxy) -> some View {
-        HStack {
+        HStack{
             Spacer()
-            VStack {
-                Image("no_user_image")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: geometry.size.width * 0.2)
-                    .overlay {
-                        Circle()
-                            .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
+            VStack(spacing: 0){
+                AsyncImage(url: user.userImage) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: geometry.size.width * 0.2)
+                            .clipShape(Circle())
+                    case .failure(_):
+                        Image("no_user_image")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: geometry.size.width * 0.2)
+                            .overlay {
+                                Circle()
+                                    .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
+                            }
+                    @unknown default:
+                        Image("no_user_image")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: geometry.size.width * 0.2)
+                            .overlay {
+                                Circle()
+                                    .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
+                            }
                     }
+                }
                 Text("\(user.name)")
                     .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.03))
+                    .offset(y:-geometry.size.height*0.07)
             }
             VStack {
                 HStack {
