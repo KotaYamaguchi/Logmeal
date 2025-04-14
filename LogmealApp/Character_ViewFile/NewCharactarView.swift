@@ -17,7 +17,7 @@ struct NewCharacterView: View {
                             .frame(width:350)
                     }
                     NavigationLink{
-                        
+                        NewCharacterDetailView()
                     }label:{
                         Image("bt_toCharaSelect")
                             .resizable()
@@ -87,8 +87,7 @@ struct NewCharacterView: View {
 
 
 #Preview(body: {
-//    NewCharacterView(showCharacterView: .constant(true))
-    NewShopView()
+    NewCharacterView(showCharacterView: .constant(true))
 })
 
 struct NewCharacterDetailView:View {
