@@ -285,6 +285,16 @@ struct ProfileSettingView: View {
         userData.yourClass = self.userClass
         userData.grade = self.userGrade
     }
+    private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
+        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
+        do {
+            try saveData.jpegData(compressionQuality: 1.0)?.write(to: fileURL)
+        } catch {
+            print("画像の保存に失敗しました: \(error)")
+        }
+        return fileURL
+    }
     var body: some View {
         ZStack {
             if !isFirst{
