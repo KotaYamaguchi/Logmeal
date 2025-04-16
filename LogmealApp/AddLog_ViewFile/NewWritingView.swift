@@ -3,6 +3,7 @@ import PhotosUI
 import SwiftData
 
 struct NewWritingView: View {
+    @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
@@ -83,7 +84,24 @@ struct NewWritingView: View {
 
         showSaveResultAlert = true
     }
-    
+    // ユーザー経験値の更新処理
+        private func updateUserExperience(by gainedExp: Int) {
+            user.exp += gainedExp
+            
+            let levelThresholds: [Int] = [0, 10, 20, 30, 50, 70, 90, 110, 130, 150, 170, 200, 220, 250, 290, 350]
+            var newLevel = 0
+            // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
+            for threshold in levelThresholds {
+                if user.exp >= threshold {
+                    newLevel += 1
+                } else {
+                    break
+                }
+            }
+            user.level = newLevel
+            print("獲得経験値: \(gainedExp), 総経験値: \(user.exp), 新しいレベル: \(user.level)")
+        }
+        
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
@@ -291,6 +309,8 @@ struct NewWritingView: View {
                         Spacer()
                         Button{
                             if let timeStanp = timeStanp, let uiImage = uiImage {
+                                let gainedExp = editedSenseText.reduce(0) { $0 + $1.count }
+                                updateUserExperience(by: gainedExp)
                                 saveCurrentData(
                                     saveDay: currentDate,
                                     times: timeStanp,

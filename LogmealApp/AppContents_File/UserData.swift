@@ -91,32 +91,9 @@ class UserData:ObservableObject{
     @AppStorage("exp") var exp:Int = 0
     @AppStorage("appearExp") var appearExp:Int = 0
     @AppStorage("point") var point:Int = 0
-    @Published var levelTable = [0,10,20,30,50,70,90,110,130,150,170,200,220,250,290,350]
     @AppStorage("growthStage") var growthStage = 3
     @Published var gotEXP:Int = 0
 
-    func checkLevel() -> Bool {
-        var levelUped = false
-        
-        while level + 1 < levelTable.count && exp >= levelTable[level + 1] {
-            level += 1
-            levelUped = true
-        }
-        
-        return levelUped
-    }
-
-    func growth() -> Bool{
-        var growthed = false
-        if level == 12{
-            growthStage = 3
-            growthed = true
-        }else if level == 5{
-            growthStage = 2
-            growthed = true
-        }
-        return growthed
-    }
     func setGrowthStage(){
         if level >= 12{
             growthStage = 3
