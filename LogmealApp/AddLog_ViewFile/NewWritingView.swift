@@ -336,6 +336,11 @@ struct NewWritingView: View {
                                     uiImage: uiImage,
                                     menu: editedMenu
                                 )
+                                if user.level >= 12{
+                                    user.growthStage = 3
+                                }else if user.level >= 5{
+                                    user.growthStage = 2
+                                }
                             }
                         } label:{
                             Text("ほぞんする")
@@ -354,7 +359,7 @@ struct NewWritingView: View {
                                 title: Text(saveResultMessage ?? ""),
                                 dismissButton: .default(Text("OK")) {
                                     if saveResultMessage == "保存に成功しました！" {
-                                        showWritingView = false
+                                        dismiss()
                                     }
                                 }
                             )
