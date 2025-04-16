@@ -101,7 +101,13 @@ struct NewWritingView: View {
             user.level = newLevel
             print("獲得経験値: \(gainedExp), 総経験値: \(user.exp), 新しいレベル: \(user.level)")
         }
-        
+    // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
+      private func updateUserPoints(by gainedExp: Int) {
+          // 獲得ポイントは経験値の計算結果を基にスケールする
+          let gainedPoints = gainedExp / 10  // 例：10文字につき1ポイント
+          user.point += gainedPoints
+          print("獲得ポイント: \(gainedPoints), 新しいポイント: \(user.point)")
+      }
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
@@ -309,8 +315,13 @@ struct NewWritingView: View {
                         Spacer()
                         Button{
                             if let timeStanp = timeStanp, let uiImage = uiImage {
-                                let gainedExp = editedSenseText.reduce(0) { $0 + $1.count }
-                                updateUserExperience(by: gainedExp)
+                                let totalCharacterCount = editedSenseText.reduce(0) { (result, element) in
+                                    result += element
+                                 }
+                                // 経験値更新：文字数そのままの値を使用
+                                updateUserExperience(by: totalCharacterCount)
+                                // ポイント更新：例として10文字につき1ポイント（バランス調整可能）
+                                updateUserPoints(by: totalCharacterCount)
                                 saveCurrentData(
                                     saveDay: currentDate,
                                     times: timeStanp,
