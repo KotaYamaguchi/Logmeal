@@ -11,6 +11,7 @@ struct NewShopView:View {
     @EnvironmentObject var user:UserData
     @State private var isFrontItemsBord:Bool = true
     @State private var showPurchaseAlert:Bool = false
+    @State private var showInsufficientAlert: Bool = false  // ポイント不足用のアラート表示用変数
     @State private var products:[Product] = []
     @State private var boughtProducts:[Product] = [
         Product(name: "Dog3_animation_applause", price: 200, img: "img_dog_applause", isBought: false),
@@ -50,7 +51,7 @@ struct NewShopView:View {
                 VStack(alignment:.trailing){
                     Image("shop_point_display")
                         .overlay{
-                            Text("1,000")
+                            Text("\(user.point)")
                                 .foregroundStyle(.white)
                                 .font(.custom("GenJyuuGothicX-Bold", size: 30))
                                 .offset(x:20)
@@ -108,7 +109,7 @@ struct NewShopView:View {
                             }label:{
                                 RoundedRectangle(cornerRadius: 50)
                                     .frame(width:400,height:70)
-                                    .foregroundStyle(Color(red: 225/255, green: 108/255, blue: 68/255))
+                                    .foregroundStyle(selectedItemIndex == nil ? Color.gray : Color(red: 225/255, green: 108/255, blue: 68/255))
                                     .overlay {
                                         RoundedRectangle(cornerRadius: 50)
                                             .stroke(.white,lineWidth: 5)
@@ -143,12 +144,8 @@ struct NewShopView:View {
                     }
                     HStack(spacing:0){
                         Button{
-                            //購入時の処理を行う
-                            if let index =  selectedItemIndex{
-                                products[index].isBought = true
-                                showPurchaseAlert = false
-                                selectedItemIndex = nil
-                            }
+                            // 購入確認時の処理を実行
+                            confirmPurchase()
                         }label:{
                             ZStack{
                                 UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 40, bottomTrailingRadius: 0, topTrailingRadius: 0, style: .continuous)
@@ -186,102 +183,113 @@ struct NewShopView:View {
                 
             }
         }
+        // ポイント不足用のアラート表示
+        .alert("ポイントが足りません", isPresented: $showInsufficientAlert) {
+            Button("閉じる") {}
+        } message: {
+            Text("所持ポイントが不足しているため、購入できません。")
+        }
+        .onAppear {
+            loadProducts()
+            // ローカルに保存されている購入済み商品の読み込み（必要に応じて実装）
+            boughtProducts = products.filter { $0.isBought }
+        }
     }
     @ViewBuilder private func itemArray() -> some View{
-            ZStack{
-                List{
-                    ForEach(Array(zip(products.indices, products)), id: \.1.id) { index, product in
-                        Button{
-                            selectedItemIndex = index
-                            displayImage = product.img
-                        }label:{
-                            HStack{
-                                Image(product.img)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width:50)
-                                Spacer()
-                                VStack(alignment:.trailing){
-                                    VStack(alignment:.leading){
-                                        Text("つままれる")
-                                        Text("ポチッとつまんで、キャラクターと遊ぼう！")
-                                    }
-                                    HStack{
-                                        Text("120")
-                                        Text("pt")
-                                    }
+        ZStack{
+            List{
+                ForEach(Array(zip(products.indices, products)), id: \.1.id) { index, product in
+                    Button{
+                        selectedItemIndex = index
+                        displayImage = product.img
+                    }label:{
+                        HStack{
+                            Image(product.img)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width:50)
+                            Spacer()
+                            VStack(alignment:.trailing){
+                                VStack(alignment:.leading){
+                                    Text("つままれる")
+                                    Text("ポチッとつまんで、キャラクターと遊ぼう！")
                                 }
-                            }
-                            .padding()
-                            .background{
-                                if selectedItemIndex == index{
-                                    Color(red: 248/255, green: 201/255, blue: 201/255)
-                                        .ignoresSafeArea()
+                                HStack{
+                                    Text("120")
+                                    Text("pt")
                                 }
                             }
                         }
-                        .overlay{
-                            if products[index].isBought{
-                                Color.gray.opacity(0.6)
-                                    .overlay{
-                                        Text("SOLD OUT")
-                                            .font(.largeTitle)
-                                            .fontWeight(.heavy)
-                                            .foregroundStyle(.red)
-                                    }
+                        .padding()
+                        .background{
+                            if selectedItemIndex == index{
+                                Color(red: 248/255, green: 201/255, blue: 201/255)
+                                    .ignoresSafeArea()
                             }
                         }
                     }
-                    .listRowBackground(Color.clear)
+                    .overlay{
+                        if products[index].isBought{
+                            Color.gray.opacity(0.6)
+                                .overlay{
+                                    Text("SOLD OUT")
+                                        .font(.largeTitle)
+                                        .fontWeight(.heavy)
+                                        .foregroundStyle(.red)
+                                }
+                        }
+                    }
                 }
-                .scrollContentBackground(.hidden)
+                .listRowBackground(Color.clear)
             }
-            .frame(width:.infinity,height: .infinity)
-            .onAppear(){
-                switch user.selectedCharacter {
-                case "Dog":
-                    products = [
-                        Product(name: "Dog3_animation_applause", price: 200, img: "img_dog_applause", isBought: false),
-                        Product(name: "Dog3_animation_bow", price: 400, img: "img_dog_bow", isBought: false),
-                        Product(name: "Dog3_animation_byebye", price: 600, img: "img_dog_byebye", isBought: false),
-                        Product(name: "Dog3_animation_eat", price: 800, img: "img_dog_eat", isBought: false),
-                        Product(name: "Dog3_animation_question", price: 1000, img: "img_dog_question", isBought: false),
-                        Product(name: "Dog3_animation_sit", price: 300, img: "img_dog_sit", isBought: false),
-                        Product(name: "Dog3_animation_sleep", price: 500, img: "img_dog_sleep", isBought: false),
-                        Product(name: "Dog3_animation_surprised", price: 700, img: "img_dog_surprised", isBought: false),
-                        Product(name: "Dog3_animation_yawn", price: 900, img: "img_dog_yawn", isBought: false),
-                        Product(name: "Dog3_animation_yell", price: 150, img: "img_dog_yell", isBought: false)
-                    ]
-                case "Cat":
-                    products = [
-                        Product(name: "Cat3_animation_applause", price: 250, img: "img_cat_applause", isBought: false),
-                        Product(name: "Cat3_animation_bow", price: 500, img: "img_cat_bow", isBought: false),
-                        Product(name: "Cat3_animation_byebye", price: 750, img: "img_cat_byebye", isBought: false),
-                        Product(name: "Cat3_animation_eat", price: 1000, img: "img_cat_eat", isBought: false),
-                        Product(name: "Cat3_animation_question", price: 350, img: "img_cat_question", isBought: false),
-                        Product(name: "Cat3_animation_sit", price: 600, img: "img_cat_sit", isBought: false),
-                        Product(name: "Cat3_animation_sleep", price: 850, img: "img_cat_sleep", isBought: false),
-                        Product(name: "Cat3_animation_surprised", price: 150, img: "img_cat_surprised", isBought: false),
-                        Product(name: "Cat3_animation_yawn", price: 400, img: "img_cat_yawn", isBought: false),
-                        Product(name: "Cat3_animation_yell", price: 650, img: "img_cat_yell", isBought: false)
-                    ]
-                case "Rabbit":
-                    products = [
-                        Product(name: "Rabbit3_animation_applause", price: 150, img: "img_rabbit_applause", isBought: false),
-                        Product(name: "Rabbit3_animation_bow", price: 300, img: "img_rabbit_bow", isBought: false),
-                        Product(name: "Rabbit3_animation_byebye", price: 450, img: "img_rabbit_byebye", isBought: false),
-                        Product(name: "Rabbit3_animation_eat", price: 600, img: "img_rabbit_eat", isBought: false),
-                        Product(name: "Rabbit3_animation_question", price: 750, img: "img_rabbit_question", isBought: false),
-                        Product(name: "Rabbit3_animation_sit", price: 900, img: "img_rabbit_sit", isBought: false),
-                        Product(name: "Rabbit3_animation_sleep", price: 1000, img: "img_rabbit_sleep", isBought: false),
-                        Product(name: "Rabbit3_animation_surprised", price: 200, img: "img_rabbit_surprised", isBought: false),
-                        Product(name: "Rabbit3_animation_yawn", price: 350, img: "img_rabbit_yawn", isBought: false),
-                        Product(name: "Rabbit3_animation_yell", price: 500, img: "img_rabbit_yell", isBought: false)
-                    ]
-                default:
-                    products = []
-                }
+            .scrollContentBackground(.hidden)
+        }
+        .frame(width:.infinity,height: .infinity)
+        .onAppear(){
+            switch user.selectedCharacter {
+            case "Dog":
+                products = [
+                    Product(name: "Dog3_animation_applause", price: 200, img: "img_dog_applause", isBought: false),
+                    Product(name: "Dog3_animation_bow", price: 400, img: "img_dog_bow", isBought: false),
+                    Product(name: "Dog3_animation_byebye", price: 600, img: "img_dog_byebye", isBought: false),
+                    Product(name: "Dog3_animation_eat", price: 800, img: "img_dog_eat", isBought: false),
+                    Product(name: "Dog3_animation_question", price: 1000, img: "img_dog_question", isBought: false),
+                    Product(name: "Dog3_animation_sit", price: 300, img: "img_dog_sit", isBought: false),
+                    Product(name: "Dog3_animation_sleep", price: 500, img: "img_dog_sleep", isBought: false),
+                    Product(name: "Dog3_animation_surprised", price: 700, img: "img_dog_surprised", isBought: false),
+                    Product(name: "Dog3_animation_yawn", price: 900, img: "img_dog_yawn", isBought: false),
+                    Product(name: "Dog3_animation_yell", price: 150, img: "img_dog_yell", isBought: false)
+                ]
+            case "Cat":
+                products = [
+                    Product(name: "Cat3_animation_applause", price: 250, img: "img_cat_applause", isBought: false),
+                    Product(name: "Cat3_animation_bow", price: 500, img: "img_cat_bow", isBought: false),
+                    Product(name: "Cat3_animation_byebye", price: 750, img: "img_cat_byebye", isBought: false),
+                    Product(name: "Cat3_animation_eat", price: 1000, img: "img_cat_eat", isBought: false),
+                    Product(name: "Cat3_animation_question", price: 350, img: "img_cat_question", isBought: false),
+                    Product(name: "Cat3_animation_sit", price: 600, img: "img_cat_sit", isBought: false),
+                    Product(name: "Cat3_animation_sleep", price: 850, img: "img_cat_sleep", isBought: false),
+                    Product(name: "Cat3_animation_surprised", price: 150, img: "img_cat_surprised", isBought: false),
+                    Product(name: "Cat3_animation_yawn", price: 400, img: "img_cat_yawn", isBought: false),
+                    Product(name: "Cat3_animation_yell", price: 650, img: "img_cat_yell", isBought: false)
+                ]
+            case "Rabbit":
+                products = [
+                    Product(name: "Rabbit3_animation_applause", price: 150, img: "img_rabbit_applause", isBought: false),
+                    Product(name: "Rabbit3_animation_bow", price: 300, img: "img_rabbit_bow", isBought: false),
+                    Product(name: "Rabbit3_animation_byebye", price: 450, img: "img_rabbit_byebye", isBought: false),
+                    Product(name: "Rabbit3_animation_eat", price: 600, img: "img_rabbit_eat", isBought: false),
+                    Product(name: "Rabbit3_animation_question", price: 750, img: "img_rabbit_question", isBought: false),
+                    Product(name: "Rabbit3_animation_sit", price: 900, img: "img_rabbit_sit", isBought: false),
+                    Product(name: "Rabbit3_animation_sleep", price: 1000, img: "img_rabbit_sleep", isBought: false),
+                    Product(name: "Rabbit3_animation_surprised", price: 200, img: "img_rabbit_surprised", isBought: false),
+                    Product(name: "Rabbit3_animation_yawn", price: 350, img: "img_rabbit_yawn", isBought: false),
+                    Product(name: "Rabbit3_animation_yell", price: 500, img: "img_rabbit_yell", isBought: false)
+                ]
+            default:
+                products = []
             }
+        }
     }
     @ViewBuilder private func isBoughtItemArray() -> some View{
         ZStack{
@@ -327,6 +335,86 @@ struct NewShopView:View {
                 $0.isBought == true
             }
         }
+    }
+    // ユーザーの選択に応じた商品リストのロード（キャラクターごとの分岐処理）
+    private func loadProducts() {
+        switch user.selectedCharacter {
+        case "Dog":
+            products = [
+                Product(name: "Dog3_animation_applause", price: 200, img: "img_dog_applause", isBought: false),
+                Product(name: "Dog3_animation_bow", price: 400, img: "img_dog_bow", isBought: false),
+                Product(name: "Dog3_animation_byebye", price: 600, img: "img_dog_byebye", isBought: false),
+                Product(name: "Dog3_animation_eat", price: 800, img: "img_dog_eat", isBought: false),
+                Product(name: "Dog3_animation_question", price: 1000, img: "img_dog_question", isBought: false),
+                Product(name: "Dog3_animation_sit", price: 300, img: "img_dog_sit", isBought: false),
+                Product(name: "Dog3_animation_sleep", price: 500, img: "img_dog_sleep", isBought: false),
+                Product(name: "Dog3_animation_surprised", price: 700, img: "img_dog_surprised", isBought: false),
+                Product(name: "Dog3_animation_yawn", price: 900, img: "img_dog_yawn", isBought: false),
+                Product(name: "Dog3_animation_yell", price: 150, img: "img_dog_yell", isBought: false)
+            ]
+        case "Cat":
+            products = [
+                Product(name: "Cat3_animation_applause", price: 250, img: "img_cat_applause", isBought: false),
+                Product(name: "Cat3_animation_bow", price: 500, img: "img_cat_bow", isBought: false),
+                Product(name: "Cat3_animation_byebye", price: 750, img: "img_cat_byebye", isBought: false),
+                Product(name: "Cat3_animation_eat", price: 1000, img: "img_cat_eat", isBought: false),
+                Product(name: "Cat3_animation_question", price: 350, img: "img_cat_question", isBought: false),
+                Product(name: "Cat3_animation_sit", price: 600, img: "img_cat_sit", isBought: false),
+                Product(name: "Cat3_animation_sleep", price: 850, img: "img_cat_sleep", isBought: false),
+                Product(name: "Cat3_animation_surprised", price: 150, img: "img_cat_surprised", isBought: false),
+                Product(name: "Cat3_animation_yawn", price: 400, img: "img_cat_yawn", isBought: false),
+                Product(name: "Cat3_animation_yell", price: 650, img: "img_cat_yell", isBought: false)
+            ]
+        case "Rabbit":
+            products = [
+                Product(name: "Rabbit3_animation_applause", price: 150, img: "img_rabbit_applause", isBought: false),
+                Product(name: "Rabbit3_animation_bow", price: 300, img: "img_rabbit_bow", isBought: false),
+                Product(name: "Rabbit3_animation_byebye", price: 450, img: "img_rabbit_byebye", isBought: false),
+                Product(name: "Rabbit3_animation_eat", price: 600, img: "img_rabbit_eat", isBought: false),
+                Product(name: "Rabbit3_animation_question", price: 750, img: "img_rabbit_question", isBought: false),
+                Product(name: "Rabbit3_animation_sit", price: 900, img: "img_rabbit_sit", isBought: false),
+                Product(name: "Rabbit3_animation_sleep", price: 1000, img: "img_rabbit_sleep", isBought: false),
+                Product(name: "Rabbit3_animation_surprised", price: 200, img: "img_rabbit_surprised", isBought: false),
+                Product(name: "Rabbit3_animation_yawn", price: 350, img: "img_rabbit_yawn", isBought: false),
+                Product(name: "Rabbit3_animation_yell", price: 500, img: "img_rabbit_yell", isBought: false)
+            ]
+        default:
+            products = []
+        }
+    }
+    // 購入処理の確定（保存処理を含む）メソッド
+    private func confirmPurchase() {
+        guard let index = selectedItemIndex else { return }
+        let selectedProduct = products[index]
+        
+        // ポイント不足の場合の処理を追加
+        if user.point < selectedProduct.price {
+            // ポイントが不足している場合はアラートを表示し、処理を中断
+            showInsufficientAlert = true
+            showPurchaseAlert = false
+            selectedItemIndex = nil
+            return
+        }
+        
+        // 所持ポイントが十分かつ購入処理が成功した場合
+        if user.purchaseProduct(selectedProduct) {
+            // 商品の状態を更新
+            products[index].isBought = true
+            
+            // 購入済み商品のリストに追加
+            boughtProducts.append(selectedProduct)
+            
+            // ユーザーデータへ永続化
+            user.saveProducts(products: products, key: "products")
+            user.saveProducts(products: boughtProducts, key: "boughtItem")
+        } else {
+            // 万が一、ポイントが十分でも購入処理に失敗した場合はエラー扱い
+            showInsufficientAlert = true
+        }
+        
+        // 購入確認用アラートを閉じ、選択状態をクリア
+        showPurchaseAlert = false
+        selectedItemIndex = nil
     }
 }
 
