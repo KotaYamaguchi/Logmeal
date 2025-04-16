@@ -78,7 +78,6 @@ struct NewCharacterView: View {
                     Image(systemName: "house.circle.fill")
                         .font(.system(size: 100))
                 }
-                .position(x:1140,y:60)
             }
         }
     }
@@ -88,6 +87,7 @@ struct NewCharacterView: View {
 
 #Preview(body: {
     NewCharacterView(showCharacterView: .constant(true))
+        .environmentObject(UserData())
 })
 
 struct NewCharacterDetailView:View {
