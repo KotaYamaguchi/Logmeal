@@ -322,6 +322,11 @@ struct NewShopView:View {
             .scrollContentBackground(.hidden)
         }
         .frame(width:.infinity,height: .infinity)
+        .onAppear(){
+            boughtProducts = products.filter{
+                $0.isBought == true
+            }
+        }
     }
 }
 
