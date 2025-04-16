@@ -3,6 +3,7 @@ import PhotosUI
 import SwiftData
 
 struct NewWritingView: View {
+    @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
@@ -83,7 +84,30 @@ struct NewWritingView: View {
 
         showSaveResultAlert = true
     }
-    
+    // ユーザー経験値の更新処理
+        private func updateUserExperience(by gainedExp: Int) {
+            user.exp += gainedExp / 10 //　10文字につき1exp
+            
+            let levelThresholds: [Int] = [0, 10, 20, 30, 50, 70, 90, 110, 130, 150, 170, 200, 220, 250, 290, 350]
+            var newLevel = 0
+            // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
+            for threshold in levelThresholds {
+                if user.exp >= threshold {
+                    newLevel += 1
+                } else {
+                    break
+                }
+            }
+            user.level = newLevel
+            print("獲得経験値: \(gainedExp), 総経験値: \(user.exp), 新しいレベル: \(user.level)")
+        }
+    // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
+      private func updateUserPoints(by gainedExp: Int) {
+          // 獲得ポイントは経験値の計算結果を基にスケールする
+          let gainedPoints = gainedExp  / 10 // 10文字につき1ポイント
+          user.point += gainedPoints
+          print("獲得ポイント: \(gainedPoints), 新しいポイント: \(user.point)")
+      }
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
@@ -291,6 +315,16 @@ struct NewWritingView: View {
                         Spacer()
                         Button{
                             if let timeStanp = timeStanp, let uiImage = uiImage {
+                                // ① 各文字列の文字数を計算して配列に変換
+                                let characterCounts = editedSenseText.map { $0.count }
+                                // ② その総和を求める
+                                let totalCharacterCount = characterCounts.reduce(0, +)
+                                print("合計文字数\(totalCharacterCount)")
+                                // 経験値更新：10文字につき1exp（バランス調整可能）
+                                updateUserExperience(by: totalCharacterCount)
+                                // ポイント更新：1文字につき1ポイント（バランス調整可能）
+                                updateUserPoints(by: totalCharacterCount)
+                                
                                 saveCurrentData(
                                     saveDay: currentDate,
                                     times: timeStanp,
@@ -302,7 +336,6 @@ struct NewWritingView: View {
                                     uiImage: uiImage,
                                     menu: editedMenu
                                 )
-
                             }
                         } label:{
                             Text("ほぞんする")
