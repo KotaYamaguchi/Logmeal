@@ -381,7 +381,7 @@ struct NewWritingView: View {
     @ViewBuilder private func backgroundCard(geometry:GeometryProxy) -> some View{
         ZStack{
             RoundedRectangle(cornerRadius: 10)
-                .frame(width: geometry.size.width*0.47,height: .infinity)
+                .frame(width: geometry.size.width*0.47)
                 .foregroundStyle(.white)
                 .shadow(radius: 10)
                 .overlay {
