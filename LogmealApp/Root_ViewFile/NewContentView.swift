@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct NewContentView: View {
+    @EnvironmentObject var user:UserData
     let headLineTitles: [String] = ["ホーム", "コラム", "せってい"]
     @State private var isShowSelectedView: [Bool] = [true, false, false] // 初期状態で1つ目を選択
     @State private var showCharactarView:Bool = false
@@ -15,6 +16,40 @@ struct NewContentView: View {
             NewCharacterView(showCharacterView: $showCharactarView)
                 .scaleEffect(showCharactarView ? 1.0 : 0.0)
                 .ignoresSafeArea()
+            if user.showAnimation{
+                if user.showGrowthAnimation{
+                    GrowthAnimationView(text1: "おや、\(user.characterName)のようすが…",
+                                        text2: "おめでとう！\(user.characterName)が進化したよ！",
+                                        useBackGroundColor: true)
+                    .onTapGesture{
+                        user.showGrowthAnimation = false
+                        user.isGrowthed = false
+                        user.showAnimation = false
+                    }
+                }else if user.showLevelUPAnimation{
+                    LevelUpAnimationView(
+                        characterGifName: "\(user.selectedCharacter)\(user.growthStage)_animation_breath",
+                        text: "\(user.characterName)がレベルアップしたよ！",
+                        backgroundImage: "mt_RewardView_callout_\(user.selectedCharacter)",
+                        useBackGroundColor: true
+                    )
+                    .onTapGesture{
+                        user.showLevelUPAnimation = false
+                        user.isIncreasedLevel = false
+                        user.showAnimation = false
+                    }
+                }else{
+                    NormalAnimetionView(
+                        characterGifName: "\(user.selectedCharacter)\(user.growthStage)_animation_breath",
+                        text: "今日も記録してくれてありがとう！",
+                        backgroundImage: "mt_RewardView_callout_\(user.selectedCharacter)",
+                        useBackGroundColor: true
+                    )
+                    .onTapGesture {
+                        user.showAnimation = false
+                    }
+                }
+            }
         }
     }
     

@@ -1,18 +1,39 @@
 import SwiftUI
 import SwiftyGif
 
-struct BaseAnimationView: View {
-    let firstGifName: String
-    let secondGifName: String
+struct GrowthAnimationView: View {
     let text1: String
     let text2: String
     let useBackGroundColor:Bool
+    @EnvironmentObject var user: UserData
     @State private var showFirstGif = true
     @State private var showSecondGif = false
     @State private var showGrowthGif = false
     @State private var showText1 = true
     @State private var showText2 = false
     @State private var playGif: Bool = true
+    
+    private func getFirstGifName() -> String {
+           switch user.growthStage {
+           case 2:
+               return "\(user.selectedCharacter)1_animation_breath"
+           case 3:
+               return "\(user.selectedCharacter)2_animation_breath"
+           default:
+               return "\(user.selectedCharacter)\(user.growthStage)_animation_breath"
+           }
+       }
+       
+       private func getSecondGifName() -> String {
+           switch user.growthStage {
+           case 2:
+               return "\(user.selectedCharacter)2_animation_breath"
+           case 3:
+               return "\(user.selectedCharacter)3_animation_breath"
+           default:
+               return "\(user.selectedCharacter)\(user.growthStage)_animation_breath"
+           }
+       }
     
     var body: some View {
         GeometryReader { geometry in
@@ -22,13 +43,13 @@ struct BaseAnimationView: View {
                         .ignoresSafeArea()
                 }
                 if showFirstGif {
-                    GIFImage(data: NSDataAsset(name: firstGifName)!.data, loopCount: 1, playGif: $playGif)
+                    GIFImage(data: NSDataAsset(name: getFirstGifName())!.data, loopCount: 1, playGif: $playGif)
                         .frame(width: geometry.size.width * 0.7, height: geometry.size.height * 0.7)
                         .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.65)
                 }
                 
                 if showSecondGif {
-                    GIFImage(data: NSDataAsset(name: secondGifName)!.data, loopCount: 1, playGif: $playGif)
+                    GIFImage(data: NSDataAsset(name: getSecondGifName())!.data, loopCount: 1, playGif: $playGif)
                         .frame(width: geometry.size.width * 0.7, height: geometry.size.height * 0.7)
                         .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.65)
                 }
@@ -82,7 +103,7 @@ struct BaseAnimationView: View {
 import SwiftUI
 import SwiftyGif
 
-struct BaseLevelUpView: View {
+struct LevelUpAnimationView: View {
     var characterGifName: String
     var text: String
     var backgroundImage: String = ""
@@ -137,7 +158,7 @@ struct BaseLevelUpView: View {
 import SwiftUI
 import SwiftyGif
 
-struct NormalCharacterView: View {
+struct NormalAnimetionView: View {
     var characterGifName: String
     var text: String
     var backgroundImage: String = ""

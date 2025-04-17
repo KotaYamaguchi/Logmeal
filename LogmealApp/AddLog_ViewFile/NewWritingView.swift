@@ -99,6 +99,7 @@ struct NewWritingView: View {
                 }
             }
             user.level = newLevel
+            user.isIncreasedLevel = true
             print("獲得経験値: \(gainedExp), 総経験値: \(user.exp), 新しいレベル: \(user.level)")
         }
     // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
@@ -336,6 +337,14 @@ struct NewWritingView: View {
                                     uiImage: uiImage,
                                     menu: editedMenu
                                 )
+                                if user.level >= 12{
+                                    user.growthStage = 3
+                                    user.isGrowthed = true
+                                }else if user.level >= 5{
+                                    user.growthStage = 2
+                                    user.isGrowthed = true
+                                }
+                                user.showAnimation = true
                             }
                         } label:{
                             Text("ほぞんする")
@@ -354,7 +363,7 @@ struct NewWritingView: View {
                                 title: Text(saveResultMessage ?? ""),
                                 dismissButton: .default(Text("OK")) {
                                     if saveResultMessage == "保存に成功しました！" {
-                                        showWritingView = false
+                                        dismiss()
                                     }
                                 }
                             )
@@ -381,7 +390,7 @@ struct NewWritingView: View {
     @ViewBuilder private func backgroundCard(geometry:GeometryProxy) -> some View{
         ZStack{
             RoundedRectangle(cornerRadius: 10)
-                .frame(width: geometry.size.width*0.47,height: .infinity)
+                .frame(width: geometry.size.width*0.47)
                 .foregroundStyle(.white)
                 .shadow(radius: 10)
                 .overlay {

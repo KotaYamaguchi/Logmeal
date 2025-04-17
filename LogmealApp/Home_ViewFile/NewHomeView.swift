@@ -9,7 +9,6 @@ struct NewHomeView: View {
     @Query private var allData: [AjiwaiCardData]
     @State var selectedIndex: Int? = nil
     @State var showDetailView:Bool = false
-
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -19,6 +18,7 @@ struct NewHomeView: View {
                     logGrid(geometry: geometry)
                 }
                 addLogButton(geometry: geometry)
+               
             }
             .onAppear(){
                 print("ーーーーーーーーーーーーアプリを起動しました！ーーーーーーーーーーーー")

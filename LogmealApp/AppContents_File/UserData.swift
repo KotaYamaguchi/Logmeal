@@ -93,12 +93,9 @@ class UserData:ObservableObject{
     @AppStorage("point") var point:Int = 0
     @AppStorage("growthStage") var growthStage = 3
     @Published var gotEXP:Int = 0
-
-    func setGrowthStage(){
-        if level >= 12{
-            growthStage = 3
-        }else if level >= 5{
-            growthStage = 2
-        }
-    }
+    @Published var isGrowthed:Bool = false
+    @Published var isIncreasedLevel:Bool = false
+    @Published var showGrowthAnimation:Bool = false
+    @Published var showLevelUPAnimation:Bool = false
+    @Published var showAnimation:Bool = false
 }
