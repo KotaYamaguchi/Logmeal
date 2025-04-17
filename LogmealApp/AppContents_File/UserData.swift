@@ -94,4 +94,8 @@ class UserData:ObservableObject{
     @AppStorage("growthStage") var growthStage = 3
     @Published var gotEXP:Int = 0
     @Published var isGrowthed:Bool = false
+    @Published var isIncreasedLevel:Bool = false
+    @Published var showGrowthAnimation:Bool = false
+    @Published var showLevelUPAnimation:Bool = false
+    @Published var showAnimation:Bool = false
 }

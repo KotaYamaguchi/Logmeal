@@ -99,6 +99,7 @@ struct NewWritingView: View {
                 }
             }
             user.level = newLevel
+            user.isIncreasedLevel = true
             print("獲得経験値: \(gainedExp), 総経験値: \(user.exp), 新しいレベル: \(user.level)")
         }
     // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
@@ -343,6 +344,7 @@ struct NewWritingView: View {
                                     user.growthStage = 2
                                     user.isGrowthed = true
                                 }
+                                user.showAnimation = true
                             }
                         } label:{
                             Text("ほぞんする")
