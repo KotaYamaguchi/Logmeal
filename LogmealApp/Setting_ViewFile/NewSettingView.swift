@@ -9,64 +9,69 @@ struct NewSettingView: View {
     @EnvironmentObject var userData: UserData
     var body: some View {
         NavigationStack{
-            ZStack{
-                Image("bg_newSettingView.png")
-                    .resizable()
-                    .ignoresSafeArea()
-                RoundedRectangle(cornerRadius: 20)
+            GeometryReader{ geomtry in
+                ZStack{
+                    Image("bg_newSettingView.png")
+                        .resizable()
+                        .ignoresSafeArea()
+                    ScrollView{
+                            Image("mt_newSettingView_setting")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width:550)
+                            NavigationLink{
+                                ProfileSettingView(isFirst: false)
+                            }label: {
+                                settingRow(imageName: "mt_newSettingView_profile")
+                            }
+                            NavigationLink{
+                                soundSettingView()
+                            }label: {
+                                settingRow(imageName: "mt_newSettingView_sound")
+                            }
+                            NavigationLink{
+                                ShareExportView()
+                            }label: {
+                                settingRow(imageName: "mt_newSettingView_share")
+                            }
+                            NavigationLink{
+                                otherSettingView()
+                            }label: {
+                                settingRow(imageName: "mt_newSettingView_others")
+                            }
+                            Button{
+                                withAnimation {
+                                    userData.isTitle = true
+                                }
+                            }label:{
+                                rowDesignWithoutImage()
+                            }
+                            .padding(.bottom)
+                            Image("mt_newSettingView_aboutTheApp")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width:550)
+                            NavigationLink{
+                                YoutubeView()
+                            }label: {
+                                settingRow(imageName: "mt_newSettingView_prologue")
+                            }
+                            NavigationLink{
+                                TutorialView(imageArray: tutorialImage)
+                            }label: {
+                                settingRow(imageName: "mt_newSettingView_houUseApp")
+                            }
+                        
+                    }
+                    .padding(.vertical)
                     .frame(width: 650, height: 650)
-                    .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
-                VStack{
-                    Spacer()
-                    Image("mt_newSettingView_setting")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width:550)
-                    NavigationLink{
-                        ProfileSettingView(isFirst: false)
-                    }label: {
-                        settingRow(imageName: "mt_newSettingView_profile")
+                    .background(){
+                        RoundedRectangle(cornerRadius: 20)
+                            .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
                     }
-                    NavigationLink{
-                        soundSettingView()
-                    }label: {
-                        settingRow(imageName: "mt_newSettingView_sound")
-                    }
-                    NavigationLink{
-                        ShareExportView()
-                    }label: {
-                        settingRow(imageName: "mt_newSettingView_share")
-                    }
-                    NavigationLink{
-                        otherSettingView()
-                    }label: {
-                        settingRow(imageName: "mt_newSettingView_others")
-                    }
-                    Button{
-                        withAnimation {
-                            userData.isTitle = true
-                        }
-                    }label:{
-                        rowDesignWithoutImage()
-                    }
-                    Spacer()
-                    Image("mt_newSettingView_aboutTheApp")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width:550)
-                    NavigationLink{
-                        YoutubeView()
-                    }label: {
-                        settingRow(imageName: "mt_newSettingView_prologue")
-                    }
-                    NavigationLink{
-                        TutorialView(imageArray: tutorialImage)
-                    }label: {
-                        settingRow(imageName: "mt_newSettingView_houUseApp")
-                    }
-                    Spacer()
                 }
             }
+            
         }
     }
     private func rowDesignWithoutImage() -> some View{

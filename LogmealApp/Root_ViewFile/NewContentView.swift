@@ -11,11 +11,11 @@ struct NewContentView: View {
                 leftSideSection()
                     .toolbar(removing: .sidebarToggle)
             } detail: {
-                rightSideSection()
+                NavigationStack{
+                    rightSideSection()
+                }
+                
             }
-            NewCharacterView(showCharacterView: $showCharactarView)
-                .scaleEffect(showCharactarView ? 1.0 : 0.0)
-                .ignoresSafeArea()
             if user.showAnimation{
                 if user.showGrowthAnimation{
                     GrowthAnimationView(text1: "おや、\(user.characterName)のようすが…",
@@ -110,7 +110,9 @@ struct NewContentView: View {
             } else if isShowSelectedView[1] {
                 NewColumnView()
             } else if isShowSelectedView[2] {
-                NewSettingView()
+                NavigationStack{
+                    NewSettingView()
+            }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
