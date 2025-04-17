@@ -338,8 +338,10 @@ struct NewWritingView: View {
                                 )
                                 if user.level >= 12{
                                     user.growthStage = 3
+                                    user.isGrowthed = true
                                 }else if user.level >= 5{
                                     user.growthStage = 2
+                                    user.isGrowthed = true
                                 }
                             }
                         } label:{
