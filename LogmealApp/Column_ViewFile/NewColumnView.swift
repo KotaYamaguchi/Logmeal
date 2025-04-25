@@ -57,6 +57,7 @@ struct NewColumnView: View {
                 ZStack{
                     VStack {
                         HStack {
+                            Spacer()
                             Image("mt_ColumnViewTitle")
                             VStack {
                                 TextField("", text: $searchText)
@@ -123,9 +124,22 @@ struct NewColumnView: View {
                                                 }
                                             }
                                     }
-                                    
                                 }
                             }
+                            Spacer()
+                            Button{
+                                showQRscanner = true
+                            }label:{
+                                Circle()
+                                    .foregroundStyle(.cyan)
+                                    .frame(width:60)
+                                    .overlay{
+                                        Image(systemName:"plus")
+                                            .font(.system(size: 40))
+                                            .foregroundStyle(.white)
+                                    }
+                            }
+                            Spacer()
                         }
                         ScrollView {
                             ForEach(filteredColumns) { column in
@@ -213,20 +227,6 @@ struct NewColumnView: View {
                     .position(x: geometry.size.width * 0.92, y: geometry.size.height * 0.15)
                     .offset(y: isOpenSortMenu ? geometry.size.height * 0.1 : geometry.size.height * 0.07)
                     .opacity(isOpenSortMenu ? 1.0 : 0)
-                    Button{
-                        showQRscanner = true
-                    }label:{
-                        Circle()
-                            .foregroundStyle(.cyan)
-                            .frame(width:60)
-                            .overlay{
-                                Image(systemName:"plus")
-                                    .font(.system(size: 40))
-                                    .foregroundStyle(.white)
-                            }
-                    }
-                    .position(x:geometry.size.width,y:1)
-                    .offset(x:15,y:-10)
                 }
             }
             }
