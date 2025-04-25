@@ -27,6 +27,15 @@ struct NewHomeView: View {
             "bg_home_Dog"
         }
     }
+    private var addButtonImage:String{
+        switch user.selectedCharacter{
+        case "Dog":"bt_add_Dog"
+        case "Cat":"bt_add_Cat"
+        case "Rabbit":"bt_add_Rabbit"
+        default:
+            "bt_add_Dog"
+        }
+    }
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -59,7 +68,7 @@ struct NewHomeView: View {
     }
 
     private func backgroundImage(geometry: GeometryProxy) -> some View {
-        Image("bg_HomeView_dog")
+        Image(backgoundImage)
             .resizable()
             .scaledToFill()
             .ignoresSafeArea()
@@ -170,7 +179,7 @@ struct NewHomeView: View {
         Button {
             showWritingView = true
         } label: {
-            Image("bt_add_log")
+            Image(addButtonImage)
                 .resizable()
                 .scaledToFit()
                 .frame(width: geometry.size.width * 0.15)
