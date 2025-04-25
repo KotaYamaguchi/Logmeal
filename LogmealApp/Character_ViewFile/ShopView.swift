@@ -27,9 +27,27 @@ struct NewShopView:View {
     ]
     @State private var selectedItemIndex:Int? = nil
     @State private var displayImage = ""
+    private var displayContentColor:Color{
+        switch user.selectedCharacter{
+        case "Dog": Color(red: 248/255, green: 201/255, blue: 201/255)
+        case "Cat": Color(red: 198/255, green: 166/255, blue: 208/255)
+        case "Rabbit": Color(red: 251/255, green: 233/255, blue: 184/255)
+        default:
+            Color.white
+        }
+    }
+    private var backgoundImage:String{
+        switch user.selectedCharacter{
+        case "Dog":"bg_shop_Dog"
+        case "Cat":"bg_shop_Cat"
+        case "Rabbit":"bg_shop_Rabbit"
+        default:
+            "bg_shop_Dog"
+        }
+    }
     var body: some View {
         ZStack{
-            Image("bg_shop_Dog")
+            Image(backgoundImage)
                 .resizable()
                 .ignoresSafeArea()
                 .scaleEffect(1.1)
@@ -62,10 +80,16 @@ struct NewShopView:View {
                                 Button{
                                     isFrontItemsBord = true
                                 }label: {
-                                    Image("shop_top_label")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width:195)
+                                    ZStack{
+                                        UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 20, style: .continuous)
+                                            .frame(width:195,height: 70)
+                                            .foregroundStyle(.white)
+                                        UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 20, style: .continuous)
+                                            .stroke(lineWidth: 5)
+                                            .frame(width:195,height: 70)
+                                            .foregroundStyle(Color(red: 175/255, green: 170/255, blue: 170/255))
+                                    }
+                                    
                                         .overlay{
                                             Label("ショップ", systemImage: "cart.fill")
                                                 .font(.custom("GenJyuuGothicX-Bold", size: 23))
@@ -76,10 +100,15 @@ struct NewShopView:View {
                                 Button{
                                     isFrontItemsBord = false
                                 }label: {
-                                    Image("shop_top_label_dog")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width:195)
+                                    ZStack{
+                                        UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 20, style: .continuous)
+                                            .frame(width:195,height: 70)
+                                            .foregroundStyle(displayContentColor)
+                                        UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 20, style: .continuous)
+                                            .stroke(lineWidth: 5)
+                                            .frame(width:195,height: 70)
+                                            .foregroundStyle(Color(red: 175/255, green: 170/255, blue: 170/255))
+                                    }
                                         .overlay{
                                             Text("買ったもの")
                                                 .font(.custom("GenJyuuGothicX-Bold", size: 23))
@@ -89,10 +118,15 @@ struct NewShopView:View {
                                 .disabled(!isFrontItemsBord)
                             }
                             .offset(y:5)
-                            Image(isFrontItemsBord ?"shop_main_bord" : "shop_main_bord_dog")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width:460)
+                            ZStack{
+                                RoundedRectangle(cornerRadius: 20)
+                                    .frame(width:460,height: 500)
+                                    .foregroundStyle(isFrontItemsBord ? .white : displayContentColor)
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(lineWidth: 5)
+                                    .frame(width:460,height: 500)
+                                    .foregroundStyle(Color(red: 175/255, green: 170/255, blue: 170/255))
+                            }
                                 .overlay{
                                     if isFrontItemsBord{
                                         itemArray()
