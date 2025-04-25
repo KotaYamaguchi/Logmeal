@@ -15,7 +15,7 @@ struct TitleView: View {
     @Query private var allData: [AjiwaiCardData]
     @Environment(\.modelContext) private var context
     var body: some View {
-        NavigationStack{
+        
             if user.isTitle{
                 GeometryReader{ geometry in
                     ZStack(alignment: .topTrailing) {
@@ -64,7 +64,6 @@ struct TitleView: View {
                 InitialScreenSelectorView()
             }
             
-        }
     }
     @ViewBuilder private func appSettingView(geometry:GeometryProxy) -> some View {
         NavigationStack {

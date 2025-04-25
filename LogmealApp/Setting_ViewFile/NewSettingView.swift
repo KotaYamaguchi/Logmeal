@@ -8,7 +8,7 @@ struct NewSettingView: View {
     @State private var bgmVolume: Float = BGMManager.shared.bgmVolume
     @EnvironmentObject var userData: UserData
     var body: some View {
-        NavigationStack{
+     
             GeometryReader{ geomtry in
                 ZStack{
                     Image("bg_newSettingView.png")
@@ -23,6 +23,9 @@ struct NewSettingView: View {
                                 ProfileSettingView(isFirst: false)
                             }label: {
                                 settingRow(imageName: "mt_newSettingView_profile")
+                            }
+                            .onTapGesture{
+                                print("お下で")
                             }
                             NavigationLink{
                                 soundSettingView()
@@ -72,7 +75,7 @@ struct NewSettingView: View {
                 }
             }
             
-        }
+        
     }
     private func rowDesignWithoutImage() -> some View{
             Rectangle()

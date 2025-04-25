@@ -9,12 +9,10 @@ struct NewContentView: View {
         ZStack{
             NavigationSplitView {
                 leftSideSection()
-                    .toolbar(removing: .sidebarToggle)
+                   
             } detail: {
-                NavigationStack{
-                    rightSideSection()
-                }
                 
+                rightSideSection()
             }
             if user.showAnimation{
                 if user.showGrowthAnimation{
@@ -74,19 +72,8 @@ struct NewContentView: View {
                 Divider()
             }
             Spacer()
-            Image("img_dog_yell")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 300, height: 300)
-                .onTapGesture {
-                    withAnimation {
-                        showCharactarView = true
-                    }
-                    
-                }
         }
         .padding(.top)
-        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(red: 255/255, green: 254/255, blue: 245/255))
     }
     
@@ -106,13 +93,20 @@ struct NewContentView: View {
     private func rightSideSection() -> some View {
         ZStack {
             if isShowSelectedView[0] {
-                NewHomeView()
+                NavigationStack{
+                    NewHomeView()
+                }
+                
             } else if isShowSelectedView[1] {
-                NewColumnView()
+                NavigationStack{
+                    NewColumnView()
+                }
+                
             } else if isShowSelectedView[2] {
+                
                 NavigationStack{
                     NewSettingView()
-            }
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
