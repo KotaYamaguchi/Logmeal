@@ -93,6 +93,7 @@ struct NewCharacterView: View {
 struct NewCharacterDetailView:View {
     @State private var selectedTab:Int = 0
     @State private var isSelected:Bool = false
+    @EnvironmentObject var user:UserData
     var body: some View {
         ZStack{
             switch selectedTab {
@@ -162,65 +163,121 @@ struct NewCharacterDetailView:View {
                     }
                 Spacer()
                 if selectedTab == 0 {
-                    HStack(alignment: .bottom, spacing: 1) {
-                        Spacer()
-                        Image("Dog_normal_1")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 200)
-                        Image("arrow_symbol")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 80)
-                            .offset(y: -50)
-                        Image("img_dog_applause")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 300)
-                        Image("arrow_symbol")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 80)
-                            .offset(y: -50)
-                        Image("img_dog_applause")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 400)
-                        Spacer()
+                    VStack{
+                        HStack(alignment: .bottom, spacing: 1) {
+                            Spacer()
+                            Image("Dog_normal_1")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 200)
+                            Image("arrow_symbol")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 80)
+                                .offset(y: -50)
+                            Image("img_dog_applause")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 300)
+                            Image("arrow_symbol")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 80)
+                                .offset(y: -50)
+                            Image("img_dog_applause")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 400)
+                            Spacer()
+                        }
+                        if user.selectedCharacter != "Dog"{
+                            Button{
+                                user.selectedCharacter = "Dog"
+                            }label:{
+                                RoundedRectangle(cornerRadius: 50)
+                                    .frame(width:400,height: 80)
+                                    .foregroundStyle(.green)
+                                    .overlay{
+                                        Text("このキャラにする！")
+                                            .foregroundStyle(.white)
+                                            .font(.system(size: 40))
+                                    }
+                            }
+                        }else{
+                            Button{
+                               
+                            }label:{
+                                RoundedRectangle(cornerRadius: 50)
+                                    .frame(width:300,height: 80)
+                                    .foregroundStyle(.gray)
+                                    .overlay{
+                                        Text("選択中")
+                                            .foregroundStyle(.white)
+                                            .font(.system(size: 40))
+                                    }
+                            }
+                        }
                     }
                 } else if selectedTab == 1 {
                     Text("うさぎ")
+                    if user.selectedCharacter != "Rabbit"{
+                        Button{
+                            user.selectedCharacter = "Rabbit"
+                        }label:{
+                            RoundedRectangle(cornerRadius: 50)
+                                .frame(width:400,height: 80)
+                                .foregroundStyle(.green)
+                                .overlay{
+                                    Text("このキャラにする！")
+                                        .foregroundStyle(.white)
+                                        .font(.system(size: 40))
+                                }
+                        }
+                    }else{
+                        Button{
+                           
+                        }label:{
+                            RoundedRectangle(cornerRadius: 50)
+                                .frame(width:300,height: 80)
+                                .foregroundStyle(.gray)
+                                .overlay{
+                                    Text("選択中")
+                                        .foregroundStyle(.white)
+                                        .font(.system(size: 40))
+                                }
+                        }
+                    }
                 } else if selectedTab == 2 {
                     Text("ねこ")
-                }
-                Spacer()
-                if isSelected{
-                    Button{
-                        
-                    }label:{
-                        RoundedRectangle(cornerRadius: 50)
-                            .frame(width:300,height: 80)
-                            .foregroundStyle(.green)
-                            .overlay{
-                                Text("決定")
-                                    .foregroundStyle(.white)
-                                    .font(.system(size: 40))
-                            }
+                    if user.selectedCharacter != "Cat"{
+                        Button{
+                            user.selectedCharacter = "Cat"
+                        }label:{
+                            RoundedRectangle(cornerRadius: 50)
+                                .frame(width:400,height: 80)
+                                .foregroundStyle(.green)
+                                .overlay{
+                                    Text("このキャラにする！")
+                                        .foregroundStyle(.white)
+                                        .font(.system(size: 40))
+                                }
+                        }
+                    }else{
+                        Button{
+                           
+                        }label:{
+                            RoundedRectangle(cornerRadius: 50)
+                                .frame(width:300,height: 80)
+                                .foregroundStyle(.gray)
+                                .overlay{
+                                    Text("選択中")
+                                        .foregroundStyle(.white)
+                                        .font(.system(size: 40))
+                                }
+                        }
                     }
-                }else{
-                    Button{
-                        
-                    }label:{
-                        RoundedRectangle(cornerRadius: 50)
-                            .frame(width:300,height: 80)
-                            .foregroundStyle(.gray)
-                            .overlay{
-                                Text("選択中")
-                                    .foregroundStyle(.white)
-                                    .font(.system(size: 40))
-                            }
-                    }
                 }
+
                 
             }
 
