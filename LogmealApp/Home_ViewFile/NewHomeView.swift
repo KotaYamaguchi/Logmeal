@@ -9,6 +9,24 @@ struct NewHomeView: View {
     @Query private var allData: [AjiwaiCardData]
     @State var selectedIndex: Int? = nil
     @State var showDetailView:Bool = false
+    private var displayContentColor:Color{
+        switch user.selectedCharacter{
+        case "Dog": Color(red: 248/255, green: 201/255, blue: 201/255)
+        case "Cat": Color(red: 198/255, green: 166/255, blue: 208/255)
+        case "Rabbit": Color(red: 251/255, green: 233/255, blue: 184/255)
+        default:
+            Color.white
+        }
+    }
+    private var backgoundImage:String{
+        switch user.selectedCharacter{
+        case "Dog":"bg_home_Dog"
+        case "Cat":"bg_home_Cat"
+        case "Rabbit":"bg_home_Rabbit"
+        default:
+            "bg_home_Dog"
+        }
+    }
     var body: some View {
         GeometryReader { geometry in
             ZStack {
