@@ -3,7 +3,7 @@ import SwiftUI
 struct NewContentView: View {
     @EnvironmentObject var user:UserData
     let headLineTitles: [String] = ["ホーム", "コラム", "せってい"]
-    @State private var isShowSelectedView: [Bool] = [true, false, false] // 初期状態で1つ目を選択
+    @State private var isShowSelectedView: [Bool] = [false, true, false] // 初期状態で1つ目を選択
     @State private var showCharactarView:Bool = false
     var body: some View {
         ZStack{
