@@ -9,6 +9,33 @@ struct NewHomeView: View {
     @Query private var allData: [AjiwaiCardData]
     @State var selectedIndex: Int? = nil
     @State var showDetailView:Bool = false
+    private var displayContentColor:Color{
+        switch user.selectedCharacter{
+        case "Dog": Color(red: 248/255, green: 201/255, blue: 201/255)
+        case "Cat": Color(red: 198/255, green: 166/255, blue: 208/255)
+        case "Rabbit": Color(red: 251/255, green: 233/255, blue: 184/255)
+        default:
+            Color.white
+        }
+    }
+    private var backgoundImage:String{
+        switch user.selectedCharacter{
+        case "Dog":"bg_home_Dog"
+        case "Cat":"bg_home_Cat"
+        case "Rabbit":"bg_home_Rabbit"
+        default:
+            "bg_home_Dog"
+        }
+    }
+    private var addButtonImage:String{
+        switch user.selectedCharacter{
+        case "Dog":"bt_add_Dog"
+        case "Cat":"bt_add_Cat"
+        case "Rabbit":"bt_add_Rabbit"
+        default:
+            "bt_add_Dog"
+        }
+    }
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -41,7 +68,7 @@ struct NewHomeView: View {
     }
 
     private func backgroundImage(geometry: GeometryProxy) -> some View {
-        Image("bg_HomeView_dog")
+        Image(backgoundImage)
             .resizable()
             .scaledToFill()
             .ignoresSafeArea()
@@ -152,7 +179,7 @@ struct NewHomeView: View {
         Button {
             showWritingView = true
         } label: {
-            Image("bt_add_log")
+            Image(addButtonImage)
                 .resizable()
                 .scaledToFit()
                 .frame(width: geometry.size.width * 0.15)
