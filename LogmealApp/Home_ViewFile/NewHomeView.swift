@@ -82,7 +82,14 @@ struct NewHomeView: View {
                 AsyncImage(url: user.userImage) { phase in
                     switch phase {
                     case .empty:
-                        ProgressView()
+                        Image("no_user_image")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: geometry.size.width * 0.2)
+                            .overlay {
+                                Circle()
+                                    .stroke(displayContentColor, lineWidth: 5)
+                            }
                     case .success(let image):
                         image
                             .resizable()
@@ -131,7 +138,8 @@ struct NewHomeView: View {
                 }
                 RoundedRectangle(cornerRadius: 10)
                     .frame(width: geometry.size.width * 0.8, height: 3)
-                    .foregroundStyle(Color(red: 236/255, green: 178/255, blue: 183/255))
+                    .foregroundStyle(displayContentColor)
+                    .padding()
             }
             Spacer()
         }
