@@ -398,11 +398,11 @@ struct ShareExportView: View {
 }
 
 
-#Preview{
-    NewContentView()
-        .environmentObject(UserData())
-        .modelContainer(for: AjiwaiCardData.self)
-}
+//#Preview{
+//    NewContentView()
+//        .environmentObject(UserData())
+//        .modelContainer(for: AjiwaiCardData.self)
+//}
 #Preview{
     NewSettingView()
         .environmentObject(UserData())
