@@ -5,71 +5,71 @@ struct NewSettingView: View {
     private let tutorialImage: [String] = ["HowToUseHome", "HowToUseCalendar", "HowToUseShop", "HowToUseCharacter", "HowToUseColumnList", "HowToUseAjiwaiCard", "HowToUseQr", "HowToUseCardEdit", "HowToUseSetting", "HowToUseShare1", "HowToUseShare2"]
     @EnvironmentObject var userData: UserData
     var body: some View {
-        
-        GeometryReader{ geomtry in
-            ZStack{
-                Image("bg_newSettingView.png")
-                    .resizable()
-                    .ignoresSafeArea()
-                ScrollView{
-                    Image("mt_newSettingView_setting")
+        NavigationStack{
+            GeometryReader{ geomtry in
+                ZStack{
+                    Image("bg_newSettingView.png")
                         .resizable()
-                        .scaledToFit()
-                        .frame(width:550)
-                    NavigationLink{
-                        ProfileSettingView(isFirst: false)
-                    }label: {
-                        SettingRowDesign(withImage: true, imageName: "mt_newSettingView_profile")
-                    }
-                    NavigationLink{
-                        SoundSettingView()
-                    }label: {
-                        SettingRowDesign(withImage: true, imageName: "mt_newSettingView_sound")
-                    }
-                    NavigationLink{
-                        ShareExportView()
-                    }label: {
-                        SettingRowDesign(withImage: true, imageName: "mt_newSettingView_share")
-                    }
-                    NavigationLink{
-                        OtherSettingView()
-                    }label: {
-                        SettingRowDesign(withImage: true, imageName: "mt_newSettingView_others")
-                    }
-                    Button{
-                        withAnimation {
-                            userData.isTitle = true
+                        .ignoresSafeArea()
+                    ScrollView{
+                        Image("mt_newSettingView_setting")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width:550)
+                        NavigationLink{
+                            ProfileSettingView(isFirst: false)
+                        }label: {
+                            SettingRowDesign(withImage: true, imageName: "mt_newSettingView_profile")
                         }
-                    }label:{
-                        SettingRowDesign(withImage: false,rowTitle: "タイトルに戻る", iconName: "arrowshape.turn.up.backward")
+                        NavigationLink{
+                            SoundSettingView()
+                        }label: {
+                            SettingRowDesign(withImage: true, imageName: "mt_newSettingView_sound")
+                        }
+                        NavigationLink{
+                            ShareExportView()
+                        }label: {
+                            SettingRowDesign(withImage: true, imageName: "mt_newSettingView_share")
+                        }
+                        NavigationLink{
+                            OtherSettingView()
+                        }label: {
+                            SettingRowDesign(withImage: true, imageName: "mt_newSettingView_others")
+                        }
+                        Button{
+                            withAnimation {
+                                userData.isTitle = true
+                            }
+                        }label:{
+                            SettingRowDesign(withImage: false,rowTitle: "タイトルに戻る", iconName: "arrowshape.turn.up.backward")
+                        }
+                        .padding(.bottom)
+                        Image("mt_newSettingView_aboutTheApp")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width:550)
+                        NavigationLink{
+                            YoutubeView()
+                        }label: {
+                            SettingRowDesign(withImage: true, imageName: "mt_newSettingView_prologue")
+                        }
+                        NavigationLink{
+                            TutorialView(imageArray: tutorialImage)
+                        }label: {
+                            SettingRowDesign(withImage: true, imageName: "mt_newSettingView_houUseApp")
+                        }
+                        
                     }
-                    .padding(.bottom)
-                    Image("mt_newSettingView_aboutTheApp")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width:550)
-                    NavigationLink{
-                        YoutubeView()
-                    }label: {
-                        SettingRowDesign(withImage: true, imageName: "mt_newSettingView_prologue")
+                    .padding(.vertical)
+                    .frame(width: 650, height: 650)
+                    .background(){
+                        RoundedRectangle(cornerRadius: 20)
+                            .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
                     }
-                    NavigationLink{
-                        TutorialView(imageArray: tutorialImage)
-                    }label: {
-                        SettingRowDesign(withImage: true, imageName: "mt_newSettingView_houUseApp")
-                    }
-                    
-                }
-                .padding(.vertical)
-                .frame(width: 650, height: 650)
-                .background(){
-                    RoundedRectangle(cornerRadius: 20)
-                        .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
                 }
             }
+            
         }
-        
-        
     }
 }
 
