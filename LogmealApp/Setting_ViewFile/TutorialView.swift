@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TutorialView: View {
     let imageArray:[String]
+    let withBackButton:Bool
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         GeometryReader{ geometry in
@@ -27,15 +28,19 @@ struct TutorialView: View {
                     UIPageControl.appearance().currentPageIndicatorTintColor = UIColor.red
                     UIPageControl.appearance().pageIndicatorTintColor = UIColor.gray
                 }
-                Button{
-                    dismiss()
-                }label: {
-                    Image("bt_close")
-                        .resizable()
-                        .frame(width:50,height: 50)
+                if withBackButton{
+                    
+                    
+                    Button{
+                        dismiss()
+                    }label: {
+                        Image("bt_close")
+                            .resizable()
+                            .frame(width:50,height: 50)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding()
                 }
-                .buttonStyle(PlainButtonStyle())
-                .padding()
             }
         }
     }

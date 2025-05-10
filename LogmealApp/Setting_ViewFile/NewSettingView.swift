@@ -11,7 +11,7 @@ struct NewSettingView: View {
                     Image("bg_newSettingView.png")
                         .resizable()
                         .ignoresSafeArea()
-                    ScrollView{
+                    VStack{
                         Image("mt_newSettingView_setting")
                             .resizable()
                             .scaledToFit()
@@ -49,19 +49,19 @@ struct NewSettingView: View {
                             .scaledToFit()
                             .frame(width:550)
                         NavigationLink{
-                            YoutubeView()
+                            YoutubeView(withBaclButton: false)
                         }label: {
                             SettingRowDesign(withImage: true, imageName: "mt_newSettingView_prologue")
                         }
                         NavigationLink{
-                            TutorialView(imageArray: tutorialImage)
+                            TutorialView(imageArray: tutorialImage,withBackButton: false)
                         }label: {
                             SettingRowDesign(withImage: true, imageName: "mt_newSettingView_houUseApp")
                         }
                         
                     }
                     .padding(.vertical)
-                    .frame(width: 650, height: 650)
+                    .frame(width: 600, height: 600)
                     .background(){
                         RoundedRectangle(cornerRadius: 20)
                             .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
@@ -79,7 +79,8 @@ struct SettingRowDesign:View {
     var rowTitle:String = ""
     var iconName:String = ""
     var textColor:Color = .black
-    var body: some View {
+    var icnoColor:Color = .black
+     var body: some View {
         if withImage{
             Image(imageName)
                 .resizable()
@@ -93,7 +94,7 @@ struct SettingRowDesign:View {
                     HStack(spacing:30){
                         Image(systemName: iconName)
                             .font(.system(size: 30))
-                            .foregroundStyle(textColor)
+                            .foregroundStyle(icnoColor)
                         Text(rowTitle)
                             .font(.custom("GenJyuuGothicX-Bold", size: 28))
                             .foregroundStyle(textColor)
@@ -110,114 +111,212 @@ struct SoundSettingView:View {
     @ObservedObject private var soundManager = SoundManager.shared
     @ObservedObject private var bgmManager = BGMManager.shared
     @State private var bgmVolume: Float = BGMManager.shared.bgmVolume
+    @State private var soundVolume: Float = SoundManager.shared.soundVolume
     var body: some View {
         ZStack{
             Image("bg_newSettingView.png")
                 .resizable()
                 .ignoresSafeArea()
             
-            VStack(alignment:.leading){
-                Text("サウンド")
-                    .font(.custom("GenJyuuGothicX-Bold", size: 30))
                 ZStack{
                     RoundedRectangle(cornerRadius: 20)
-                        .frame(width: 600, height: 350)
+                        .frame(width: 600, height: 330)
                         .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
-                    
-                    RoundedRectangle(cornerRadius: 20)
-                        .frame(width: 550, height: 300)
-                        .foregroundStyle(.white)
-                    VStack(alignment:.leading){
-                        //BGM変更スライダー
-                        VStack(alignment:.leading){
-                            HStack{
-                                Text("BGMの音量")
-                                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                                    .foregroundStyle(bgmManager.isBGMOn ? .black : .gray)
-                                Spacer()
+                    VStack(spacing:10){
+                        UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 20, style: .continuous)
+                            .frame(width: 550, height: 40)
+                            .foregroundStyle(.white)
+                            .overlay{
+                                HStack{
+                                    Text("サウンド")
+                                        .padding()
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 23))
+                                    Spacer()
+                                }
+                            }
+                        VStack(spacing:6){
+                            //BGM変更スライダー
+                            VStack(alignment:.leading,spacing: 3){
+                                Rectangle()
+                                    .foregroundStyle(.white)
+                                    .frame(width:550,height: 60)
+                                .overlay{
+                                    HStack{
+                                        Text("BGMの音量")
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                            .foregroundStyle(bgmManager.isBGMOn ? .black : .gray)
+                                        Spacer()
+                                        Button {
+                                            bgmManager.toggleBGM()
+                                        } label: {
+                                            ZStack{
+                                                Capsule()
+                                                    .frame(width: 65, height: 35)
+                                                    .foregroundStyle(.gray.opacity(0.3))
+                                                Circle()
+                                                    .frame(height: 35)
+                                                    .foregroundStyle(bgmManager.isBGMOn ? .orange : .gray)
+                                                    .offset(x:bgmManager.isBGMOn ? 15 :-15)
+                                                    
+                                            }
+    //                                        ZStack {
+    //                                            RoundedRectangle(cornerRadius: 10)
+    //                                                .frame(width: 65, height: 35)
+    //                                                .foregroundStyle(Color(red: 0.42, green: 0.4, blue: 0.4))
+    //                                                .offset(y: 5)
+    //                                            RoundedRectangle(cornerRadius: 10)
+    //                                                .frame(width: 65, height: 35)
+    //                                                .foregroundStyle(bgmManager.isBGMOn ? .orange : .gray)
+    //                                                .overlay {
+    //                                                    Text(bgmManager.isBGMOn ? "ON" : "OFF")
+    //                                                        .font(.title)
+    //                                                        .foregroundStyle(.white)
+    //                                                }
+    //                                        }
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                    }
+                                    .padding()
+                                }
+                                Rectangle()
+                                    .foregroundStyle(.white)
+                                    .frame(width:550,height: 45)
+                                    .overlay{
+                                        HStack{
+                                            Button{
+                                                if bgmVolume >= 0{
+                                                    bgmVolume -= 0.1
+                                                    print("-1")
+                                                }else{
+                                                    print("MIN")
+                                                }
+                                            }label: {
+                                                Image(systemName: "minus.circle")
+                                                    .font(.system(size: 25))
+                                                    .foregroundStyle(bgmVolume <= 0 || !bgmManager.isBGMOn ? .gray : .orange)
+                                            }
+                                            .disabled(bgmVolume <= 0 || !bgmManager.isBGMOn)
+                                            Slider(value: $bgmVolume, in: 0...1, step: 0.1,onEditingChanged: { editing in
+                                                if !editing {
+                                                    bgmManager.setBGMVolume(bgmVolume)
+                                                }
+                                            })
+                                            .tint(bgmManager.isBGMOn ? .orange : .gray)
+                                            .disabled(!bgmManager.isBGMOn)
+                                            Button{
+                                                if bgmVolume <= 1{
+                                                    bgmVolume += 0.1
+                                                    print("+1")
+                                                }else{
+                                                    print("MAX")
+                                                }
+                                                
+                                            }label: {
+                                                Image(systemName: "plus.circle")
+                                                    .font(.system(size: 25))
+                                                    .foregroundStyle(bgmVolume >= 1 || !bgmManager.isBGMOn ? .gray : .orange)
+                                            }
+                                            .disabled(bgmVolume >= 1 || !bgmManager.isBGMOn)
+                                        }
+                                        .padding(.horizontal)
+                                    }
                                 
-                                Image(systemName: "speaker.wave.2")
-                                    .font(.largeTitle)
-                                    .foregroundStyle(bgmManager.isBGMOn ? .black : .gray)
-                                Button {
-                                    bgmManager.toggleBGM()
-                                } label: {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .frame(width: 65, height: 35)
-                                            .foregroundStyle(Color(red: 0.42, green: 0.4, blue: 0.4))
-                                            .offset(y: 5)
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .frame(width: 65, height: 35)
-                                            .foregroundStyle(bgmManager.isBGMOn ? .orange : .gray)
-                                            .overlay {
-                                                Text(bgmManager.isBGMOn ? "ON" : "OFF")
-                                                    .font(.title)
-                                                    .foregroundStyle(.white)
-                                            }
-                                    }
-                                }
-                                .buttonStyle(PlainButtonStyle())
                             }
-                            Slider(value: $bgmVolume, in: 0...1, step: 0.1,onEditingChanged: { editing in
-                                if !editing {
-                                    bgmManager.setBGMVolume(bgmVolume)
-                                }
-                            })
-                            .tint(bgmManager.isBGMOn ? .orange : .gray)
-                            .disabled(!bgmManager.isBGMOn)
-                            .padding(.horizontal)
-                        }
-                        .padding()
-                        // SE音量調整スライダー
-                        VStack(alignment:.leading){
-                            HStack{
-                                Text("効果音の音量")
-                                    .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                                    .foregroundStyle(soundManager.isSoundOn ? .black : .gray)
-                                Spacer()
-                                Image(systemName: "speaker.wave.2")
-                                    .font(.largeTitle)
-                                    .foregroundStyle(soundManager.isSoundOn ? .black : .gray)
-                                Button{
-                                    soundManager.toggleSound()
-                                }label:{
-                                    ZStack{
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .frame(width: 65, height: 35)
-                                            .foregroundStyle(Color(red: 0.42, green: 0.4, blue: 0.4))
-                                            .offset(y:5)
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .frame(width: 65, height: 35)
-                                            .foregroundStyle( soundManager.isSoundOn ? .orange : .gray)
-                                            .overlay{
-                                                Text( soundManager.isSoundOn ? "ON" : "OFF")
-                                                    .font(.title)
-                                                    .foregroundStyle(.white)
+                           
+                            // SE音量調整スライダー
+                            VStack(alignment:.leading,spacing: 3){
+                                Rectangle()
+                                    .foregroundStyle(.white)
+                                    .frame(width:550,height: 60)
+                                    .overlay{
+                                        HStack{
+                                            Text("効果音の音量")
+                                                .font(.custom("GenJyuuGothicX-Bold", size: 15))
+                                                .foregroundStyle(soundManager.isSoundOn ? .black : .gray)
+                                            Spacer()
+                                            Button{
+                                                soundManager.toggleSound()
+                                            }label:{
+                                                ZStack{
+                                                    Capsule()
+                                                        .frame(width: 65, height: 35)
+                                                        .foregroundStyle(.gray.opacity(0.3))
+                                                    Circle()
+                                                        .frame(height: 35)
+                                                        .foregroundStyle(soundManager.isSoundOn ? .orange : .gray)
+                                                        .offset(x:soundManager.isSoundOn ? 15 :-15)
+                                                        
+                                                }
+                                                
+    //                                            ZStack{
+    //                                                RoundedRectangle(cornerRadius: 10)
+    //                                                    .frame(width: 65, height: 35)
+    //                                                    .foregroundStyle(Color(red: 0.42, green: 0.4, blue: 0.4))
+    //                                                    .offset(y:5)
+    //                                                RoundedRectangle(cornerRadius: 10)
+    //                                                    .frame(width: 65, height: 35)
+    //                                                    .foregroundStyle( soundManager.isSoundOn ? .orange : .gray)
+    //                                                    .overlay{
+    //                                                        Text( soundManager.isSoundOn ? "ON" : "OFF")
+    //                                                            .font(.title)
+    //                                                            .foregroundStyle(.white)
+    //                                                    }
+    //                                            }
                                             }
+                                            .buttonStyle(PlainButtonStyle())
+                                        }
+                                        .padding(.horizontal)
                                     }
-                                }
-                                .buttonStyle(PlainButtonStyle())
+                                UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 20, bottomTrailingRadius: 20, topTrailingRadius: 0, style: .continuous)
+                                    .foregroundStyle(.white)
+                                    .frame(width:550,height: 45)
+                                    .overlay{
+                                        HStack{
+                                            Button{
+                                                if soundVolume > 0{
+                                                    soundVolume -= 0.1
+                                                    print("-1")
+                                                }else{
+                                                    print("MIN")
+                                                }
+                                                
+                                            }label: {
+                                                Image(systemName: "minus.circle")
+                                                    .font(.system(size: 25))
+                                                    .foregroundStyle(soundVolume <= 0 || !soundManager.isSoundOn ? .gray : .orange)
+                                            }
+                                            .disabled(soundVolume <= 0 || !soundManager.isSoundOn)
+                                            Slider(value: $soundVolume, in: 0...1, step: 0.1, onEditingChanged: { editing in
+                                                if !editing{
+                                                    soundManager.setSoundVolume(soundVolume)
+                                                }
+                                            })
+                                            .tint(soundManager.isSoundOn ? .orange : .gray)
+                                            .disabled(!soundManager.isSoundOn)
+                                            Button{
+                                                if soundVolume < 1{
+                                                    soundVolume += 0.1
+                                                    print("+1")
+                                                }else{
+                                                    print("MAX")
+                                                }
+                                                
+                                            }label: {
+                                                Image(systemName: "plus.circle")
+                                                    .font(.system(size: 25))
+                                                    .foregroundStyle(soundVolume >= 1 || !soundManager.isSoundOn ? .gray : .orange)
+                                            }
+                                            .disabled(soundVolume >= 1 || !soundManager.isSoundOn)
+                                        }
+                                        .padding(.horizontal)
+                                    }
+                                
                             }
-                            
-                            Slider(value: Binding(
-                                get: { soundManager.soundVolume },
-                                set: { newVolume in
-                                    soundManager.setSoundVolume(newVolume)
-                                }
-                            ), in: 0...1, step:0.1, onEditingChanged: { editing in
-                                if !editing {
-                                    soundManager.setSoundVolume(soundManager.soundVolume)
-                                }
-                            })
-                            .tint(soundManager.isSoundOn ? .orange : .gray)
-                            .disabled(!soundManager.isSoundOn)
                         }
-                        .padding()
+                 
+                        
                     }
-                    .frame(width: 500, height: 300)
                 }
-            }
         }
     }
 }
@@ -243,7 +342,7 @@ struct OtherSettingView:View {
             Image("bg_newSettingView.png")
                 .resizable()
                 .ignoresSafeArea()
-            VStack{
+            VStack(spacing:10){
                 UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 20, style: .continuous)
                     .frame(width: 550, height: 40)
                     .foregroundStyle(.white)
@@ -255,25 +354,43 @@ struct OtherSettingView:View {
                             Spacer()
                         }
                     }
-                Button{
-                    showQRreader = true
-                }label: {
-                    SettingRowDesign(withImage: false, rowTitle: rowTitles[0], iconName: rowIcons[0])
+                VStack(spacing:5){
+                    Button{
+                        showQRreader = true
+                    }label: {
+                        SettingRowDesign(withImage: false, rowTitle: rowTitles[0], iconName: rowIcons[0])
+                    }
+                    Button{
+                        isColumn = false
+                        showDeleteView = true
+                    }label: {
+                        SettingRowDesign(withImage: false, rowTitle: rowTitles[1], iconName: rowIcons[1],textColor: .red,icnoColor: .red)
+                    }
+                    Button{
+                        isColumn = true
+                        showDeleteView = true
+                    }label: {
+                        UnevenRoundedRectangle(topLeadingRadius: 0,bottomLeadingRadius: 20,bottomTrailingRadius: 20,topTrailingRadius: 0)
+                            .foregroundStyle(.white)
+                            .frame(width:550,height: 50)
+                            .overlay{
+                                HStack(spacing:30){
+                                    Image(systemName: "trash")
+                                        .font(.system(size: 30))
+                                        .foregroundStyle(.red)
+                                    Text("コラムを削除する")
+                                        .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                                        .foregroundStyle(.red)
+                                    Spacer()
+                                    
+                                }
+                                .padding(.horizontal)
+                            }
+                    }
                 }
-                Button{
-                    isColumn = false
-                    showDeleteView = true
-                }label: {
-                    SettingRowDesign(withImage: false, rowTitle: rowTitles[1], iconName: rowIcons[1],textColor: .red)
-                }
-                Button{
-                    isColumn = true
-                    showDeleteView = true
-                }label: {
-                    SettingRowDesign(withImage: false, rowTitle: rowTitles[2], iconName: rowIcons[2],textColor: .red)
-                }
+                
             }
-            .frame(width: 650, height: 650)
+            .frame(width: 600, height: 250)
             .background(){
                 RoundedRectangle(cornerRadius: 20)
                     .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
@@ -360,7 +477,8 @@ struct ShareExportView: View {
     @State private var selectedFileType: FileType = .pdf
     @State private var startDate: Date = Date()
     @State private var endDate: Date = Date()
-    
+    @State private var isSelctedPDF = false
+    @State private var isSelctedCSV = false
     enum FileType {
         case pdf, csv
     }
@@ -371,35 +489,59 @@ struct ShareExportView: View {
                 .resizable()
                 .ignoresSafeArea()
             RoundedRectangle(cornerRadius: 20)
-                .frame(width: 350, height: 200)
+                .frame(width: 600, height: 250)
                 .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
-            VStack(spacing: 20) {
-                Button{
-                    selectedFileType = .pdf
-                    showDatePicker = true
-                }label:{
-                    Text("PDFで共有")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                        .frame(width: 300, height: 50)
-                        .background(Color.white)
-                        .foregroundStyle(Color.black)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
+            VStack(spacing:10){
+                UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 20, style: .continuous)
+                    .frame(width: 550, height: 40)
+                    .foregroundStyle(.white)
+                    .overlay{
+                        HStack{
+                            Text("共有")
+                                .padding()
+                                .font(.custom("GenJyuuGothicX-Bold", size: 23))
+                            Spacer()
+                        }
+                    }
+                VStack(spacing:5){
+                    Button{
+                        selectedFileType = .pdf
+                        isSelctedCSV = false
+                        isSelctedPDF = true
+                    }label:{
+                        ZStack{
+                            SettingRowDesign(withImage: false, rowTitle: "PDFで共有", iconName: isSelctedPDF ? "checkmark.circle.fill" : "circle", textColor: allData.isEmpty ? .gray :  .black, icnoColor:isSelctedPDF ? .orange : .gray)
+
+                        }
+                    }
+                    .disabled(allData.isEmpty)
+                    Button{
+                        selectedFileType = .csv
+                        isSelctedPDF = false
+                        isSelctedCSV = true
+                    }label:{
+                        ZStack{
+                            UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 20, bottomTrailingRadius: 20, topTrailingRadius: 0, style: .continuous)
+                                .foregroundStyle(.white)
+                                .frame(width:550,height: 50)
+                                .overlay{
+                                    HStack(spacing:30){
+                                        Image(systemName: isSelctedCSV ? "checkmark.circle.fill" : "circle")
+                                            .font(.system(size: 30))
+                                            .foregroundStyle(isSelctedCSV ? .orange : .gray)
+                                        Text("CSVで共有")
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                                            .foregroundStyle(allData.isEmpty ? .gray : .black)
+                                        Spacer()
+                                        
+                                    }
+                                    .padding(.horizontal)
+                                }
+                        }
+                    }
+                    .disabled(allData.isEmpty)
                 }
-                .disabled(allData.isEmpty)
-                Button{
-                    selectedFileType = .csv
-                    showDatePicker = true
-                }label:{
-                    Text("CSVで共有")
-                        .font(.custom("GenJyuuGothicX-Bold", size: 15))
-                        .frame(width: 300, height: 50)
-                        .background(Color.white)
-                        .foregroundStyle(Color.black)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                }
-                .disabled(allData.isEmpty)
             }
-            .padding()
             .sheet(isPresented: $showDatePicker) {
                 VStack {
                     HStack {
@@ -468,6 +610,23 @@ struct ShareExportView: View {
                     }
                 }
             }
+            VStack{
+                Spacer()
+                Button{
+                    showDatePicker = true
+                }label: {
+                    Capsule()
+                        .frame(width:400,height: 70)
+                        .foregroundStyle(isSelctedPDF || isSelctedCSV ? Color(red: 215/255, green: 97/255, blue: 68/255) : .gray)
+                        .overlay{
+                            Text("完了")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 40))
+                                .foregroundStyle(.white)
+                                .kerning(5)
+                        }
+                }
+                .disabled(!isSelctedPDF || !isSelctedCSV)
+            }
         }
     }
     
@@ -528,5 +687,5 @@ struct ShareExportView: View {
         .modelContainer(for: AjiwaiCardData.self)
 }
 #Preview{
-    OtherSettingView()
+    ShareExportView()
 }
