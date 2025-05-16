@@ -507,7 +507,7 @@ struct ShareExportView: View {
                     Button{
                         selectedFileType = .pdf
                         isSelctedCSV = false
-                        isSelctedPDF = true
+                        isSelctedPDF.toggle()
                     }label:{
                         ZStack{
                             SettingRowDesign(withImage: false, rowTitle: "PDFで共有", iconName: isSelctedPDF ? "checkmark.circle.fill" : "circle", textColor: allData.isEmpty ? .gray :  .black, icnoColor:isSelctedPDF ? .orange : .gray)
@@ -518,7 +518,7 @@ struct ShareExportView: View {
                     Button{
                         selectedFileType = .csv
                         isSelctedPDF = false
-                        isSelctedCSV = true
+                        isSelctedCSV .toggle()
                     }label:{
                         ZStack{
                             UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 20, bottomTrailingRadius: 20, topTrailingRadius: 0, style: .continuous)
@@ -625,7 +625,7 @@ struct ShareExportView: View {
                                 .kerning(5)
                         }
                 }
-                .disabled(!isSelctedPDF || !isSelctedCSV)
+                .disabled(!isSelctedPDF && !isSelctedCSV)
             }
         }
     }
