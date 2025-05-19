@@ -4,7 +4,8 @@ import SwiftData
 struct LogmealApp: App {
     @StateObject var user = UserData()
     @StateObject private var bgmManager = BGMManager.shared
-
+    @Environment(\.modelContext) private var context
+    @Query private var allData: [AjiwaiCardData]
     var body: some Scene {
         WindowGroup {
             LaunchScreen()
@@ -14,6 +15,21 @@ struct LogmealApp: App {
                     if bgmManager.isBGMOn {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                             bgmManager.playBGM()  // アプリ起動時にBGMを再生
+                        }
+                    }
+                    for card in allData{
+                        if card.uuid == nil{
+                            card.uuid = UUID()
+                            print("card.uuid", card.uuid)
+                        }
+                        if card.time == nil{
+                            card.time = .lunch
+                            print("card.time", card.time)
+                        }
+                        do{
+                            try context.save()
+                        } catch {
+                            print("マイグレーションエラー")
                         }
                     }
                 }

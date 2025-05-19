@@ -36,6 +36,7 @@ struct NewHomeView: View {
             "bt_add_Dog"
         }
     }
+    @State var isEditing:Bool = false
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -54,11 +55,11 @@ struct NewHomeView: View {
                 showDetailView = (newValue != nil)
             }
             .fullScreenCover(isPresented: $showWritingView) {
-                NewWritingView(showWritingView: $showWritingView)
+                NewWritingView(showWritingView: $showWritingView,isEditing: $isEditing, dataIndex: 0)
             }
             .fullScreenCover(isPresented: $showDetailView) {
                 if let index = selectedIndex {
-                    NewLogDetailView(dataIndex: index, showDetailView: $showDetailView)
+                    NewLogDetailView(dataIndex: index)
                         .onDisappear(){
                             selectedIndex = nil
                         }

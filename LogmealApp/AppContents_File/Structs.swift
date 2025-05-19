@@ -41,7 +41,8 @@ enum TimeStamp:String, Codable{
 }
 
 @Model class AjiwaiCardData{
-    @Attribute(.unique) var saveDay:Date
+    @Attribute(.unique) var uuid: UUID?
+    var saveDay:Date
     var time:TimeStamp?
     var sight:String
     var taste:String
@@ -54,7 +55,8 @@ enum TimeStamp:String, Codable{
     @Transient
     var lunchComments:String = ""
     
-    init(saveDay: Date, times: TimeStamp? = .lunch, sight: String, taste: String, smell: String, tactile: String, hearing: String, imagePath: URL, menu: [String]) {
+    init(uuid: UUID? = nil,saveDay: Date, times: TimeStamp? = .lunch, sight: String, taste: String, smell: String, tactile: String, hearing: String, imagePath: URL, menu: [String]) {
+        self.uuid = uuid
         self.saveDay = saveDay
         self.time = times
         self.sight = sight

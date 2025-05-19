@@ -15,7 +15,6 @@ struct NewWritingView: View {
     @State private var editedText: String = ""
     @State private var editedSenseText: [String] = ["","","","",""]
     @State private var editedMenu: [String] = ["","","",""]
-    @State private var editedSenses: [String] = Array(repeating: "", count: 5)
     @State private var showCameraPicker = false
     @State private var showingSaveAlert = false
     @State private var showDatePicker:Bool = false
@@ -37,6 +36,11 @@ struct NewWritingView: View {
         Color(red: 139 / 255, green: 194 / 255, blue: 222 / 255),
         Color(red: 196 / 255, green: 160 / 255, blue: 193 / 255)
     ]
+    
+    
+    
+    @Binding var isEditing:Bool
+    let dataIndex:Int
     private func dateFormatter(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -56,32 +60,65 @@ struct NewWritingView: View {
         menu: [String]
     ) {
         let imagePath: URL = getDocumentPath(saveData: uiImage, fileName: dateFormatter(date: saveDay))
-        let newData = AjiwaiCardData(
-            saveDay: saveDay,
-            times: times,
-            sight: sight,
-            taste: taste,
-            smell: smell,
-            tactile: tactile,
-            hearing: hearing,
-            imagePath: imagePath,
-            menu: menu
-        )
+        if isEditing {
+            // 各プロパティを更新
+            allData[dataIndex].saveDay = saveDay
+            allData[dataIndex].time = times
+            allData[dataIndex].sight = sight
+            allData[dataIndex].taste = taste
+            allData[dataIndex].smell = smell
+            allData[dataIndex].tactile = tactile
+            allData[dataIndex].hearing = hearing
+            allData[dataIndex].imagePath = getDocumentPath(saveData: uiImage, fileName: dateFormatter(date: saveDay))
+            allData[dataIndex].menu = menu
 
-        // ⬇︎ 追加：SwiftDataに挿入
-        context.insert(newData)
-
-        do {
-            try context.save()  // ⬅︎ 実際に保存
-            saveResultMessage = "保存に成功しました！"
-            print("メニュー = \(newData.menu)")
-            print("五感(聴覚) = \(newData.hearing)")
-            
-        } catch {
-            print("保存に失敗しました: \(error)")
-            saveResultMessage = "保存に失敗しました…"
+            do {
+                try context.save()
+                saveResultMessage = "保存に成功しました！"
+            } catch {
+                print("保存に失敗しました: \(error)")
+                saveResultMessage = "保存に失敗しました…"
+            }
+        }else{
+            let newData = AjiwaiCardData(
+                saveDay: saveDay,
+                times: times,
+                sight: sight,
+                taste: taste,
+                smell: smell,
+                tactile: tactile,
+                hearing: hearing,
+                imagePath: imagePath,
+                menu: menu
+            )
+            context.insert(newData)
+            do {
+                try context.save()
+                saveResultMessage = "保存に成功しました！"
+                print("メニュー = \(newData.menu)")
+                print("五感(聴覚) = \(newData.hearing)")
+           
+                    // ① 各文字列の文字数を計算して配列に変換
+                    let characterCounts = editedSenseText.map { $0.count }
+                    // ② その総和を求める
+                    let totalCharacterCount = characterCounts.reduce(0, +)
+                    print("合計文字数\(totalCharacterCount)")
+                    // 経験値更新：10文字につき1exp（バランス調整可能）
+                    updateUserExperience(by: totalCharacterCount)
+                    // ポイント更新：1文字につき1ポイント（バランス調整可能）
+                    updateUserPoints(by: totalCharacterCount)
+                    if user.level >= 12{
+                        user.growthStage = 3
+                        user.isGrowthed = true
+                    }else if user.level >= 5{
+                        user.growthStage = 2
+                        user.isGrowthed = true
+                    }
+            } catch {
+                print("保存に失敗しました: \(error)")
+                saveResultMessage = "保存に失敗しました…"
+            }
         }
-
         showSaveResultAlert = true
     }
     // ユーザー経験値の更新処理
@@ -118,6 +155,15 @@ struct NewWritingView: View {
             print("画像の保存に失敗しました: \(error)")
         }
         return fileURL
+    }
+    func getImageByUrl(url: URL) -> UIImage{
+        do {
+            let data = try Data(contentsOf: url)
+            return UIImage(data: data)!
+        } catch let err {
+            print("Error : \(err.localizedDescription)")
+        }
+        return UIImage()
     }
     var body: some View {
         GeometryReader{ geometry in
@@ -314,18 +360,24 @@ struct NewWritingView: View {
                     Spacer()
                     HStack{
                         Spacer()
+                        if isEditing{
+                            Button{
+                                isEditing = false
+                            }label: {
+                                Text("キャンセル")
+                                    .font(.custom("GenJyuuGothicX-Bold",size:15))
+                                    .frame(width: 180, height: 50)
+                                    .background(Color.white)
+                                    .foregroundStyle(Color.red)
+                                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                                    .overlay{
+                                        RoundedRectangle(cornerRadius: 15)
+                                            .stroke(Color.red ,lineWidth: 4)
+                                    }
+                            }
+                        }
                         Button{
                             if let timeStanp = timeStanp, let uiImage = uiImage {
-                                // ① 各文字列の文字数を計算して配列に変換
-                                let characterCounts = editedSenseText.map { $0.count }
-                                // ② その総和を求める
-                                let totalCharacterCount = characterCounts.reduce(0, +)
-                                print("合計文字数\(totalCharacterCount)")
-                                // 経験値更新：10文字につき1exp（バランス調整可能）
-                                updateUserExperience(by: totalCharacterCount)
-                                // ポイント更新：1文字につき1ポイント（バランス調整可能）
-                                updateUserPoints(by: totalCharacterCount)
-                                
                                 saveCurrentData(
                                     saveDay: currentDate,
                                     times: timeStanp,
@@ -337,14 +389,8 @@ struct NewWritingView: View {
                                     uiImage: uiImage,
                                     menu: editedMenu
                                 )
-                                if user.level >= 12{
-                                    user.growthStage = 3
-                                    user.isGrowthed = true
-                                }else if user.level >= 5{
-                                    user.growthStage = 2
-                                    user.isGrowthed = true
-                                }
-                                user.showAnimation = true
+                                    user.showAnimation = true
+                                
                             }
                         } label:{
                             Text("ほぞんする")
@@ -362,7 +408,9 @@ struct NewWritingView: View {
                             Alert(
                                 title: Text(saveResultMessage ?? ""),
                                 dismissButton: .default(Text("OK")) {
-                                    if saveResultMessage == "保存に成功しました！" {
+                                    if isEditing{
+                                        isEditing = false
+                                    }else if saveResultMessage == "保存に成功しました！"{
                                         dismiss()
                                     }
                                 }
@@ -372,7 +420,19 @@ struct NewWritingView: View {
                 }
                 .padding()
             }
-            
+            .onAppear(){
+                if self.isEditing{
+                    self.uiImage = getImageByUrl(url: allData[dataIndex].imagePath)
+                    self.currentDate = allData[dataIndex].saveDay
+                    self.timeStanp = allData[dataIndex].time
+                    self.editedSenseText[0] = allData[dataIndex].sight
+                    self.editedSenseText[1] = allData[dataIndex].hearing
+                    self.editedSenseText[2] = allData[dataIndex].smell
+                    self.editedSenseText[3] = allData[dataIndex].taste
+                    self.editedSenseText[4] = allData[dataIndex].tactile
+                    self.editedMenu = allData[dataIndex].menu
+                }
+            }
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiImage, sourceType: .camera)
                     .ignoresSafeArea()
@@ -513,13 +573,13 @@ struct NewWritingView: View {
     }
 }
 
-#Preview {
-    NewWritingView(showWritingView: .constant(true))
-        .environmentObject(UserData())
-        .modelContainer(for: AjiwaiCardData.self)
-}
-#Preview {
-    NewContentView()
-        .environmentObject(UserData())
-        .modelContainer(for: AjiwaiCardData.self)
-}
+//#Preview {
+//    NewWritingView(showWritingView: .constant(true), isEditing: true)
+//        .environmentObject(UserData())
+//        .modelContainer(for: AjiwaiCardData.self)
+//}
+//#Preview {
+//    NewContentView()
+//        .environmentObject(UserData())
+//        .modelContainer(for: AjiwaiCardData.self)
+//}
