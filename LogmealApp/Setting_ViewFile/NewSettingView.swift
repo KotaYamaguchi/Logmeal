@@ -17,7 +17,7 @@ struct NewSettingView: View {
                             .scaledToFit()
                             .frame(width:550)
                         NavigationLink{
-                            ProfileSettingView(isFirst: false)
+                            ProfileSettingView()
                         }label: {
                             SettingRowDesign(withImage: true, imageName: "mt_newSettingView_profile")
                         }

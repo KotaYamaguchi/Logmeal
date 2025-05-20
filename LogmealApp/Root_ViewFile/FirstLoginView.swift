@@ -43,7 +43,7 @@ struct FirstLoginView: View {
                         Image("bg_AjiwaiCardView")
                             .resizable()
                             .ignoresSafeArea()
-                        ProfileSettingView(isFirst: true)
+                        ProfileSettingView()
                         VStack{
                             TypeWriterTextView("あなたのことを教えてね", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 30), textColor: .textColor, onAnimationCompleted: {
                                 print("アニメーションが終了しました")

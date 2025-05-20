@@ -3,7 +3,7 @@ import PhotosUI
 
 struct ProfileSettingView: View {
     @EnvironmentObject var userData:UserData
-    @State var isFirst:Bool
+    @State var showSaveSuccess:Bool = false
     @State private var userName: String = ""
     @State private var userGrade: String = ""
     @State private var userClass: String = ""
@@ -302,178 +302,199 @@ struct ProfileSettingView: View {
         return fileURL
     }
     var body: some View {
-        ZStack {
-            if !isFirst{
-                Image("bg_newSettingView.png")
-                    .resizable()
-                    .ignoresSafeArea()
-            }
-            ZStack{
-                RoundedRectangle(cornerRadius: 20)
-                    .frame(width: 650, height: 780)
-                    .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
-                    .shadow(radius: 5)
-            }
-            VStack{
-                PhotosPicker(selection: $selectedPhotoItem) {
-                    if let userImage = self.userImage{
-                        Image(uiImage: userImage)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width:350)
-                            .clipShape(Circle())
-                    }else{
-                        Image("mt_newSettingView_userImage")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 350)
-                            .clipShape(Circle())
-                    }
-                }
-                PhotosPicker(selection: $selectedPhotoItem) {
-                    Label("写真を選ぶ", systemImage: "photo")
-                }
-                Image("mt_newSettingView_profileHeadline")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
+        GeometryReader{ geometry in
+            ZStack {
+              
+                    Image("bg_newSettingView.png")
+                        .resizable()
+                        .ignoresSafeArea()
                 
-                // 名前入力
-                Image("mt_newSettingView_name")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
-                    .overlay {
-                        HStack {
-                            Spacer()
-                            TextField("ここに名前を入力してください", text: $userName)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .frame(width: 400)
-                                .foregroundStyle(nameTextColor)
-                                .padding(.horizontal)
-                                .multilineTextAlignment(TextAlignment.trailing)
-                                .onChange(of: userName) { oldValue, newValue in
-                                    let containsBannedWord = bannedWords.contains { word in
-                                        newValue.localizedCaseInsensitiveContains(word)
-                                    }
+                    RoundedRectangle(cornerRadius: 20)
+                        .frame(width: geometry.size.width*0.8, height: geometry.size.height*0.9)
+                        .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
+                        .shadow(radius: 5)
+                ScrollView{
+                    PhotosPicker(selection: $selectedPhotoItem) {
+                        if let userImage = self.userImage{
+                            Image(uiImage: userImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width:350)
+                                .clipShape(Circle())
+                        }else{
+                            Image("mt_newSettingView_userImage")
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geometry.size.width*0.3)
+                                .padding()
+                                .clipShape(Circle())
+                        }
+                    }
+                    PhotosPicker(selection: $selectedPhotoItem) {
+                        Label("写真を選ぶ", systemImage: "photo")
+                    }
+                    Image("mt_newSettingView_profileHeadline")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: geometry.size.width*0.63)
+                    
+                    // 名前入力
+                    Rectangle()
+                        .foregroundStyle(.white)
+                        .frame(width: geometry.size.width*0.63,height: geometry.size.height*0.07)
+                        .overlay {
+                            HStack {
+                                Text("名前")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                                    .padding(.leading)
+                                Spacer()
+                                TextField("ここに名前を入力してください", text: $userName)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .frame(width: geometry.size.width*0.43)
+                                    .foregroundStyle(nameTextColor)
+                                    .padding(.horizontal)
+                                    .multilineTextAlignment(TextAlignment.trailing)
+                                    .onChange(of: userName) { oldValue, newValue in
+                                        let containsBannedWord = bannedWords.contains { word in
+                                            newValue.localizedCaseInsensitiveContains(word)
+                                        }
 
-                                    if containsBannedWord {
-                                        showNameAlert = true
-                                        nameTextColor = .red
-                                    } else {
-                                        showNameAlert = false
-                                        nameTextColor = .black
+                                        if containsBannedWord {
+                                            showNameAlert = true
+                                            nameTextColor = .red
+                                        } else {
+                                            showNameAlert = false
+                                            nameTextColor = .black
+                                        }
+                                    }
+                            }
+                        }
+                    
+                    // 学年選択
+                    Rectangle()
+                        .foregroundStyle(.white)
+                        .frame(width: geometry.size.width*0.63,height: geometry.size.height*0.07)
+                        .overlay {
+                            HStack {
+                                Text("学年")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                                    .padding(.leading)
+                                Spacer()
+                                
+                                Picker("選択してください", selection: $userGrade) {
+                                    ForEach(gradeArray, id: \.self) { grade in
+                                        Text("\(grade)年").tag(grade)
                                     }
                                 }
-                        }
-                    }
-                
-                // 学年選択
-                Image("mt_newSettingView_grade")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
-                    .overlay {
-                        HStack {
-                            Spacer()
-                            
-                            Picker("選択してください", selection: $userGrade) {
-                                ForEach(gradeArray, id: \.self) { grade in
-                                    Text("\(grade)年").tag(grade)
-                                }
+                                .pickerStyle(MenuPickerStyle())
+                                .frame(width: 150)
                             }
-                            .pickerStyle(MenuPickerStyle())
-                            .frame(width: 150)
-                        }
-                        .padding(.horizontal)
-                    }
-                
-                // クラス選択
-                Image("mt_newSettingView_class")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
-                    .overlay {
-                        HStack {
-                            Spacer()
                             
-                            Picker("選択してください", selection: $userClass) {
-                                ForEach(classArray, id: \.self) { classNum in
-                                    Text("\(classNum)組").tag(classNum)
-                                }
-                            }
-                            .pickerStyle(MenuPickerStyle())
-                            .frame(width: 150)
                         }
-                        .padding(.horizontal)
-                    }
-                
-                // 年齢選択
-                Image("mt_newSettingView_age")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 550)
-                    .overlay {
-                        HStack {
-                            Spacer()
-                            
-                            Picker("選択してください", selection: $userAge) {
-                                ForEach(6...18, id: \.self) { age in
-                                    Text("\(age)歳").tag(age)
+                    
+                    // クラス選択
+                    Rectangle()
+                        .foregroundStyle(.white)
+                        .frame(width: geometry.size.width*0.63,height: geometry.size.height*0.07)
+                        .overlay {
+                            HStack {
+                                Text("クラス")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                                    .padding(.leading)
+                                Spacer()
+                                
+                                Picker("選択してください", selection: $userClass) {
+                                    ForEach(classArray, id: \.self) { classNum in
+                                        Text("\(classNum)組").tag(classNum)
+                                    }
                                 }
+                                .pickerStyle(MenuPickerStyle())
+                                .frame(width: 150)
                             }
-                            .pickerStyle(MenuPickerStyle())
-                            .frame(width: 150)
+               
                         }
-                        .padding(.horizontal)
-                    }
-            }
-            .padding()
-            VStack{
-                Spacer()
-                HStack{
+                    
+                    // 年齢選択
+                    Rectangle()
+                        .foregroundStyle(.white)
+                        .frame(width: geometry.size.width*0.63,height: geometry.size.height*0.07)
+                        .overlay {
+                            HStack {
+                                Text("年齢")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                                    .padding(.leading)
+                                Spacer()
+                                
+                                Picker("選択してください", selection: $userAge) {
+                                    ForEach(6...18, id: \.self) { age in
+                                        Text("\(age)歳").tag(age)
+                                    }
+                                }
+                                .pickerStyle(MenuPickerStyle())
+                                .frame(width: 150)
+                            }
+                         
+                        }
+                }
+                .frame(width: geometry.size.width*0.8, height: geometry.size.height*0.85)
+                .padding()
+                VStack{
                     Spacer()
-                    if !isFirst{
+                    HStack{
+                        Spacer()
                         Button{
                             saveNewProfile()
-                        }label:{
-                            Text("保存する")
-                                .font(.headline)
-                                .padding()
-                                .frame(width:150,height: 60)
-                                .foregroundStyle(.white)
-                                .background(RoundedRectangle(cornerRadius: 10))
+                            showSaveSuccess = true
+                        }label: {
+                            Text("ほぞんする")
+                                .font(.custom("GenJyuuGothicX-Bold",size:15))
+                                .frame(width: 180, height: 50)
+                                .background(Color.white)
+                                .foregroundStyle(Color.buttonColor)
+                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 15)
+                                        .stroke(Color.buttonColor ,lineWidth: 4)
+                                }
                         }
-                        .padding()
+                    }
+                }
+                .padding(.horizontal)
+            }
+            .onAppear(){
+                print(geometry.size)
+                userName = userData.name
+                userGrade = userData.grade
+                userAge = userData.age
+                userClass = userData.yourClass
+                
+                print(userData.name)
+                print(userData.age)
+                print(userData.grade)
+                print(userData.yourClass)
+            }
+            .onChange(of: selectedPhotoItem) { oldValue, newValue in
+                Task {
+                    if let data = try? await newValue?.loadTransferable(type: Data.self),
+                       let userImage = UIImage(data: data) {
+                        self.userImage = userImage
                     }
                 }
             }
-            .padding(.horizontal)
-        }
-        .onAppear(){
-            userName = userData.name
-            userGrade = userData.grade
-            userAge = userData.age
-            userClass = userData.yourClass
-            
-            print(userData.name)
-            print(userData.age)
-            print(userData.grade)
-            print(userData.yourClass)
-        }
-        .onChange(of: selectedPhotoItem) { oldValue, newValue in
-            Task {
-                if let data = try? await newValue?.loadTransferable(type: Data.self),
-                   let userImage = UIImage(data: data) {
-                    self.userImage = userImage
-                }
+            .alert(isPresented: $showSaveSuccess) {
+                Alert(
+                    title: Text("プロフィールを更新しました"),
+                    dismissButton: .default(Text("OK")) {
+                      
+                    }
+                )
             }
         }
     }
 }
 
 #Preview{
-    ProfileSettingView(isFirst: false)
+    NewSettingView()
         .environmentObject(UserData())
 }
 #Preview{
