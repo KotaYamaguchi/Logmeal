@@ -326,12 +326,14 @@ struct ForstProfileSetView:View {
                 Image("bg_AjiwaiCardView")
                     .resizable()
                     .ignoresSafeArea()
-                Image("mt_callout")
-                    .resizable()
-                    .frame(width: geometry.size.width*0.6,height: geometry.size.height*0.5)
-                    .position(x:geometry.size.width * 0.5, y:geometry.size.height * 0.5)
+                if !showUserImagePicker{
+                    Image("mt_callout")
+                        .resizable()
+                        .frame(width: geometry.size.width*0.6,height: geometry.size.height*0.5)
+                        .position(x:geometry.size.width * 0.5, y:geometry.size.height * 0.5)
+                }
                 if isAllProfileSet{
-                    if currentPage == 4{
+                    if currentPage == 5{
                         HStack{
                             Spacer()
                             VStack{
@@ -341,23 +343,23 @@ struct ForstProfileSetView:View {
                                 })
                                 Spacer()
                                 Button{
-                                    currentPage = 5
+                                    currentPage = 6
                                 }label: {
                                     Text("もちろん！")
                                         .font(.custom("GenJyuuGothicX-Bold",size:15))
                                         .frame(width: 200, height: 60)
-                                        .background(Color.white)
-                                        .foregroundStyle( .cyan)
+                                        .background(Color.buttonColor)
+                                        .foregroundStyle(.white)
                                         .clipShape(RoundedRectangle(cornerRadius: 15))
                                         .overlay{
                                             RoundedRectangle(cornerRadius: 15)
-                                                .stroke( .cyan ,lineWidth: 4)
+                                                .stroke(Color.buttonColor ,lineWidth: 4)
                                         }
                                 }
                             }
                             Spacer()
                         }
-                    }else if currentPage == 5{
+                    }else if currentPage == 6{
                         TypeWriterTextView("よし！これからよろしくね！", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 28), textColor: .textColor, onAnimationCompleted: {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                                 withAnimation {
@@ -372,7 +374,7 @@ struct ForstProfileSetView:View {
                         HStack{
                             Spacer()
                             Button{
-                                if currentPage > 0 || currentPage < 3{
+                                if currentPage > 0 || currentPage < 4{
                                     currentPage -= 1
                                     print(currentPage)
                                 }
@@ -392,12 +394,12 @@ struct ForstProfileSetView:View {
                             progressBar(size: geometry.size)
                                 .padding()
                             Button{
-                                if currentPage < 3{
+                                if currentPage < 4{
                                     currentPage += 1
                                     print(currentPage)
                                 }else{
                                     saveNewProfile()
-                                    currentPage = 4
+                                    currentPage = 5
                                     isAllProfileSet = true
                                 }
                             }label: {
@@ -405,14 +407,14 @@ struct ForstProfileSetView:View {
                                     .font(.custom("GenJyuuGothicX-Bold",size:15))
                                     .frame(width: 100, height: 50)
                                     .background(Color.white)
-                                    .foregroundStyle(currentPage == 3 ? .gray : .cyan)
+                                    .foregroundStyle(currentPage == 4 ? .gray : .cyan)
                                     .clipShape(RoundedRectangle(cornerRadius: 15))
                                     .overlay{
                                         RoundedRectangle(cornerRadius: 15)
-                                            .stroke(currentPage == 3 ? .gray : .cyan ,lineWidth: 4)
+                                            .stroke(currentPage == 4 ? .gray : .cyan ,lineWidth: 4)
                                     }
                             }
-                            .disabled(currentPage == 3)
+                            .disabled(currentPage == 4)
                             Spacer()
                         }
                         Spacer()
@@ -426,6 +428,8 @@ struct ForstProfileSetView:View {
                                 gradeSetView(size: geometry.size)
                             case 3:
                                 ageSetView(size: geometry.size)
+                            case 4:
+                                userImageSetView(size: geometry.size)
                             default:
                                 Text("エラー")
                             }
@@ -433,25 +437,29 @@ struct ForstProfileSetView:View {
                         .offset(y:-geometry.size.height*0.05)
                         Spacer()
                         Button{
-                            if currentPage < 3{
+                            if currentPage < 4{
                                 currentPage += 1
                                 print(currentPage)
                             }else{
                                 saveNewProfile()
-                                currentPage = 4
+                                currentPage = 5
                                 isAllProfileSet = true
                             }
                         }label: {
                             Text("つぎへ")
-                                .font(.custom("GenJyuuGothicX-Bold", size: 28))
+                                .font(.custom("GenJyuuGothicX-Bold",size:15))
+                                .frame(width: 200, height: 60)
+                                .background(Color.buttonColor)
                                 .foregroundStyle(.white)
-                                .frame(width: geometry.size.width*0.3,height: geometry.size.height*0.1)
-                                .background(){
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .foregroundStyle(.green)
+                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 15)
+                                        .stroke(Color.buttonColor ,lineWidth: 4)
                                 }
                         }
+                        .disabled(isAnimating)
                     }
+                    .padding(.vertical)
                     
                 }
                 Image("\(userData.selectedCharacter)_normal_1")
@@ -482,48 +490,48 @@ struct ForstProfileSetView:View {
             TypeWriterTextView("あなたのお名前を教えてね？", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 30), textColor: .textColor, onAnimationCompleted: {
                 print("アニメーションが終了しました")
             })
-        HStack{
-            Text("お名前")
-                .font(.custom("GenJyuuGothicX-Bold", size: 25))
-            TextField("例）山田雄斗, やまだゆうと", text: $userName)
-                .font(.custom("GenJyuuGothicX-Bold", size: 30))
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: size.width*0.43)
-                .foregroundStyle(nameTextColor)
-                .padding(.horizontal)
-                .multilineTextAlignment(TextAlignment.leading)
-                .onChange(of: userName) { oldValue, newValue in
-                    let containsBannedWord = bannedWords.contains { word in
-                        newValue.localizedCaseInsensitiveContains(word)
+            HStack{
+                Text("お名前")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                TextField("例）山田雄斗, やまだゆうと", text: $userName)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 30))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: size.width*0.43)
+                    .foregroundStyle(nameTextColor)
+                    .padding(.horizontal)
+                    .multilineTextAlignment(TextAlignment.leading)
+                    .onChange(of: userName) { oldValue, newValue in
+                        let containsBannedWord = bannedWords.contains { word in
+                            newValue.localizedCaseInsensitiveContains(word)
+                        }
+                        
+                        if containsBannedWord {
+                            showNameAlert = true
+                            nameTextColor = .red
+                        } else {
+                            showNameAlert = false
+                            nameTextColor = .black
+                        }
                     }
-                    
-                    if containsBannedWord {
-                        showNameAlert = true
-                        nameTextColor = .red
-                    } else {
-                        showNameAlert = false
-                        nameTextColor = .black
-                    }
-                }
+            }
         }
-    }
     }
     private func ageSetView(size:CGSize) -> some View{
         VStack{
             TypeWriterTextView("あなたの年齢を教えてね！", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 30), textColor: .textColor, onAnimationCompleted: {
                 print("アニメーションが終了しました")
             })
-        HStack{
-            Text("年齢")
-                .font(.custom("GenJyuuGothicX-Bold", size: 25))
-            TextField("例）10", value: $userAge,format: .number)
-                .font(.custom("GenJyuuGothicX-Bold", size: 30))
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: size.width*0.43)
-                .foregroundStyle(.black)
-                .padding(.horizontal)
+            HStack{
+                Text("年齢")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                TextField("例）10", value: $userAge,format: .number)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 30))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: size.width*0.43)
+                    .foregroundStyle(.black)
+                    .padding(.horizontal)
+            }
         }
-    }
     }
     private func gradeSetView(size:CGSize) -> some View{
         VStack{
@@ -559,9 +567,65 @@ struct ForstProfileSetView:View {
             }
         }
     }
+    @State private var showUserImagePicker:Bool = false
+    @State private var isAnimating = false
+    private func userImageSetView(size:CGSize) -> some View{
+        VStack{
+            if showUserImagePicker{
+                PhotosPicker(selection: $selectedPhotoItem) {
+                    VStack{
+                        if let userImage = self.userImage{
+                            Image(uiImage: userImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: size.width*0.3)
+                                .clipShape(Circle())
+                        }else{
+                            Image("mt_newSettingView_userImage")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: size.width*0.3)
+                                .clipShape(Circle())
+                                .overlay {
+                                    Circle()
+                                        .stroke(.gray, lineWidth: 5)
+                                }
+                        }
+                        Label("写真を選ぶ", systemImage: "photo")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                    }
+                }
+            }else{
+                TypeWriterTextView("あなたのアイコンを決めよう！", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 28), textColor: .textColor, onAnimationCompleted: {
+                    print("アニメーションが終了しました")
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                        withAnimation {
+                            showUserImagePicker = true
+                            isAnimating = false
+                        }
+                    }
+                })
+            }
+        }
+        .onChange(of: selectedPhotoItem) { oldValue, newValue in
+            Task {
+                if let data = try? await newValue?.loadTransferable(type: Data.self),
+                   let userImage = UIImage(data: data) {
+                    self.userImage = userImage
+                }
+            }
+        }
+        .onAppear(){
+            isAnimating = true
+        }
+        .onDisappear(){
+            isAnimating = false
+            showUserImagePicker = false
+        }
+    }
 }
 
 #Preview {
-    ForstProfileSetView()
+    FirstLoginView()
         .environmentObject(UserData())
 }
