@@ -30,55 +30,8 @@ struct FirstLoginView: View {
                         .fullScreenCover(isPresented: $showYouTube) {
                             prologueView(geometry: geometry)
                         }
-                } else if isStart{
-                    ZStack{
-                        Image("bg_AjiwaiCardView")
-                            .resizable()
-                            .ignoresSafeArea()
-                        gameStart(size: geometry.size)
-                    }
-                    
                 }else{
-                    ZStack{
-                        Image("bg_AjiwaiCardView")
-                            .resizable()
-                            .ignoresSafeArea()
-                        ProfileSettingView()
-                        VStack{
-                            TypeWriterTextView("あなたのことを教えてね", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 30), textColor: .textColor, onAnimationCompleted: {
-                                print("アニメーションが終了しました")
-                            })
-                            .padding()
-                            .background(){
-                                RoundedRectangle(cornerRadius: 30)
-                                    .foregroundStyle(.white)
-                            }
-                            Spacer()
-                        }
-                        .padding()
-                        VStack(spacing:50){
-                            Image("\(user.selectedCharacter)_normal_1")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 180)
-                                .rotationEffect(.degrees(rotationAngle))
-                                .animation(.easeInOut(duration: 0.3), value: rotationAngle)
-                            Button{
-                                isStart = true
-                            }label:{
-                                Text("決定")
-                                    .font(.custom("GenJyuuGothicX-Bold", size: 30))
-                                    .background(){
-                                        Image("bt_base")
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 100,height: 60)
-                                    }
-                            }
-                        }
-                        .position(x:geometry.size.width * 0.88, y:geometry.size.height * 0.85)
-                    }
-                    .ignoresSafeArea()
+                    ForstProfileSetView()
                 }
             }
         }
