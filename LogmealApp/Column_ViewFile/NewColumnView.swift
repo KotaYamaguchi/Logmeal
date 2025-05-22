@@ -153,9 +153,15 @@ struct NewColumnView: View {
                                         }
                                     HStack(alignment: .bottom) {
                                         VStack(alignment: .leading) {
-                                            Text(column.title)
-                                                .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.05))
-                                                .padding(.bottom)
+                                            HStack{
+                                                Text(column.title)
+                                                    .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.05))
+                                                    .padding(.bottom)
+                                                Spacer()
+                                                Text(column.columnDay)
+                                                    .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.02))
+                                                    .padding(.bottom)
+                                            }
                                             
                                             Text(column.caption)
                                                 .lineLimit(column.isExpanded ? nil : 2)
