@@ -2,6 +2,45 @@ import SwiftUI
 struct NewCharacterView: View {
     @Binding var showCharacterView:Bool
     @EnvironmentObject var userData :UserData
+    @State private var houseSize:CGFloat = 0
+    @State private var houseOffsetX:CGFloat = 0
+    @State private var houseOffsetY:CGFloat = 0
+    private func setHouseSize() -> CGFloat{
+        switch userData.selectedCharacter{
+        case "Dog":
+            return 590
+        case "Cat":
+            return 590
+        case "Rabbit":
+            return 590
+        default:
+            return 400
+        }
+    }
+    private func setHouseOffsetX() -> CGFloat{
+        switch userData.selectedCharacter{
+        case "Dog":
+            return -40
+        case "Cat":
+            return -50
+        case "Rabbit":
+            return -50
+        default:
+            return 0
+        }
+    }
+    private func setHouseOffsetY() -> CGFloat{
+        switch userData.selectedCharacter{
+        case "Dog":
+            return 130
+        case "Cat":
+            return 135
+        case "Rabbit":
+            return 130
+        default:
+            return 0
+        }
+    }
     var body: some View {
         NavigationStack{
             ZStack{
@@ -27,50 +66,62 @@ struct NewCharacterView: View {
                     }
                 }
                 .position(x:1000,y:600)
-                Image("mt_characterHouse")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width:1000,height:600)
-                    .position(x:300,y:450)
-                HStack(spacing:20){
-                    Image("mt_PointBadge")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width:50)
-                    Text("3,000")
-                        .foregroundStyle(.green)
-                        .font(.custom("GenJyuuGothicX-Bold", size: 40))
-                    Text("pt")
-                        .foregroundStyle(.green)
-                        .font(.custom("GenJyuuGothicX-Bold", size: 35))
-                }
-                .position(x:250,y:230)
-                VStack(spacing:0){
-                    Text("やましたとくまのレーク")
-                        .foregroundStyle(.white)
-                        .font(.custom("GenJyuuGothicX-Bold", size: 35))
-                    HStack(spacing:0){
-                        Image("mt_LvBadge")
+                ZStack{
+                    ZStack{
+                        Image("House_\(userData.selectedCharacter)")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height:setHouseSize())
+                            .offset(x:houseOffsetX,y:houseOffsetY)
+                    }
+                    .onAppear(){
+                        self.houseSize = setHouseSize()
+                        self.houseOffsetX = setHouseOffsetX()
+                        self.houseOffsetY = setHouseOffsetY()
+                    }
+                    .onChange(of: userData.selectedCharacter, { oldValue, newValue in
+                        self.houseSize = setHouseSize()
+                    })
+                    HStack(spacing:20){
+                        Image("mt_PointBadge")
                             .resizable()
                             .scaledToFit()
                             .frame(width:50)
-                        ZStack(alignment:.leading){
-                            RoundedRectangle(cornerRadius: 20)
-                                .frame(width:260,height: 15)
-                                .foregroundStyle(.white)
-                            
-                            RoundedRectangle(cornerRadius: 20)
-                                .frame(width:160,height: 15)
-                                .foregroundStyle(.red)
-                        }
-                        Text("LV.10")
+                        Text("\(userData.point)")
+                            .foregroundStyle(.green)
+                            .font(.custom("GenJyuuGothicX-Bold", size: 40))
+                        Text("pt")
+                            .foregroundStyle(.green)
+                            .font(.custom("GenJyuuGothicX-Bold", size: 35))
+                    }
+                    .offset(x:-80,y:-80)
+                    VStack(spacing:0){
+                        Text("\(userData.name)のレーク")
                             .foregroundStyle(.white)
                             .font(.custom("GenJyuuGothicX-Bold", size: 35))
-                            .padding(.horizontal)
+                        HStack(spacing:0){
+                            Image("mt_LvBadge")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width:50)
+                            ZStack(alignment:.leading){
+                                RoundedRectangle(cornerRadius: 20)
+                                    .frame(width:260,height: 15)
+                                    .foregroundStyle(.white)
+                                
+                                RoundedRectangle(cornerRadius: 20)
+                                    .frame(width:CGFloat(userData.exp)/260,height: 15)
+                                    .foregroundStyle(.red)
+                            }
+                            Text("LV.\(userData.level)")
+                                .foregroundStyle(.white)
+                                .font(.custom("GenJyuuGothicX-Bold", size: 35))
+                                .padding(.horizontal)
+                        }
                     }
+                    .offset(x:-25,y:40)
                 }
-                
-                .position(x:310,y:365)
+                .position(x:350,y:300)
                 VStack{
                     HStack{
                         Spacer()

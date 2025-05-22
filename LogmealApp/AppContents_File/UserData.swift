@@ -88,7 +88,7 @@ class UserData:ObservableObject{
     @AppStorage("selectedCharactar") var selectedCharacter:String = "Rabbit"
     @AppStorage("CharactarName") var characterName:String = "Rabbit"
     @AppStorage("level") var level:Int = 0
-    @AppStorage("exp") var exp:Int = 0
+    @AppStorage("exp") var exp:Int = 10
     @AppStorage("appearExp") var appearExp:Int = 0
     @AppStorage("point") var point:Int = 0
     @AppStorage("growthStage") var growthStage = 3
