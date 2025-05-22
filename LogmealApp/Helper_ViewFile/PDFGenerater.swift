@@ -38,7 +38,18 @@ struct MultiPagePDFGenerator {
             return nil
         }
     }
-
+    private func changeTimeStamp(timeStamp:TimeStamp) -> String{
+        switch timeStamp{
+        case .morning:
+            return "あさ"
+        case .lunch:
+            return "ひる"
+        case .dinner:
+            return "よる"
+        default:
+            return "ー"
+        }
+    }
     private func drawPage(data: AjiwaiCardData, in context: CGContext, rect: CGRect) {
         let titleFontSize: CGFloat = 16
         let subtitleFontSize: CGFloat = 14
@@ -57,7 +68,7 @@ struct MultiPagePDFGenerator {
         var currentY: CGFloat = topMargin
 
         // Draw title
-        drawText(dateFormat(date: data.saveDay) + "給食の記録", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 30), font: titleFont)
+        drawText(dateFormat(date: data.saveDay) + " " + changeTimeStamp(timeStamp: data.time ?? .lunch) + " " + "の給食の記録", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 30), font: titleFont)
         currentY += 30
 
         // Draw user grade and class with name
@@ -88,16 +99,16 @@ struct MultiPagePDFGenerator {
         currentY += 20
 
         // Draw impression title
-        drawText("給食の感想", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 20), font: subtitleFont)
-        currentY += 30
-
-        // Draw impression content with a border
-        let impressionRect = CGRect(x: leftMargin, y: currentY, width: contentWidth - 40, height: 100)
-        context.setStrokeColor(UIColor.gray.cgColor)
-        context.setLineWidth(3)
-        context.stroke(impressionRect)
-//        drawText(data.lunchComments, in: context, rect: impressionRect.insetBy(dx: 10, dy: 10), font: bodyFont)
-        currentY += 110
+//        drawText("給食の感想", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 20), font: subtitleFont)
+//        currentY += 30
+//
+//        // Draw impression content with a border
+//        let impressionRect = CGRect(x: leftMargin, y: currentY, width: contentWidth - 40, height: 100)
+//        context.setStrokeColor(UIColor.gray.cgColor)
+//        context.setLineWidth(3)
+//        context.stroke(impressionRect)
+////        drawText(data.lunchComments, in: context, rect: impressionRect.insetBy(dx: 10, dy: 10), font: bodyFont)
+//        currentY += 110
 
         // Draw senses title
         drawText("五感の感想", in: context, rect: CGRect(x: leftMargin, y: currentY, width: contentWidth, height: 20), font: subtitleFont)

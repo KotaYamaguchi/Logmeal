@@ -34,7 +34,18 @@ class ExportData {
         }
         return escapedValue
     }
-
+    private func changeTimeStamp(timeStamp:TimeStamp) -> String{
+        switch timeStamp{
+        case .morning:
+            return "あさ"
+        case .lunch:
+            return "ひる"
+        case .dinner:
+            return "よる"
+        default:
+            return "ー"
+        }
+    }
     func createCSV(filename: String, datas: [AjiwaiCardData]) {
         let fileManager = FileManager.default
         guard let docURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
@@ -49,7 +60,7 @@ class ExportData {
 
             let BOM = "\u{feff}"
             strm.write(BOM, maxLength: 3)
-            let header = "名前：\(userName),年齢：\(userAge),学年：\(userGrade),クラス：\(userClass),性別：\(userSex)\r\n日付,献立,給食の感想,視覚,聴覚,嗅覚,味覚,触覚\r\n"
+            let header = "名前：\(userName),年齢：\(userAge),学年：\(userGrade),クラス：\(userClass),性別：\(userSex)\r\n日付,時間帯,献立,給食の感想,視覚,聴覚,嗅覚,味覚,触覚\r\n"
             var row = ""
             for content in datas {
                 let escapedMenu = escapeForCSV(content.menu.joined(separator: "/"))
@@ -59,7 +70,7 @@ class ExportData {
                 let escapedSmell = escapeForCSV(content.smell)
                 let escapedTaste = escapeForCSV(content.taste)
                 let escapedTactile = escapeForCSV(content.tactile)
-                let joinedContent = "\(dateFormat(date: content.saveDay)),\(escapedMenu),\(escapedSight),\(escapedHearing),\(escapedSmell),\(escapedTaste),\(escapedTactile)\r\n"
+                let joinedContent = "\(dateFormat(date: content.saveDay)),\(changeTimeStamp(timeStamp: content.time ?? .lunch)),\(escapedMenu),\(escapedSight),\(escapedHearing),\(escapedSmell),\(escapedTaste),\(escapedTactile)\r\n"
                 row += joinedContent
             }
             let csv = header + row
