@@ -7,6 +7,7 @@ struct NewWritingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
+    @Query private var allMenu:[MenuData]
     @State private var timeStanp:TimeStamp? = nil
     @State private var currentDate: Date = Date()
     @Binding var showWritingView: Bool
@@ -431,6 +432,12 @@ struct NewWritingView: View {
                     self.editedSenseText[3] = allData[dataIndex].taste
                     self.editedSenseText[4] = allData[dataIndex].tactile
                     self.editedMenu = allData[dataIndex].menu
+                }else{
+                    print("allMenu",allMenu.first{$0.day == dateFormatter(date: currentDate)}?.menu
+                    )
+                    print("emptyMenu",editedMenu)
+                    editedMenu = allMenu.first{ $0.day == dateFormatter(date: currentDate)}?.menu ?? []
+                    print("addedMenu",editedMenu)
                 }
             }
             .fullScreenCover(isPresented: $showCameraPicker) {
