@@ -1,6 +1,7 @@
 import SwiftUI
 struct NewCharacterView: View {
     @Binding var showCharacterView:Bool
+    @EnvironmentObject var userData :UserData
     var body: some View {
         NavigationStack{
             ZStack{
@@ -11,15 +12,15 @@ struct NewCharacterView: View {
                     NavigationLink{
                         NewShopView()
                     }label:{
-                        Image("bt_toShop")
+                        Image("bt_toShop_\(userData.selectedCharacter)")
                             .resizable()
                             .scaledToFit()
-                            .frame(width:350)
+                            .frame(width:300)
                     }
                     NavigationLink{
                         NewCharacterDetailView()
                     }label:{
-                        Image("bt_toCharaSelect")
+                        Image("bt_toCharaSelect_\(userData.selectedCharacter)")
                             .resizable()
                             .scaledToFit()
                             .frame(width:350)
@@ -70,13 +71,23 @@ struct NewCharacterView: View {
                 }
                 
                 .position(x:310,y:365)
-                Button{
-                    withAnimation {
-                        showCharacterView = false
+                VStack{
+                    HStack{
+                        Spacer()
+                        Button{
+                            withAnimation {
+                                showCharacterView = false
+                            }
+                        }label: {
+                            Image("bt_toHome_\(userData.selectedCharacter)")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 80)
+                        
+                        }
+                        .padding(.horizontal)
                     }
-                }label: {
-                    Image(systemName: "house.circle.fill")
-                        .font(.system(size: 100))
+                    Spacer()
                 }
             }
         }
