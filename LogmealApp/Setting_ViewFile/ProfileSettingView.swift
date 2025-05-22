@@ -313,6 +313,30 @@ struct ProfileSettingView: View {
                         .frame(width: geometry.size.width*0.8, height: geometry.size.height*0.9)
                         .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
                         .shadow(radius: 5)
+                        .overlay {
+                            VStack{
+                                HStack{
+                                    Spacer()
+                                    Button{
+                                        saveNewProfile()
+                                        showSaveSuccess = true
+                                    }label: {
+                                        Text("ほぞんする")
+                                            .font(.custom("GenJyuuGothicX-Bold",size:15))
+                                            .frame(width: 160, height: 50)
+                                            .background(Color.white)
+                                            .foregroundStyle(Color.buttonColor)
+                                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                                            .overlay{
+                                                RoundedRectangle(cornerRadius: 15)
+                                                    .stroke(Color.buttonColor ,lineWidth: 4)
+                                            }
+                                    }
+                                }
+                                Spacer()
+                            }
+                            .padding()
+                        }
                 ScrollView{
                     PhotosPicker(selection: $selectedPhotoItem) {
                         if let userImage = self.userImage{
@@ -438,28 +462,6 @@ struct ProfileSettingView: View {
                 }
                 .frame(width: geometry.size.width*0.8, height: geometry.size.height*0.85)
                 .padding()
-                VStack{
-                    Spacer()
-                    HStack{
-                        Spacer()
-                        Button{
-                            saveNewProfile()
-                            showSaveSuccess = true
-                        }label: {
-                            Text("ほぞんする")
-                                .font(.custom("GenJyuuGothicX-Bold",size:15))
-                                .frame(width: 180, height: 50)
-                                .background(Color.white)
-                                .foregroundStyle(Color.buttonColor)
-                                .clipShape(RoundedRectangle(cornerRadius: 15))
-                                .overlay{
-                                    RoundedRectangle(cornerRadius: 15)
-                                        .stroke(Color.buttonColor ,lineWidth: 4)
-                                }
-                        }
-                    }
-                }
-                .padding(.horizontal)
             }
             .onAppear(){
                 print(geometry.size)
