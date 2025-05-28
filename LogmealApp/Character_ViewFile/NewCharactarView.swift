@@ -16,42 +16,49 @@ struct NewCharacterView: View {
     @State private var toglleHouseImage:Bool = false
     @State private var toglleBalloonImage:Bool = false
     
+    // 画面遷移後のリフレッシュ用
+    @State private var refreshAnimationID = UUID()
+    
+    // 基準サイズ
+    private let baseWidth: CGFloat = 1210.0
+    private let baseHeight: CGFloat = 785.0
+    
     //家の写真のサイズと位置を設定するための変数
     @State private var houseSize:CGFloat = 0
     @State private var houseOffsetX:CGFloat = 0
     @State private var houseOffsetY:CGFloat = 0
-    private func setHouseSize() -> CGFloat{
+    private func setHouseSize(size: CGSize) -> CGFloat {
         switch userData.selectedCharacter{
         case "Dog":
-            return 590
+            return 590 * (size.width / baseWidth)
         case "Cat":
-            return 590
+            return 590 * (size.width / baseWidth)
         case "Rabbit":
-            return 590
+            return 590 * (size.width / baseWidth)
         default:
-            return 400
+            return 400 * (size.width / baseWidth)
         }
     }
-    private func setHouseOffsetX() -> CGFloat{
+    private func setHouseOffsetX(size: CGSize) -> CGFloat {
         switch userData.selectedCharacter{
         case "Dog":
-            return -40
+            return -40 * (size.width / baseWidth)
         case "Cat":
-            return -50
+            return -50 * (size.width / baseWidth)
         case "Rabbit":
-            return -50
+            return -50 * (size.width / baseWidth)
         default:
             return 0
         }
     }
-    private func setHouseOffsetY() -> CGFloat{
+    private func setHouseOffsetY(size: CGSize) -> CGFloat {
         switch userData.selectedCharacter{
         case "Dog":
-            return 130
+            return 130 * (size.height / baseHeight)
         case "Cat":
-            return 135
+            return 135 * (size.height / baseHeight)
         case "Rabbit":
-            return 130
+            return 125 * (size.height / baseHeight)
         default:
             return 0
         }
@@ -71,7 +78,7 @@ struct NewCharacterView: View {
                         Image("bt_toShop_\(userData.selectedCharacter)")
                             .resizable()
                             .scaledToFit()
-                            .frame(width:300)
+                            .frame(width: geometry.size.width * (300 / baseWidth))
                     }
                     NavigationLink{
                         NewCharacterDetailView()
@@ -80,79 +87,106 @@ struct NewCharacterView: View {
                         Image("bt_toCharaSelect_\(userData.selectedCharacter)")
                             .resizable()
                             .scaledToFit()
-                            .frame(width:350)
+                            .frame(width: geometry.size.width * (350 / baseWidth))
                     }
                 }
-                .position(x:1000,y:600)
+                .position(
+                    x: geometry.size.width * (1000 / baseWidth),
+                    y: geometry.size.height * (600 / baseHeight)
+                )
                 ZStack{
                     ZStack{
                         Image("House_\(userData.selectedCharacter)")
                             .resizable()
                             .scaledToFit()
-                            .frame(height:setHouseSize())
-                            .offset(x:houseOffsetX,y:houseOffsetY)
+                            .frame(height: setHouseSize(size: geometry.size))
+                            .offset(x: houseOffsetX, y: houseOffsetY)
                     }
                     .onAppear(){
-                        self.houseSize = setHouseSize()
-                        self.houseOffsetX = setHouseOffsetX()
-                        self.houseOffsetY = setHouseOffsetY()
-                        userData.gifWidth = geometry.size.width*0.2
-                        userData.gifHeight = geometry.size.width*0.2
-                        self.baseGifPosition = CGPoint(x: 600, y: 600)
+                        print("size", geometry.size)
+                        self.houseSize = setHouseSize(size: geometry.size)
+                        self.houseOffsetX = setHouseOffsetX(size: geometry.size)
+                        self.houseOffsetY = setHouseOffsetY(size: geometry.size)
+                        userData.gifWidth = geometry.size.width * 0.2
+                        userData.gifHeight = geometry.size.width * 0.2
+                        self.baseGifPosition = CGPoint(
+                            x: geometry.size.width * (650 / baseWidth),
+                            y: geometry.size.height * (600 / baseHeight)
+                        )
                         self.gifPosition = baseGifPosition
                         changeGifData()
                         startGifTimer()
                         self.boughtProducts = userData.loadProducts(key: "boughtItem")
                     }
                     .onChange(of: userData.selectedCharacter, { oldValue, newValue in
-                        self.houseSize = setHouseSize()
-                        userData.gifWidth = geometry.size.width*0.2
-                        userData.gifHeight = geometry.size.width*0.2
-                        self.baseGifPosition = CGPoint(x: 600, y: 600)
+                        self.houseSize = setHouseSize(size: geometry.size)
+                        self.houseOffsetX = setHouseOffsetX(size: geometry.size)
+                        self.houseOffsetY = setHouseOffsetY(size: geometry.size)
+                        userData.gifWidth = geometry.size.width * 0.2
+                        userData.gifHeight = geometry.size.width * 0.2
+                        self.baseGifPosition = CGPoint(
+                            x: geometry.size.width * (650 / baseWidth),
+                            y: geometry.size.height * (600 / baseHeight)
+                        )
                         self.gifPosition = baseGifPosition
                         changeGifData()
                         startGifTimer()
                     })
-                    HStack(spacing:20){
+                    HStack(spacing: geometry.size.width * (20 / baseWidth)){
                         Image("mt_PointBadge")
                             .resizable()
                             .scaledToFit()
-                            .frame(width:50)
+                            .frame(width: geometry.size.width * (50 / baseWidth))
                         Text("\(userData.point)")
                             .foregroundStyle(.green)
-                            .font(.custom("GenJyuuGothicX-Bold", size: 40))
+                            .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (40 / baseWidth)))
                         Text("pt")
                             .foregroundStyle(.green)
-                            .font(.custom("GenJyuuGothicX-Bold", size: 35))
+                            .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
                     }
-                    .offset(x:-80,y:-80)
+                    .offset(
+                        x: geometry.size.width * (-80 / baseWidth),
+                        y: geometry.size.height * (-80 / baseHeight)
+                    )
                     VStack(spacing:0){
                         Text("\(userData.name)のレーク")
                             .foregroundStyle(.white)
-                            .font(.custom("GenJyuuGothicX-Bold", size: 35))
+                            .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
                         HStack(spacing:0){
                             Image("mt_LvBadge")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width:50)
+                                .frame(width: geometry.size.width * (50 / baseWidth))
                             ZStack(alignment:.leading){
                                 RoundedRectangle(cornerRadius: 20)
-                                    .frame(width:260,height: 15)
+                                    .frame(
+                                        width: geometry.size.width * (260 / baseWidth),
+                                        height: geometry.size.width * (15 / baseWidth)
+                                    )
                                     .foregroundStyle(.white)
                                 
                                 RoundedRectangle(cornerRadius: 20)
-                                    .frame(width:CGFloat(userData.exp)/260,height: 15)
+                                    .frame(
+                                        width: CGFloat(userData.exp) / 260 * geometry.size.width * (260 / baseWidth),
+                                        height: geometry.size.width * (15 / baseWidth)
+                                    )
                                     .foregroundStyle(.red)
                             }
                             Text("LV.\(userData.level)")
                                 .foregroundStyle(.white)
-                                .font(.custom("GenJyuuGothicX-Bold", size: 35))
-                                .padding(.horizontal)
+                                .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
+                                .padding(.horizontal, geometry.size.width * 0.01)
                         }
                     }
-                    .offset(x:-25,y:40)
+                    .offset(
+                        x: geometry.size.width * (-25 / baseWidth),
+                        y: geometry.size.height * (40 / baseHeight)
+                    )
                 }
-                .position(x:350,y:300)
+                .position(
+                    x: geometry.size.width * (350 / baseWidth),
+                    y: geometry.size.height * (300 / baseHeight)
+                )
                 VStack{
                     HStack{
                         Spacer()
@@ -164,15 +198,20 @@ struct NewCharacterView: View {
                             Image("bt_toHome_\(userData.selectedCharacter)")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 80)
+                                .frame(width: geometry.size.width * (80 / baseWidth))
                             
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, geometry.size.width * 0.02)
                     }
                     Spacer()
                 }
                 
                 AllGIFView(geometry: geometry)
+                    .id(refreshAnimationID) // リフレッシュ用ID追加
+                }
+                .onAppear {
+                    // 画面表示時にIDを更新して強制的に再描画
+                    refreshAnimationID = UUID()
                 }
             }
         }
@@ -315,6 +354,19 @@ struct NewCharacterView: View {
         ZStack{
             bg_cloudImage(size: geometry.size)
             gifView(size: geometry.size, gif: gifData)
+        }
+        .onAppear {
+            // GIFサイズの初期化を強制
+            userData.gifWidth = geometry.size.width * 0.2
+            userData.gifHeight = geometry.size.width * 0.2
+            self.baseGifPosition = CGPoint(
+                x: geometry.size.width * (650 / baseWidth),
+                y: geometry.size.height * (600 / baseHeight)
+            )
+            self.gifPosition = baseGifPosition
+            changeGifData()
+            startGifTimer()
+            self.boughtProducts = userData.loadProducts(key: "boughtItem")
         }
     }
     @ViewBuilder func gifView(size: CGSize, gif: Data?) -> some View {
@@ -565,4 +617,3 @@ struct NewCharacterDetailView:View {
         }
     }
 }
-
