@@ -84,6 +84,9 @@ class UserData:ObservableObject{
         }
         return []
     }
+    
+    @Published var gifWidth:CGFloat = 0
+    @Published var gifHeight:CGFloat = 0
     //GameData
     @AppStorage("selectedCharactar") var selectedCharacter:String = "Rabbit"
     @AppStorage("CharactarName") var characterName:String = "Rabbit"
