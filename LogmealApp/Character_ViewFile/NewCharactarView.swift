@@ -187,6 +187,10 @@ struct NewCharacterView: View {
                     x: geometry.size.width * (350 / baseWidth),
                     y: geometry.size.height * (300 / baseHeight)
                 )
+                
+                
+                AllGIFView(geometry: geometry)
+                    .id(refreshAnimationID) // リフレッシュ用ID追加
                 VStack{
                     HStack{
                         Spacer()
@@ -205,14 +209,12 @@ struct NewCharacterView: View {
                     }
                     Spacer()
                 }
-                
-                AllGIFView(geometry: geometry)
-                    .id(refreshAnimationID) // リフレッシュ用ID追加
                 }
                 .onAppear {
                     // 画面表示時にIDを更新して強制的に再描画
                     refreshAnimationID = UUID()
                 }
+            
             }
         }
     }

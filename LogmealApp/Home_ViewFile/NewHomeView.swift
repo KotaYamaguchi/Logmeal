@@ -69,7 +69,7 @@ struct NewHomeView: View {
     }
 
     private func backgroundImage(geometry: GeometryProxy) -> some View {
-        Image(backgoundImage)
+        Image("bg_home_\(user.selectedCharacter)")
             .resizable()
             .scaledToFill()
             .ignoresSafeArea()
