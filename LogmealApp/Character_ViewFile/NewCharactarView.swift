@@ -78,8 +78,11 @@ struct NewCharacterView: View {
                         Image("bt_toShop_\(userData.selectedCharacter)")
                             .resizable()
                             .scaledToFit()
+                            .brightness(userData.growthStage < 3 ? -0.2 : 0.0)
+                            .scaleEffect(userData.growthStage < 3 ? 0.7 : 0.0)
                             .frame(width: geometry.size.width * (300 / baseWidth))
                     }
+                    .disabled(userData.growthStage < 3)
                     NavigationLink{
                         NewCharacterDetailView()
                           
@@ -499,31 +502,36 @@ struct NewCharacterDetailView:View {
                 Spacer()
                 if selectedTab == 0 {
                     VStack{
-                        HStack(alignment: .bottom, spacing: 1) {
-                            Spacer()
-                            Image("Dog_normal_1")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 200)
-                            Image("arrow_symbol")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 80)
-                                .offset(y: -50)
-                            Image("img_dog_applause")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 300)
-                            Image("arrow_symbol")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 80)
-                                .offset(y: -50)
-                            Image("img_dog_applause")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 400)
-                            Spacer()
+                        ZStack{
+                            HStack(alignment: .bottom, spacing: 1) {
+                                Spacer()
+                                Image("Dog_normal_1")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 200)
+                                Image("arrow_symbol")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 80)
+                                    .offset(y: -50)
+                                Image("img_dog_applause")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .brightness(userData.growthStage < 2 ? -1.0 : 0.0)
+                                    .frame(width: 300)
+                                    
+                                Image("arrow_symbol")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 80)
+                                    .offset(y: -50)
+                                Image("img_dog_applause")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .brightness(userData.growthStage < 3 ? -1.0 : 0.0)
+                                    .frame(width: 400)
+                                Spacer()
+                            }
                         }
                         if userData.selectedCharacter != "Dog"{
                             Button{
@@ -535,7 +543,7 @@ struct NewCharacterDetailView:View {
                                     .overlay{
                                         Text("このキャラにする！")
                                             .foregroundStyle(.white)
-                                            .font(.system(size: 40))
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 40))
                                     }
                             }
                         }else{
@@ -548,7 +556,7 @@ struct NewCharacterDetailView:View {
                                     .overlay{
                                         Text("選択中")
                                             .foregroundStyle(.white)
-                                            .font(.system(size: 40))
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 40))
                                     }
                             }
                         }
