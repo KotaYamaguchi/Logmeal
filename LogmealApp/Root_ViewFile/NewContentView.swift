@@ -102,7 +102,7 @@ struct NewContentView: View {
                     showCharactarView = true
                 }
             }label: {
-                Image("\(user.selectedCharacter)_window")
+                Image("\(user.selectedCharacter)_window_\(user.growthStage)")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 280)

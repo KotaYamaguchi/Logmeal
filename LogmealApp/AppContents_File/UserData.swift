@@ -94,7 +94,7 @@ class UserData:ObservableObject{
     @AppStorage("exp") var exp:Int = 10
     @AppStorage("appearExp") var appearExp:Int = 0
     @AppStorage("point") var point:Int = 0
-    @AppStorage("growthStage") var growthStage = 3
+    @AppStorage("growthStage") var growthStage = 1
     @Published var gotEXP:Int = 0
     @Published var isGrowthed:Bool = false
     @Published var isIncreasedLevel:Bool = false
