@@ -1,629 +1,396 @@
 import SwiftUI
+
 struct NewCharacterView: View {
-    @Binding var showCharacterView:Bool
-    @EnvironmentObject var userData :UserData
-    
-    // GIF表示に関する変数
-    @State var gifData:Data? = NSDataAsset(name: "")?.data
-    @State var gifArray:[String] = []
-    @State var playGif:Bool = true
-    @State private var gifPosition:CGPoint = CGPoint(x: 500, y: 550)
-    @State private var baseGifPosition:CGPoint = CGPoint(x: 600, y: 600)
-    @State private var gifOffset:Double = 0.0
-    @State private var isDrag:Bool = false
+    @Binding var showCharacterView: Bool
+    @EnvironmentObject var userData: UserData
+
+    // GIF-related state
+    @State private var gifData: Data? = nil
+    @State private var gifArray: [String] = []
+    @State private var playGif: Bool = true
+    @State private var gifPosition: CGPoint = .zero
+    @State private var baseGifPosition: CGPoint = .zero
     @State private var timer: Timer? = nil
-    @State private var boughtProducts:[Product] = []
-    @State private var toglleHouseImage:Bool = false
-    @State private var toglleBalloonImage:Bool = false
-    
-    // 画面遷移後のリフレッシュ用
-    @State private var refreshAnimationID = UUID()
-    
-    // 基準サイズ
-    private let baseWidth: CGFloat = 1210.0
-    private let baseHeight: CGFloat = 785.0
-    
-    //家の写真のサイズと位置を設定するための変数
-    @State private var houseSize:CGFloat = 0
-    @State private var houseOffsetX:CGFloat = 0
-    @State private var houseOffsetY:CGFloat = 0
-    private func setHouseSize(size: CGSize) -> CGFloat {
-        switch userData.selectedCharacter{
-        case "Dog":
-            return 590 * (size.width / baseWidth)
-        case "Cat":
-            return 590 * (size.width / baseWidth)
-        case "Rabbit":
-            return 590 * (size.width / baseWidth)
-        default:
-            return 400 * (size.width / baseWidth)
-        }
-    }
-    private func setHouseOffsetX(size: CGSize) -> CGFloat {
-        switch userData.selectedCharacter{
-        case "Dog":
-            return -40 * (size.width / baseWidth)
-        case "Cat":
-            return -50 * (size.width / baseWidth)
-        case "Rabbit":
-            return -50 * (size.width / baseWidth)
-        default:
-            return 0
-        }
-    }
-    private func setHouseOffsetY(size: CGSize) -> CGFloat {
-        switch userData.selectedCharacter{
-        case "Dog":
-            return 130 * (size.height / baseHeight)
-        case "Cat":
-            return 135 * (size.height / baseHeight)
-        case "Rabbit":
-            return 125 * (size.height / baseHeight)
-        default:
-            return 0
-        }
-    }
+    @State private var boughtProducts: [Product] = []
+
+    // Refresh ID
+    @State private var refreshID = UUID()
+
+    // Base dimensions
+    private let baseSize = CGSize(width: 1210, height: 785)
+
     var body: some View {
-        GeometryReader{ geometry in
-            NavigationStack{
-                ZStack{
+        GeometryReader { geo in
+            NavigationStack {
+                ZStack {
                     Image("bg_homeView")
                         .resizable()
                         .ignoresSafeArea()
-                    VStack(alignment:.trailing,spacing:0){
-                        NavigationLink{
-                            NewShopView()
-                            
-                        }label:{
-                            Image("bt_toShop_\(userData.selectedCharacter)")
-                                .resizable()
-                                .scaledToFit()
-                                .brightness(userData.growthStage < 3 ? -0.2 : 0.0)
-                                .scaleEffect(userData.growthStage < 3 ? 0.7 : 0.0)
-                                .frame(width: geometry.size.width * (300 / baseWidth))
-                        }
-                        .disabled(userData.growthStage < 3)
-                        NavigationLink{
-                            NewCharacterDetailView()
-                            
-                        }label:{
-                            Image("bt_toCharaSelect_\(userData.selectedCharacter)")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: geometry.size.width * (350 / baseWidth))
-                        }
-                    }
-                    .position(
-                        x: geometry.size.width * (1000 / baseWidth),
-                        y: geometry.size.height * (600 / baseHeight)
+
+                    TopActionButtons(
+                        size: geo.size,
+                        character: userData.selectedCharacter,
+                        growthStage: userData.currentCharacter.growthStage
                     )
-                    ZStack{
-                        ZStack{
-                            Image("House_\(userData.selectedCharacter)")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: setHouseSize(size: geometry.size))
-                                .offset(x: houseOffsetX, y: houseOffsetY)
-                        }
-                        .onAppear(){
-                            print("size", geometry.size)
-                            self.houseSize = setHouseSize(size: geometry.size)
-                            self.houseOffsetX = setHouseOffsetX(size: geometry.size)
-                            self.houseOffsetY = setHouseOffsetY(size: geometry.size)
-                            userData.gifWidth = geometry.size.width * 0.2
-                            userData.gifHeight = geometry.size.width * 0.2
-                            self.baseGifPosition = CGPoint(
-                                x: geometry.size.width * (650 / baseWidth),
-                                y: geometry.size.height * (600 / baseHeight)
-                            )
-                            self.gifPosition = baseGifPosition
-                            changeGifData()
-                            startGifTimer()
-                            self.boughtProducts = userData.loadProducts(key: "boughtItem")
-                        }
-                        .onChange(of: userData.selectedCharacter, { oldValue, newValue in
-                            self.houseSize = setHouseSize(size: geometry.size)
-                            self.houseOffsetX = setHouseOffsetX(size: geometry.size)
-                            self.houseOffsetY = setHouseOffsetY(size: geometry.size)
-                            userData.gifWidth = geometry.size.width * 0.2
-                            userData.gifHeight = geometry.size.width * 0.2
-                            self.baseGifPosition = CGPoint(
-                                x: geometry.size.width * (650 / baseWidth),
-                                y: geometry.size.height * (600 / baseHeight)
-                            )
-                            self.gifPosition = baseGifPosition
-                            changeGifData()
-                            startGifTimer()
-                        })
-                        HStack(spacing: geometry.size.width * (20 / baseWidth)){
-                            Image("mt_PointBadge")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: geometry.size.width * (50 / baseWidth))
-                            Text("\(userData.point)")
-                                .foregroundStyle(.green)
-                                .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (40 / baseWidth)))
-                            Text("pt")
-                                .foregroundStyle(.green)
-                                .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
-                        }
-                        .offset(
-                            x: geometry.size.width * (-80 / baseWidth),
-                            y: geometry.size.height * (-80 / baseHeight)
-                        )
-                        VStack(spacing:0){
-                            Text("\(userData.name)のレーク")
-                                .foregroundStyle(.white)
-                                .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
-                            HStack(spacing:0){
-                                Image("mt_LvBadge")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: geometry.size.width * (50 / baseWidth))
-                                ZStack(alignment:.leading){
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .frame(
-                                            width: geometry.size.width * (260 / baseWidth),
-                                            height: geometry.size.width * (15 / baseWidth)
-                                        )
-                                        .foregroundStyle(.white)
-                                    
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .frame(
-                                            width: CGFloat(userData.exp) / 260 * geometry.size.width * (260 / baseWidth),
-                                            height: geometry.size.width * (15 / baseWidth)
-                                        )
-                                        .foregroundStyle(.red)
-                                }
-                                Text("LV.\(userData.level)")
-                                    .foregroundStyle(.white)
-                                    .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
-                                    .padding(.horizontal, geometry.size.width * 0.01)
-                            }
-                        }
-                        .offset(
-                            x: geometry.size.width * (-25 / baseWidth),
-                            y: geometry.size.height * (40 / baseHeight)
-                        )
-                    }
                     .position(
-                        x: geometry.size.width * (350 / baseWidth),
-                        y: geometry.size.height * (300 / baseHeight)
+                        x: geo.size.width * (1000 / baseSize.width),
+                        y: geo.size.height * (600 / baseSize.height)
                     )
-                    
-                    
-                    AllGIFView(geometry: geometry)
-                        .id(refreshAnimationID) // リフレッシュ用ID追加
-                    VStack{
-                        HStack{
-                            Spacer()
-                            Button{
-                                withAnimation {
-                                    showCharacterView = false
-                                }
-                            }label: {
-                                Image("bt_toHome_\(userData.selectedCharacter)")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: geometry.size.width * (80 / baseWidth))
-                                
-                            }
-                            .padding(.horizontal, geometry.size.width * 0.02)
-                        }
-                        Spacer()
-                    }
+
+                    CharacterInfoView(
+                        size: geo.size,
+                        characterData: userData.currentCharacter
+                    )
+                    .position(
+                        x: geo.size.width * (350 / baseSize.width),
+                        y: geo.size.height * (300 / baseSize.height)
+                    )
+
+                    AllGIFView(
+                        geometry: geo,
+                        character: userData.selectedCharacter,
+                        growthStage: userData.currentCharacter.growthStage,
+                        bought: boughtProducts,
+                        gifWidth: $userData.gifWidth,
+                        gifHeight: $userData.gifHeight,
+                        gifData: $gifData,
+                        playGif: $playGif,
+                        gifArray: $gifArray,
+                        timer: $timer,
+                        gifPosition: $gifPosition,
+                        baseGifPosition: $baseGifPosition
+                    )
+                    .id(refreshID)
+
+                    CloseButton(
+                        size: geo.size,
+                        character: userData.selectedCharacter
+                    )
+                    // ─────────────────────────────────────────
+                                 // デバッグ用パネルを左上に追加
+                                 DebugControls()
+                                     .environmentObject(userData)
+                                     .position(
+                                         x: geo.size.width * 0.5,
+                                         y: geo.size.height * 0.5
+                                     )
+                                 // ─────────────────────────────────────────
+
                 }
                 .onAppear {
-                    // 画面表示時にIDを更新して強制的に再描画
-                    refreshAnimationID = UUID()
+                    userData.setCurrentCharacter()
+                    boughtProducts = userData.loadProducts(key: "boughtItem")
+                    setupGIF(in: geo.size)
+                    refreshID = UUID()
                 }
-                
+                .onChange(of: userData.selectedCharacter) { _ in
+                    userData.setCurrentCharacter()
+                    boughtProducts = userData.loadProducts(key: "boughtItem")
+                    setupGIF(in: geo.size)
+                }
             }
         }
     }
-    
-    private func startGifTimer() {
-        timer?.invalidate() // 既存のタイマーがあれば無効化する
+
+    // Initialize GIF settings
+    private func setupGIF(in size: CGSize) {
+        userData.gifWidth = size.width * 0.2
+        userData.gifHeight = size.width * 0.2
+        baseGifPosition = CGPoint(
+            x: size.width * (650 / baseSize.width),
+            y: size.height * (600 / baseSize.height)
+        )
+        gifPosition = baseGifPosition
+        updateGifArray()
+        timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
-            updateGifData()
+            updateGifArray()
         }
     }
-    
-    private func updateGifData() {
-        changeGifData()
-        self.gifData = NSDataAsset(name: gifArray.randomElement()! )?.data
-    }
-    
-    
-    private func changeGifData() {
-        switch userData.growthStage {
-        case 1:
-            switch userData.selectedCharacter {
-            case "Dog":
-                gifData = NSDataAsset(name: "Dog1_animation_breath")?.data
-                gifArray = ["Dog1_animation_breath",
-                            "Dog1_animation_sleep"]
-            case "Cat":
-                gifData = NSDataAsset(name: "Cat1_animation_breath")?.data
-                gifArray = ["Cat1_animation_breath",
-                            "Cat1_animation_sleep"]
-            case "Rabbit":
-                gifData = NSDataAsset(name: "Rabbit1_animation_breath")?.data
-                gifArray = ["Rabbit1_animation_breath",
-                            "Rabbit1_animation_sleep"]
-            default:
-                gifData = nil
-                gifArray = []
-            }
-        case 2:
-            switch userData.selectedCharacter {
-            case "Dog":
-                gifData = NSDataAsset(name: "Dog2_animation_breath")?.data
-                gifArray = ["Dog2_animation_breath",
-                            "Dog2_animation_sleep"]
-            case "Cat":
-                gifData = NSDataAsset(name: "Cat2_animation_breath")?.data
-                gifArray = ["Cat2_animation_breath",
-                            "Cat2_animation_sleep"]
-            case "Rabbit":
-                gifData = NSDataAsset(name: "Rabbit2_animation_breath")?.data
-                gifArray = ["Rabbit2_animation_breath",
-                            "Rabbit2_animation_sleep"]
-            default:
-                gifData = nil
-                gifArray = []
-            }
-        case 3:
-            switch userData.selectedCharacter {
-            case "Dog":
-                gifData = NSDataAsset(name: "Dog3_animation_breath")?.data
-                gifArray = [
-                    "Dog3_animation_breath",
-                    "Dog3_animation_sleep"
-                ] + boughtProducts.map { $0.name }
-            case "Cat":
-                gifData = NSDataAsset(name: "Cat3_animation_breath")?.data
-                gifArray = ["Cat3_animation_breath",
-                            "Cat3_animation_sleep",
-                ] + boughtProducts.map { $0.name }
-            case "Rabbit":
-                gifData = NSDataAsset(name: "Rabbit3_animation_breath")?.data
-                gifArray = [
-                    "Rabbit3_animation_breath",
-                    "Rabbit3_animation_sleep"
-                ] + boughtProducts.map { $0.name }
-            default:
-                gifData = nil
-                gifArray = []
-            }
-        default:
-            gifData = nil
-            gifArray = []
+
+    // Update GIF data array based on growth stage and product
+    private func updateGifArray() {
+        let char = userData.selectedCharacter
+        let stage = userData.currentCharacter.growthStage
+        let baseName = "\(char)\(stage)_animation_breath"
+        let sleepName = "\(char)\(stage)_animation_sleep"
+        gifArray = [baseName, sleepName]
+        if stage == 3 {
+            gifArray += boughtProducts.map { $0.name }
         }
-    }
-    var dragGesture: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                isDrag = true
-                playGif = false
-                gifData = NSDataAsset(name: "\(userData.selectedCharacter)\(userData.growthStage)_Drag")?.data
-                // 遅延アニメーションで位置を更新
-                withAnimation(.easeOut(duration: 0.2)) {
-                    gifPosition = value.location
-                }
-            }
-            .onEnded { value in
-                let velocity = CGPoint(
-                    x: value.predictedEndLocation.x - value.location.x,
-                    y: value.predictedEndLocation.y - value.location.y
-                )
-                
-                // オブジェクトが飛んでいくアニメーションを実行
-                withAnimation(.easeOut(duration: 0.5)) {
-                    gifPosition.x += velocity.x * 0.5
-                    gifPosition.y += velocity.y * 0.5
-                }
-                
-                // 画面サイズの外に行きそうな場合に跳ね返す
-                let screenWidth = UIScreen.main.bounds.width
-                let screenHeight = UIScreen.main.bounds.height
-                let gifHalfWidth = userData.gifWidth / 2
-                let gifHalfHeight = userData.gifHeight / 2
-                
-                if gifPosition.x - gifHalfWidth < 0 {
-                    gifPosition.x = gifHalfWidth
-                } else if gifPosition.x + gifHalfWidth > screenWidth {
-                    gifPosition.x = screenWidth - gifHalfWidth
-                }
-                
-                if gifPosition.y - gifHalfHeight < 0 {
-                    gifPosition.y = gifHalfHeight
-                } else if gifPosition.y + gifHalfHeight > screenHeight {
-                    gifPosition.y = screenHeight - gifHalfHeight
-                }
-                
-                // gifPosition.yが一定以上なら指定のY座標(例: 550)まで落とす
-                if gifPosition.y <= 400 { // ここで条件を指定
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        withAnimation(.easeIn(duration: 0.7)) {
-                            gifPosition.y = UIScreen.main.bounds.width*0.45
-                        }
-                    }
-                }
-                isDrag = false
-                changeGifData()
-            }
-    }
-    private func AllGIFView(geometry:GeometryProxy) -> some View {
-        
-        ZStack{
-            bg_cloudImage(size: geometry.size)
-            gifView(size: geometry.size, gif: gifData)
-        }
-        .onAppear {
-            // GIFサイズの初期化を強制
-            userData.gifWidth = geometry.size.width * 0.2
-            userData.gifHeight = geometry.size.width * 0.2
-            self.baseGifPosition = CGPoint(
-                x: geometry.size.width * (650 / baseWidth),
-                y: geometry.size.height * (600 / baseHeight)
-            )
-            self.gifPosition = baseGifPosition
-            changeGifData()
-            startGifTimer()
-            self.boughtProducts = userData.loadProducts(key: "boughtItem")
-        }
-    }
-    @ViewBuilder func gifView(size: CGSize, gif: Data?) -> some View {
-        
-        if let gifData = gif {
-            GIFImage(data: gifData,loopCount: 3, playGif: $playGif) {
-                print("GIF animation finished!")
-                self.gifData = NSDataAsset(name: gifArray.randomElement()! )?.data
-            }
-            .frame(width: userData.gifWidth,height: userData.gifHeight)
-            .onTapGesture {
-                self.gifData = NSDataAsset(name: gifArray.randomElement()! )?.data
-            }
-            .position(gifPosition)
-            .gesture(dragGesture)
-        }
-    }
-    @ViewBuilder private func bg_cloudImage(size:CGSize) -> some View{
-        ZStack {
-            GIFImage(data: NSDataAsset(name: "cloud_04")!.data, playGif: $playGif)
-                .scaledToFit()
-                .frame(width: size.width * 0.3)
-                .position(x: size.width * 0.087, y: size.height * 0.285)
-            GIFImage(data: NSDataAsset(name: "cloud_01")!.data, playGif: $playGif)
-                .scaledToFit()
-                .frame(width: size.width * 0.3)
-                .position(x: size.width * 0.235, y: size.height * 0.1)
-            GIFImage(data: NSDataAsset(name: "cloud_05")!.data, playGif: $playGif)
-                .scaledToFit()
-                .frame(width: size.width * 0.3)
-                .position(x: size.width * 0.375, y: size.height * 0.1)  // 変更: 左へ移動
-            GIFImage(data: NSDataAsset(name: "cloud_03")!.data, playGif: $playGif)
-                .scaledToFit()
-                .frame(width: size.width * 0.3)
-                .position(x: size.width * 0.49, y: size.height * 0.2)  // 変更: 左へ移動
-            GIFImage(data: NSDataAsset(name: "cloud_06")!.data, playGif: $playGif)
-                .scaledToFit()
-                .frame(width: size.width * 0.3)
-                .position(x: size.width * 0.585, y: size.height * 0.07)  // 変更: 左へ移動
-            GIFImage(data: NSDataAsset(name: "cloud_02")!.data, playGif: $playGif)
-                .scaledToFit()
-                .frame(width: size.width * 0.3)
-                .position(x: size.width * 0.8, y: size.height * 0.06)
-            
-        }
-        
+        gifData = NSDataAsset(name: gifArray.randomElement() ?? baseName)?.data
     }
 }
 
+// MARK: - GIF Container
+private struct AllGIFView: View {
+    let geometry: GeometryProxy
+    let character: String
+    let growthStage: Int
+    let bought: [Product]
+    @Binding var gifWidth: CGFloat
+    @Binding var gifHeight: CGFloat
+    @Binding var gifData: Data?
+    @Binding var playGif: Bool
+    @Binding var gifArray: [String]
+    @Binding var timer: Timer?
+    @Binding var gifPosition: CGPoint
+    @Binding var baseGifPosition: CGPoint
 
-
-#Preview(body: {
-    NewCharacterView(showCharacterView: .constant(true))
-        .environmentObject(UserData())
-})
-
-struct NewCharacterDetailView:View {
-    @State private var selectedTab:Int = 0
-    @State private var isSelected:Bool = false
-    @EnvironmentObject var userData:UserData
     var body: some View {
-        ZStack{
-            switch selectedTab {
-            case 0:
-                Image("bg_charactarDetailView_dog")
-                    .resizable()
-                    .ignoresSafeArea()
-            case 1:
-                Image("bg_charactarDetailView_rabbit")
-                    .resizable()
-                    .ignoresSafeArea()
-            case 2:
-                Image("bg_charactarDetailView_cat")
-                    .resizable()
-                    .ignoresSafeArea()
-            default:
-                Image("bg_charactarDetailView_tomato")
-                    .resizable()
-                    .ignoresSafeArea()
+        ZStack {
+            bgClouds(size: geometry.size)
+            gifView(size: geometry.size)
+        }
+        .onAppear {
+            initializeGif(size: geometry.size)
+        }
+    }
+
+    // Background clouds
+    private func bgClouds(size: CGSize) -> some View {
+        ZStack {
+            ForEach(["cloud_04", "cloud_01", "cloud_05", "cloud_03", "cloud_06", "cloud_02"], id: \.self) { name in
+                GIFImage(data: NSDataAsset(name: name)!.data,
+                         playGif: $playGif)
+                    .scaledToFit()
+                    .frame(width: size.width * 0.3)
+                    .position(cloudPosition(name: name, size: size))
             }
-            
+        }
+    }
+
+    private func cloudPosition(name: String, size: CGSize) -> CGPoint {
+        switch name {
+        case "cloud_04": return CGPoint(x: size.width * 0.087, y: size.height * 0.285)
+        case "cloud_01": return CGPoint(x: size.width * 0.235, y: size.height * 0.1)
+        case "cloud_05": return CGPoint(x: size.width * 0.375, y: size.height * 0.1)
+        case "cloud_03": return CGPoint(x: size.width * 0.49, y: size.height * 0.2)
+        case "cloud_06": return CGPoint(x: size.width * 0.585, y: size.height * 0.07)
+        case "cloud_02": return CGPoint(x: size.width * 0.8, y: size.height * 0.06)
+        default: return .zero
+        }
+    }
+
+    // GIF character
+    @ViewBuilder
+    private func gifView(size: CGSize) -> some View {
+        if let data = gifData {
+            GIFImage(data: data,
+                     loopCount: 3,
+                     playGif: $playGif) {
+                // completion
+                self.gifData = NSDataAsset(name: gifArray.randomElement() ?? "")?.data
+            }
+            .frame(width: gifWidth, height: gifHeight)
+            .position(gifPosition)
+            .gesture(dragGesture(size: size))
+            .onTapGesture {
+                gifData = NSDataAsset(name: gifArray.randomElement() ?? "")?.data
+            }
+        }
+    }
+
+    private func initializeGif(size: CGSize) {
+        gifWidth = size.width * 0.2
+        gifHeight = size.width * 0.2
+        baseGifPosition = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
+        gifPosition = baseGifPosition
+        // reset array handled by parent
+    }
+
+    // Drag gesture
+    private func dragGesture(size: CGSize) -> some Gesture {
+        DragGesture()
+            .onChanged { value in
+                playGif = false
+                gifPosition = value.location
+            }
+            .onEnded { value in
+                playGif = true
+                withAnimation(.easeOut) {
+                    gifPosition = baseGifPosition
+                }
+            }
+    }
+}
+
+// MARK: - Top Buttons
+private struct TopActionButtons: View {
+    let size: CGSize
+    let character: String
+    let growthStage: Int
+
+    private let baseSize = CGSize(width: 1210, height: 785)
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 0) {
+            NavigationLink(destination: NewShopView()) {
+                Image("bt_toShop_\(character)")
+                    .resizable()
+                    .scaledToFit()
+                    .brightness(growthStage < 3 ? -0.2 : 0)
+                    .opacity(growthStage < 3 ? 0.7 : 1)
+                    .frame(width: size.width * (300 / baseSize.width))
+            }
+            .disabled(growthStage < 3)
+
+            NavigationLink(destination: NewCharacterDetailView()) {
+                Image("bt_toCharaSelect_\(character)")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size.width * (350 / baseSize.width))
+            }
+        }
+    }
+}
+
+// MARK: - Info View
+private struct CharacterInfoView: View {
+    let size: CGSize
+    let characterData: Character
+
+    private let baseSize = CGSize(width: 1210, height: 785)
+
+    var body: some View {
+        ZStack {
+            Image("House_\(characterData.name)")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 590 * (size.width / baseSize.width))
+                .offset(x: -50 * (size.width / baseSize.width),
+                        y: 130 * (size.height / baseSize.height))
+
             VStack {
-                RoundedRectangle(cornerRadius: 50)
-                    .frame(width: 280, height: 90)
-                    .foregroundStyle(.white)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 50)
-                            .stroke(Color.gray, lineWidth: 3)
-                    }
-                    .overlay {
-                        HStack {
-                            Button {
-                                withAnimation{
-                                    selectedTab = 0
-                                }
-                                
-                            } label: {
-                                Image("Dog_normal_1")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: selectedTab == 0 ? 70 : 60)
-                                    .colorMultiply(selectedTab == 0 ? .white : .gray) // 選択されていない場合にグレー
-                            }
-                            Button {
-                                withAnimation{
-                                    selectedTab = 1
-                                }
-                            } label: {
-                                Image("Rabbit_normal_1")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: selectedTab == 1 ? 70 : 60)
-                                    .colorMultiply(selectedTab == 1 ? .white : .gray)
-                            }
-                            Button {
-                                withAnimation{
-                                    selectedTab = 2
-                                }
-                            } label: {
-                                Image("Cat_normal_1")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: selectedTab == 2 ? 70 : 60)
-                                    .colorMultiply(selectedTab == 2 ? .white : .gray)
-                            }
-                        }
-                    }
+                HStack {
+                    Text("Lv: \(characterData.level)")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    Text("EXP: \(characterData.exp)")
+                        .font(.subheadline)
+                        .foregroundColor(.white)
+                }
+
+                ProgressView(value: Float(characterData.exp),
+                             total: Float(max(characterData.level * 100, 1)))
+                    .progressViewStyle(LinearProgressViewStyle(tint: .red))
+                    .frame(width: size.width * (260 / baseSize.width))
+            }
+            .offset(x: -25 * (size.width / baseSize.width),
+                    y: 40 * (size.height / baseSize.height))
+        }
+    }
+}
+
+// MARK: - Close Button
+private struct CloseButton: View {
+    let size: CGSize
+    let character: String
+
+    private let baseSize = CGSize(width: 1210, height: 785)
+
+    var body: some View {
+        VStack {
+            HStack {
                 Spacer()
-                if selectedTab == 0 {
-                    VStack{
-                        ZStack{
-                            HStack(alignment: .bottom, spacing: 1) {
-                                Spacer()
-                                Image("Dog_normal_1")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 200)
-                                Image("arrow_symbol")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 80)
-                                    .offset(y: -50)
-                                Image("img_dog_applause")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .brightness(userData.growthStage < 2 ? -1.0 : 0.0)
-                                    .frame(width: 300)
-                                
-                                Image("arrow_symbol")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 80)
-                                    .offset(y: -50)
-                                Image("img_dog_applause")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .brightness(userData.growthStage < 3 ? -1.0 : 0.0)
-                                    .frame(width: 400)
-                                Spacer()
-                            }
-                        }
-                        if userData.selectedCharacter != "Dog"{
-                            Button{
-                                userData.selectedCharacter = "Dog"
-                            }label:{
-                                RoundedRectangle(cornerRadius: 50)
-                                    .frame(width:400,height: 80)
-                                    .foregroundStyle(.green)
-                                    .overlay{
-                                        Text("このキャラにする！")
-                                            .foregroundStyle(.white)
-                                            .font(.custom("GenJyuuGothicX-Bold", size: 40))
-                                    }
-                            }
-                        }else{
-                            Button{
-                                
-                            }label:{
-                                RoundedRectangle(cornerRadius: 50)
-                                    .frame(width:300,height: 80)
-                                    .foregroundStyle(.gray)
-                                    .overlay{
-                                        Text("選択中")
-                                            .foregroundStyle(.white)
-                                            .font(.custom("GenJyuuGothicX-Bold", size: 40))
-                                    }
-                            }
-                        }
-                    }
-                } else if selectedTab == 1 {
-                    Text("うさぎ")
-                    if userData.selectedCharacter != "Rabbit"{
-                        Button{
-                            userData.selectedCharacter = "Rabbit"
-                        }label:{
-                            RoundedRectangle(cornerRadius: 50)
-                                .frame(width:400,height: 80)
-                                .foregroundStyle(.green)
-                                .overlay{
-                                    Text("このキャラにする！")
-                                        .foregroundStyle(.white)
-                                        .font(.system(size: 40))
-                                }
-                        }
-                    }else{
-                        Button{
-                            
-                        }label:{
-                            RoundedRectangle(cornerRadius: 50)
-                                .frame(width:300,height: 80)
-                                .foregroundStyle(.gray)
-                                .overlay{
-                                    Text("選択中")
-                                        .foregroundStyle(.white)
-                                        .font(.system(size: 40))
-                                }
-                        }
-                    }
-                } else if selectedTab == 2 {
-                    Text("ねこ")
-                    if userData.selectedCharacter != "Cat"{
-                        Button{
-                            userData.selectedCharacter = "Cat"
-                        }label:{
-                            RoundedRectangle(cornerRadius: 50)
-                                .frame(width:400,height: 80)
-                                .foregroundStyle(.green)
-                                .overlay{
-                                    Text("このキャラにする！")
-                                        .foregroundStyle(.white)
-                                        .font(.system(size: 40))
-                                }
-                        }
-                    }else{
-                        Button{
-                            
-                        }label:{
-                            RoundedRectangle(cornerRadius: 50)
-                                .frame(width:300,height: 80)
-                                .foregroundStyle(.gray)
-                                .overlay{
-                                    Text("選択中")
-                                        .foregroundStyle(.white)
-                                        .font(.system(size: 40))
-                                }
-                        }
+                Button {
+                    NotificationCenter.default.post(name: .closeCharacterView, object: nil)
+                } label: {
+                    Image("bt_toHome_\(character)")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: size.width * (80 / baseSize.width))
+                }
+                .padding(.horizontal)
+            }
+            Spacer()
+        }
+    }
+}
+
+extension Notification.Name {
+    static let closeCharacterView = Notification.Name("closeCharacterView")
+}
+
+// Dummy-Fallback for Preview
+struct NewCharacterView_Previews: PreviewProvider {
+    static var previews: some View {
+        NewCharacterView(showCharacterView: .constant(true))
+            .environmentObject(UserData())
+    }
+}
+// MARK: - デバッグ用コントロール
+
+// MARK: - デバッグ用コントロール
+private struct DebugControls: View {
+    @EnvironmentObject var userData: UserData
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("🐞 Debug Controls")
+                .font(.headline)
+                .foregroundColor(.white)
+
+            // 現在のキャラ Level／EXP
+            Stepper("Level: \(userData.currentCharacter.level)", value: Binding(
+                get: { userData.currentCharacter.level },
+                set: { new in
+                    userData.currentCharacter.level = new
+                }
+            ), in: 0...50)
+
+            Stepper("EXP: \(userData.currentCharacter.exp)", value: Binding(
+                get: { userData.currentCharacter.exp },
+                set: { new in
+                    userData.currentCharacter.exp = new
+                }
+            ), in: 0...1000)
+
+            Divider().background(Color.white)
+
+            // DogData.growthStage
+            Stepper("Dog Growth: \(userData.DogData.growthStage)", value: Binding(
+                get: { userData.DogData.growthStage },
+                set: { new in
+                    userData.DogData.growthStage = new
+                    if userData.selectedCharacter == "Dog" {
+                        userData.currentCharacter.growthStage = new
                     }
                 }
-                
-                
+            ), in: 0...3)
+
+            // RabbitData.growthStage
+            Stepper("Rabbit Growth: \(userData.RabbitData.growthStage)", value: Binding(
+                get: { userData.RabbitData.growthStage },
+                set: { new in
+                    userData.RabbitData.growthStage = new
+                    if userData.selectedCharacter == "Rabbit" {
+                        userData.currentCharacter.growthStage = new
+                    }
+                }
+            ), in: 0...3)
+
+            // CatData.growthStage
+            Stepper("Cat Growth: \(userData.CatData.growthStage)", value: Binding(
+                get: { userData.CatData.growthStage },
+                set: { new in
+                    userData.CatData.growthStage = new
+                    if userData.selectedCharacter == "Cat" {
+                        userData.currentCharacter.growthStage = new
+                    }
+                }
+            ), in: 0...3)
+
+            // 必要に応じて永続化用ボタン
+            Button("Save Characters") {
+                userData.saveAllCharacter()
             }
-            
+            .font(.subheadline)
+            .foregroundColor(.white)
+            .padding(.top, 8)
         }
+        .padding(12)
+        .background(Color.black.opacity(0.6))
+        .cornerRadius(8)
     }
 }
