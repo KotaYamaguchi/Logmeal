@@ -21,6 +21,18 @@ struct FirstLoginView: View {
     @State private var rotationAngle: Double = 0 // 左右の傾き角度
     @State private var player = AVPlayer(url: Bundle.main.url(forResource: "prologue 2", withExtension: "mp4")!)
     //https://youtu.be/6SwhhYdYSm4?feature=shared
+    var character:Character{
+        switch user.selectedCharacter{
+        case "Dog":
+            return user.DogData
+        case "Rabbit":
+            return user.RabbitData
+        case "Cat":
+            return user.CatData
+        default:
+            return user.DogData
+        }
+    }
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -151,7 +163,7 @@ struct FirstLoginView: View {
     }
     @ViewBuilder func gameStart(size: CGSize) -> some View {
         ZStack(alignment: .topLeading) {
-            Image("\(user.selectedCharacter)_normal_1")
+            Image("\(character.name)_normal_1")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 180)

@@ -65,159 +65,159 @@ struct NewCharacterView: View {
     }
     var body: some View {
         GeometryReader{ geometry in
-        NavigationStack{
-            ZStack{
-                Image("bg_homeView")
-                    .resizable()
-                    .ignoresSafeArea()
-                VStack(alignment:.trailing,spacing:0){
-                    NavigationLink{
-                        NewShopView()
-                       
-                    }label:{
-                        Image("bt_toShop_\(userData.selectedCharacter)")
-                            .resizable()
-                            .scaledToFit()
-                            .brightness(userData.growthStage < 3 ? -0.2 : 0.0)
-                            .scaleEffect(userData.growthStage < 3 ? 0.7 : 0.0)
-                            .frame(width: geometry.size.width * (300 / baseWidth))
-                    }
-                    .disabled(userData.growthStage < 3)
-                    NavigationLink{
-                        NewCharacterDetailView()
-                          
-                    }label:{
-                        Image("bt_toCharaSelect_\(userData.selectedCharacter)")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geometry.size.width * (350 / baseWidth))
-                    }
-                }
-                .position(
-                    x: geometry.size.width * (1000 / baseWidth),
-                    y: geometry.size.height * (600 / baseHeight)
-                )
+            NavigationStack{
                 ZStack{
-                    ZStack{
-                        Image("House_\(userData.selectedCharacter)")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: setHouseSize(size: geometry.size))
-                            .offset(x: houseOffsetX, y: houseOffsetY)
+                    Image("bg_homeView")
+                        .resizable()
+                        .ignoresSafeArea()
+                    VStack(alignment:.trailing,spacing:0){
+                        NavigationLink{
+                            NewShopView()
+                            
+                        }label:{
+                            Image("bt_toShop_\(userData.selectedCharacter)")
+                                .resizable()
+                                .scaledToFit()
+                                .brightness(userData.growthStage < 3 ? -0.2 : 0.0)
+                                .scaleEffect(userData.growthStage < 3 ? 0.7 : 0.0)
+                                .frame(width: geometry.size.width * (300 / baseWidth))
+                        }
+                        .disabled(userData.growthStage < 3)
+                        NavigationLink{
+                            NewCharacterDetailView()
+                            
+                        }label:{
+                            Image("bt_toCharaSelect_\(userData.selectedCharacter)")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: geometry.size.width * (350 / baseWidth))
+                        }
                     }
-                    .onAppear(){
-                        print("size", geometry.size)
-                        self.houseSize = setHouseSize(size: geometry.size)
-                        self.houseOffsetX = setHouseOffsetX(size: geometry.size)
-                        self.houseOffsetY = setHouseOffsetY(size: geometry.size)
-                        userData.gifWidth = geometry.size.width * 0.2
-                        userData.gifHeight = geometry.size.width * 0.2
-                        self.baseGifPosition = CGPoint(
-                            x: geometry.size.width * (650 / baseWidth),
-                            y: geometry.size.height * (600 / baseHeight)
-                        )
-                        self.gifPosition = baseGifPosition
-                        changeGifData()
-                        startGifTimer()
-                        self.boughtProducts = userData.loadProducts(key: "boughtItem")
-                    }
-                    .onChange(of: userData.selectedCharacter, { oldValue, newValue in
-                        self.houseSize = setHouseSize(size: geometry.size)
-                        self.houseOffsetX = setHouseOffsetX(size: geometry.size)
-                        self.houseOffsetY = setHouseOffsetY(size: geometry.size)
-                        userData.gifWidth = geometry.size.width * 0.2
-                        userData.gifHeight = geometry.size.width * 0.2
-                        self.baseGifPosition = CGPoint(
-                            x: geometry.size.width * (650 / baseWidth),
-                            y: geometry.size.height * (600 / baseHeight)
-                        )
-                        self.gifPosition = baseGifPosition
-                        changeGifData()
-                        startGifTimer()
-                    })
-                    HStack(spacing: geometry.size.width * (20 / baseWidth)){
-                        Image("mt_PointBadge")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geometry.size.width * (50 / baseWidth))
-                        Text("\(userData.point)")
-                            .foregroundStyle(.green)
-                            .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (40 / baseWidth)))
-                        Text("pt")
-                            .foregroundStyle(.green)
-                            .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
-                    }
-                    .offset(
-                        x: geometry.size.width * (-80 / baseWidth),
-                        y: geometry.size.height * (-80 / baseHeight)
+                    .position(
+                        x: geometry.size.width * (1000 / baseWidth),
+                        y: geometry.size.height * (600 / baseHeight)
                     )
-                    VStack(spacing:0){
-                        Text("\(userData.name)のレーク")
-                            .foregroundStyle(.white)
-                            .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
-                        HStack(spacing:0){
-                            Image("mt_LvBadge")
+                    ZStack{
+                        ZStack{
+                            Image("House_\(userData.selectedCharacter)")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: setHouseSize(size: geometry.size))
+                                .offset(x: houseOffsetX, y: houseOffsetY)
+                        }
+                        .onAppear(){
+                            print("size", geometry.size)
+                            self.houseSize = setHouseSize(size: geometry.size)
+                            self.houseOffsetX = setHouseOffsetX(size: geometry.size)
+                            self.houseOffsetY = setHouseOffsetY(size: geometry.size)
+                            userData.gifWidth = geometry.size.width * 0.2
+                            userData.gifHeight = geometry.size.width * 0.2
+                            self.baseGifPosition = CGPoint(
+                                x: geometry.size.width * (650 / baseWidth),
+                                y: geometry.size.height * (600 / baseHeight)
+                            )
+                            self.gifPosition = baseGifPosition
+                            changeGifData()
+                            startGifTimer()
+                            self.boughtProducts = userData.loadProducts(key: "boughtItem")
+                        }
+                        .onChange(of: userData.selectedCharacter, { oldValue, newValue in
+                            self.houseSize = setHouseSize(size: geometry.size)
+                            self.houseOffsetX = setHouseOffsetX(size: geometry.size)
+                            self.houseOffsetY = setHouseOffsetY(size: geometry.size)
+                            userData.gifWidth = geometry.size.width * 0.2
+                            userData.gifHeight = geometry.size.width * 0.2
+                            self.baseGifPosition = CGPoint(
+                                x: geometry.size.width * (650 / baseWidth),
+                                y: geometry.size.height * (600 / baseHeight)
+                            )
+                            self.gifPosition = baseGifPosition
+                            changeGifData()
+                            startGifTimer()
+                        })
+                        HStack(spacing: geometry.size.width * (20 / baseWidth)){
+                            Image("mt_PointBadge")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: geometry.size.width * (50 / baseWidth))
-                            ZStack(alignment:.leading){
-                                RoundedRectangle(cornerRadius: 20)
-                                    .frame(
-                                        width: geometry.size.width * (260 / baseWidth),
-                                        height: geometry.size.width * (15 / baseWidth)
-                                    )
-                                    .foregroundStyle(.white)
-                                
-                                RoundedRectangle(cornerRadius: 20)
-                                    .frame(
-                                        width: CGFloat(userData.exp) / 260 * geometry.size.width * (260 / baseWidth),
-                                        height: geometry.size.width * (15 / baseWidth)
-                                    )
-                                    .foregroundStyle(.red)
-                            }
-                            Text("LV.\(userData.level)")
+                            Text("\(userData.point)")
+                                .foregroundStyle(.green)
+                                .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (40 / baseWidth)))
+                            Text("pt")
+                                .foregroundStyle(.green)
+                                .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
+                        }
+                        .offset(
+                            x: geometry.size.width * (-80 / baseWidth),
+                            y: geometry.size.height * (-80 / baseHeight)
+                        )
+                        VStack(spacing:0){
+                            Text("\(userData.name)のレーク")
                                 .foregroundStyle(.white)
                                 .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
-                                .padding(.horizontal, geometry.size.width * 0.01)
-                        }
-                    }
-                    .offset(
-                        x: geometry.size.width * (-25 / baseWidth),
-                        y: geometry.size.height * (40 / baseHeight)
-                    )
-                }
-                .position(
-                    x: geometry.size.width * (350 / baseWidth),
-                    y: geometry.size.height * (300 / baseHeight)
-                )
-                
-                
-                AllGIFView(geometry: geometry)
-                    .id(refreshAnimationID) // リフレッシュ用ID追加
-                VStack{
-                    HStack{
-                        Spacer()
-                        Button{
-                            withAnimation {
-                                showCharacterView = false
+                            HStack(spacing:0){
+                                Image("mt_LvBadge")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: geometry.size.width * (50 / baseWidth))
+                                ZStack(alignment:.leading){
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .frame(
+                                            width: geometry.size.width * (260 / baseWidth),
+                                            height: geometry.size.width * (15 / baseWidth)
+                                        )
+                                        .foregroundStyle(.white)
+                                    
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .frame(
+                                            width: CGFloat(userData.exp) / 260 * geometry.size.width * (260 / baseWidth),
+                                            height: geometry.size.width * (15 / baseWidth)
+                                        )
+                                        .foregroundStyle(.red)
+                                }
+                                Text("LV.\(userData.level)")
+                                    .foregroundStyle(.white)
+                                    .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * (35 / baseWidth)))
+                                    .padding(.horizontal, geometry.size.width * 0.01)
                             }
-                        }label: {
-                            Image("bt_toHome_\(userData.selectedCharacter)")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: geometry.size.width * (80 / baseWidth))
-                            
                         }
-                        .padding(.horizontal, geometry.size.width * 0.02)
+                        .offset(
+                            x: geometry.size.width * (-25 / baseWidth),
+                            y: geometry.size.height * (40 / baseHeight)
+                        )
                     }
-                    Spacer()
-                }
+                    .position(
+                        x: geometry.size.width * (350 / baseWidth),
+                        y: geometry.size.height * (300 / baseHeight)
+                    )
+                    
+                    
+                    AllGIFView(geometry: geometry)
+                        .id(refreshAnimationID) // リフレッシュ用ID追加
+                    VStack{
+                        HStack{
+                            Spacer()
+                            Button{
+                                withAnimation {
+                                    showCharacterView = false
+                                }
+                            }label: {
+                                Image("bt_toHome_\(userData.selectedCharacter)")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: geometry.size.width * (80 / baseWidth))
+                                
+                            }
+                            .padding(.horizontal, geometry.size.width * 0.02)
+                        }
+                        Spacer()
+                    }
                 }
                 .onAppear {
                     // 画面表示時にIDを更新して強制的に再描画
                     refreshAnimationID = UUID()
                 }
-            
+                
             }
         }
     }
@@ -519,7 +519,7 @@ struct NewCharacterDetailView:View {
                                     .scaledToFit()
                                     .brightness(userData.growthStage < 2 ? -1.0 : 0.0)
                                     .frame(width: 300)
-                                    
+                                
                                 Image("arrow_symbol")
                                     .resizable()
                                     .scaledToFit()

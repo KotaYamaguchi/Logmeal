@@ -16,22 +16,22 @@ struct GrowthAnimationView: View {
     private func getFirstGifName() -> String {
            switch user.growthStage {
            case 2:
-               return "\(user.selectedCharacter)1_animation_breath"
+               return "\(user.currentCharacter.name)1_animation_breath"
            case 3:
-               return "\(user.selectedCharacter)2_animation_breath"
+               return "\(user.currentCharacter.name)2_animation_breath"
            default:
-               return "\(user.selectedCharacter)\(user.growthStage)_animation_breath"
+               return "\(user.currentCharacter.name)\(user.currentCharacter.growthStage)_animation_breath"
            }
        }
        
        private func getSecondGifName() -> String {
-           switch user.growthStage {
+           switch user.currentCharacter.growthStage {
            case 2:
-               return "\(user.selectedCharacter)2_animation_breath"
+               return "\(user.currentCharacter.name)2_animation_breath"
            case 3:
-               return "\(user.selectedCharacter)3_animation_breath"
+               return "\(user.currentCharacter.name)3_animation_breath"
            default:
-               return "\(user.selectedCharacter)\(user.growthStage)_animation_breath"
+               return "\(user.currentCharacter.name)\(user.currentCharacter.growthStage)_animation_breath"
            }
        }
     

@@ -8,6 +8,22 @@ struct NewColumnView: View {
     @State private var showQRscanner:Bool = false
     @EnvironmentObject var user:UserData
     @Query private var allColumn: [ColumnData]
+    @Environment(\.modelContext) private var context
+    
+    private var randomSystemImageName: String {
+        let candidates = [
+            "fork.knife",
+            "fork.knife.circle.fill",
+            "takeoutbag.and.cup.and.straw.fill",
+            "cup.and.saucer.fill",
+            "cart.fill",
+            "birthday.cake.fill",
+            "wineglass.fill",
+            "leaf.fill"
+        ]
+        return candidates.randomElement() ?? "fork.knife"
+    }
+    
     // ソート済みのカラムリスト
     private var sortedColumns: [ColumnData] {
         switch sortTitle {
@@ -32,7 +48,7 @@ struct NewColumnView: View {
         }
     }
     private var backgoundImage:String{
-        switch user.selectedCharacter{
+        switch user.currentCharacter.name{
         case "Dog":"bg_column_Dog"
         case "Cat":"bg_column_Cat"
         case "Rabbit":"bg_column_Rabbit"
@@ -103,6 +119,7 @@ struct NewColumnView: View {
                                             .overlay {
                                                 Text("今日のコラム")
                                                     .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.02))
+                                                    .foregroundStyle(.white)
                                             }
                                     }
                                     Button {
@@ -151,32 +168,40 @@ struct NewColumnView: View {
                                             RoundedRectangle(cornerRadius: 10)
                                                 .stroke(lineWidth: 1)
                                         }
-                                    HStack(alignment: .bottom) {
-                                        VStack(alignment: .leading) {
-                                            HStack{
-                                                Text(column.title)
-                                                    .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.05))
-                                                    .padding(.bottom)
-                                                Spacer()
-                                                Text(column.columnDay)
-                                                    .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.02))
-                                                    .padding(.bottom)
-                                            }
-                                            
-                                            Text(column.caption)
-                                                .lineLimit(column.isExpanded ? nil : 2)
-                                                .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.025))
+                                    Button {
+                                        withAnimation {
+                                            column.isExpanded.toggle()
                                         }
-                                        Spacer()
-                                        Button {
-                                            withAnimation {
-                                                column.isExpanded.toggle()
+                                    } label: {
+                                        HStack(alignment: .bottom) {
+                                            VStack(alignment: .leading) {
+                                                HStack{
+                                                    if column.title == "ー" {
+                                                        Image(systemName: randomSystemImageName)
+                                                            .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.05))
+                                                    }else{
+                                                        Text(column.title)
+                                                            .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.05))
+                                                            .padding(.bottom)
+                                                    }
+                                                    Spacer()
+                                                    Text(column.columnDay)
+                                                        .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.02))
+                                                       
+                                                        .padding(.bottom)
+                                                }
+                                                
+                                                Text(column.caption)
+                                                    .frame(width: geometry.size.width * 0.7, alignment: .leading)
+                                                    .lineLimit(column.isExpanded ? nil : 2)
+                                                    .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.025))
+                                                
                                             }
-                                        } label: {
+                                            Spacer()
                                             Image(systemName: column.isExpanded ? "chevron.compact.up" : "chevron.compact.down")
                                                 .font(.title)
                                         }
-                                        
+                                        .foregroundStyle(Color.textColor)
                                     }
                                     .frame(width: geometry.size.width * 0.9)
                                     .padding()
@@ -237,6 +262,9 @@ struct NewColumnView: View {
             }
             }
             .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
+            .onAppear(){
+                user.initCharacterData()
+            }
             .sheet(isPresented:$showQRscanner){
                 ScannerView(isPresentingScanner: $showQRscanner)
             }
@@ -312,3 +340,4 @@ struct NewColumnView: View {
         .modelContainer(previewContainer)
         .environmentObject(UserData())
 }
+

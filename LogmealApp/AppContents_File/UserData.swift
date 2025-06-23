@@ -89,6 +89,7 @@ class UserData:ObservableObject{
     @Published var gifHeight:CGFloat = 0
     //GameData
     @AppStorage("selectedCharactar") var selectedCharacter:String = "Rabbit"
+    @AppStorage("inTrainingCharactar") var inTrainingCharactar:String = "Rabbit"
     @AppStorage("CharactarName") var characterName:String = "Rabbit"
     @AppStorage("level") var level:Int = 0
     @AppStorage("exp") var exp:Int = 10
@@ -101,4 +102,233 @@ class UserData:ObservableObject{
     @Published var showGrowthAnimation:Bool = false
     @Published var showLevelUPAnimation:Bool = false
     @Published var showAnimation:Bool = false
+    
+    //キャラ別管理
+    @AppStorage("isCharacterDataMigrated") var isCharacterDataMigrated: Bool = false
+    @AppStorage("isFirstCharacterChange") var isFirstCharacterChange: Bool = true
+    @Published var RabbitData:Character = Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
+    @Published var DogData:Character = Character(name: "Dog", level: 0, exp: 0, growthStage: 0)
+    @Published var CatData:Character = Character(name: "Cat", level: 0, exp: 0, growthStage: 0)
+    @Published var currentCharacter: Character = Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
+    init(){
+        initCharacterData()
+    }
+    func initCharacterData(){
+        loadAllharacterData()
+    }
+    func setCurrentCharacter() {
+        switch selectedCharacter {
+        case "Rabbit":
+            currentCharacter = RabbitData
+        case "Dog":
+            currentCharacter = DogData
+        case "Cat":
+            currentCharacter = CatData
+        default:
+            currentCharacter = DogData
+        }
+    }
+        
+    // ユーザーデフォルトのキャラクターデータを全てロード
+    func loadAllharacterData(){
+        RabbitData = loadCharacterata(key: "RabbitData") ?? Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
+        DogData = loadCharacterata(key: "DogData") ?? Character(name: "Dog", level: 0, exp: 0, growthStage: 0)
+        CatData = loadCharacterata(key: "CatData") ?? Character(name: "Cat", level: 0, exp: 0, growthStage: 0)
+        print("=== Loaded Character Data ===\n")
+        print("=== Current Character Debug Info ===")
+        print("  Name: \(currentCharacter.name)")
+        print("  Level: \(currentCharacter.level)")
+        print("  EXP: \(currentCharacter.exp)")
+        print("  Growth Stage: \(currentCharacter.growthStage)")
+
+        print("=== Current Dog Debug Info ===")
+        print("  Level: \(DogData.level)")
+        print("  EXP: \(DogData.exp)")
+        print("  Growth Stage: \(DogData.growthStage)")
+
+        print("=== Current Rabbit Debug Info ===")
+        print("  Level: \(RabbitData.level)")
+        print("  EXP: \(RabbitData.exp)")
+        print("  Growth Stage: \(RabbitData.growthStage)")
+
+        print("=== Current Cat Debug Info ===")
+        print("  Level: \(CatData.level)")
+        print("  EXP: \(CatData.exp)")
+        print("  Growth Stage: \(CatData.growthStage)")
+
+    }
+    /// すべてのキャラクターデータを初期値にリセットする
+    func resetAllCharacterData() {
+        self.DogData = Character(name: "Dog", level: 0, exp: 0, growthStage: 0)
+        self.RabbitData = Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
+        self.CatData = Character(name: "Cat", level: 0, exp: 0, growthStage: 0)
+    }
+    // 全てのキャラクターデータを保存
+    func saveAllCharacter(){
+        saveCharacterData(data: DogData, key: "DogData")
+        saveCharacterData(data: CatData, key: "CatData")
+        saveCharacterData(data: RabbitData, key: "RabbitData")
+        print("=== Saved Character Data ===\n")
+        print("=== Current Character Debug Info ===")
+        print("  Name: \(currentCharacter.name)")
+        print("  Level: \(currentCharacter.level)")
+        print("  EXP: \(currentCharacter.exp)")
+        print("  Growth Stage: \(currentCharacter.growthStage)")
+
+        print("=== Current Dog Debug Info ===")
+        print("  Level: \(DogData.level)")
+        print("  EXP: \(DogData.exp)")
+        print("  Growth Stage: \(DogData.growthStage)")
+
+        print("=== Current Rabbit Debug Info ===")
+        print("  Level: \(RabbitData.level)")
+        print("  EXP: \(RabbitData.exp)")
+        print("  Growth Stage: \(RabbitData.growthStage)")
+
+        print("=== Current Cat Debug Info ===")
+        print("  Level: \(CatData.level)")
+        print("  EXP: \(CatData.exp)")
+        print("  Growth Stage: \(CatData.growthStage)")
+
+    }
+
+    // マイグレーション処理
+    func migrateLegacyData() {
+        // 既に移行済みの場合は何もせず
+//        print("Before isCharacterDataMigrated: ",isCharacterDataMigrated)
+//        if isCharacterDataMigrated {
+//        loadAllharacterData()
+//        }else{
+            // 選択中のキャラクターに合わせて成長値をコピー
+            switch selectedCharacter {
+            case "Rabbit":
+                RabbitData.growthStage = growthStage
+                RabbitData.level = level
+                RabbitData.exp = exp
+        
+                saveCharacterData(data: RabbitData,key: "RabbitData")
+            case "Dog":
+                DogData.growthStage = growthStage
+                DogData.level = level
+                DogData.exp = exp
+           
+                saveCharacterData(data: DogData, key: "DogData")
+            case "Cat":
+                CatData.growthStage = growthStage
+                CatData.level = level
+                CatData.exp = exp
+      
+                saveCharacterData(data: CatData, key: "CatData")
+            default:
+                DogData.growthStage = growthStage
+                DogData.level = level
+                DogData.exp = exp
+
+                saveCharacterData(data: DogData, key: "DogData")
+            }
+            // 移行済みフラグを立てる
+            isCharacterDataMigrated = true
+            print("Migration completed successfully.")
+//        }
+    }
+    // キャラクターデータを保存する関数
+    func saveCharacterData(data:Character,key:String){
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(data) {
+            UserDefaults.standard.set(encoded, forKey: key)
+        }else{
+            print("一時保存に失敗しました")
+        }
+    }
+    func loadCharacterata(key:String) -> Character? {
+        if let savedData = UserDefaults.standard.data(forKey: key) {
+            let decoder = JSONDecoder()
+            if let savedCharacterData = try? decoder.decode(Character.self, from: savedData) {
+                return savedCharacterData
+            }
+        }
+        return Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
+    }
+
+  //キャラクターが変更可能か判断する関数
+    func canSwitchCharacter(currentharacter:Character,targetCharacter:Character) -> SwitchStatus {
+        if isFirstCharacterChange{
+          if currentharacter.growthStage == 3{
+                return .currentEligible
+            }else{
+                return .notEligible
+            }
+        }else{
+            if currentharacter.growthStage == 3 && inTrainingCharactar != targetCharacter.name{
+            return .notMatchedTraining
+            }else if targetCharacter.growthStage == 3{
+                return .targetEligible
+            }else if currentharacter.growthStage == 3{
+                return .currentEligible
+            }else{
+                return .notEligible
+            }
+        }
+    }
+    func switchCharacter(switchStatus: SwitchStatus,targetCharacter: Character) {
+        if isFirstCharacterChange{
+            switch switchStatus {
+            case .currentEligible:
+                currentCharacter = targetCharacter
+                selectedCharacter = currentCharacter.name
+                inTrainingCharactar = currentCharacter.name
+            case .notEligible:
+                currentCharacter = targetCharacter
+                selectedCharacter = currentCharacter.name
+            case .notMatchedTraining:
+                break
+            case .targetEligible:
+                break
+            default:
+                break
+            }
+        }else{
+            switch switchStatus {
+            case .targetEligible:
+                //セレクトのみ変更
+                currentCharacter = targetCharacter
+                selectedCharacter = currentCharacter.name
+                
+            case .currentEligible:
+                currentCharacter = targetCharacter
+                selectedCharacter = currentCharacter.name
+                inTrainingCharactar = currentCharacter.name
+            case .notMatchedTraining:
+                break
+            case .notEligible:
+                break
+            default:
+                break
+            }
+        }
+        saveAllCharacter()
+    }
+}
+
+
+struct Character:Codable,Equatable{
+    var name: String
+    var level:Int
+    var exp:Int
+    var growthStage:Int
+    
+    init(name: String, level: Int, exp: Int, growthStage: Int) {
+        self.name = name
+        self.level = level
+        self.exp = exp
+        self.growthStage = growthStage
+    }
+    
+}
+
+enum SwitchStatus:String{
+    case targetEligible
+    case currentEligible
+    case notMatchedTraining
+    case notEligible
 }

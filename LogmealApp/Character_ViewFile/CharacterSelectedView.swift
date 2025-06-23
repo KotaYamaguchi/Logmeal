@@ -194,8 +194,27 @@ struct CharacterSelectView: View {
                             }
                         Button {
                             if let character = selectedCharacter {
-                                user.selectedCharacter = character.charaImage
+                                user.resetAllCharacterData()
+                                if user.DogData.name == character.charaImage{
+                                    user.selectedCharacter = character.charaImage
+                                    user.inTrainingCharactar = character.charaImage
+                                    user.DogData.growthStage = 1
+                                } else if user.RabbitData.name == character.charaImage {
+                                    user.selectedCharacter = character.charaImage
+                                    user.RabbitData.growthStage = 1
+                                    user.selectedCharacter = character.charaImage
+                                    user.inTrainingCharactar = character.charaImage
+                                } else if user.CatData.name == character.charaImage {
+                                    user.selectedCharacter = character.charaImage
+                                    user.CatData.growthStage = 1
+                                    user.selectedCharacter = character.charaImage
+                                    user.inTrainingCharactar = character.charaImage
+                                }
                                 user.characterName = character.charaName
+                                
+                                user.saveCharacterData(data:user.DogData, key: "DogData")
+                                user.saveCharacterData(data:user.RabbitData, key: "RabbitData")
+                                user.saveCharacterData(data:user.CatData, key: "CatData")
                                 soundManager.playSound(named: "se_positive")
                                 withAnimation {
                                     isSelectedCharacter = false
@@ -243,3 +262,9 @@ struct CharacterSelectView: View {
     }
 }
 
+
+
+#Preview {
+    CharacterSelectView(isSelectedCharacter: .constant(false)).detailView(size: CGSize(width: 800, height: 600))
+        .environmentObject(UserData())
+}
