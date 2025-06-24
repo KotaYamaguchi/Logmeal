@@ -120,7 +120,7 @@ struct NewWritingView: View {
                 saveResultMessage = "保存に失敗しました…"
             }
         }
-        user.saveCharacterData(data: user.currentCharacter, key: "\(user.currentCharacter.name)Data")
+        
         showSaveResultAlert = true
     }
     // ユーザー経験値の更新処理
@@ -140,6 +140,17 @@ struct NewWritingView: View {
             }
             user.currentCharacter.level = newLevel
             user.isIncreasedLevel = true
+            switch user.selectedCharacter{
+            case "Dog":
+                user.DogData = user.currentCharacter
+            case "Cat":
+                user.CatData = user.currentCharacter
+            case "Rabbit":
+                user.RabbitData = user.currentCharacter
+            default:
+                break
+            }
+            user.saveAllCharacter()
             print("獲得経験値: \(gainedExp), 総経験値: \(user.currentCharacter.exp), 新しいレベル: \(user.currentCharacter.level)")
         }
     // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）

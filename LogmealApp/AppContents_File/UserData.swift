@@ -115,6 +115,7 @@ class UserData:ObservableObject{
     }
     func initCharacterData(){
         loadAllharacterData()
+        setCurrentCharacter()
     }
     func setCurrentCharacter() {
         switch selectedCharacter {
@@ -131,6 +132,7 @@ class UserData:ObservableObject{
         
     // ユーザーデフォルトのキャラクターデータを全てロード
     func loadAllharacterData(){
+       currentCharacter = loadCharacterata(key: "currentCharacter") ?? Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
         RabbitData = loadCharacterata(key: "RabbitData") ?? Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
         DogData = loadCharacterata(key: "DogData") ?? Character(name: "Dog", level: 0, exp: 0, growthStage: 0)
         CatData = loadCharacterata(key: "CatData") ?? Character(name: "Cat", level: 0, exp: 0, growthStage: 0)
@@ -165,6 +167,7 @@ class UserData:ObservableObject{
     }
     // 全てのキャラクターデータを保存
     func saveAllCharacter(){
+        saveCharacterData(data: currentCharacter, key: "currentCharacter")
         saveCharacterData(data: DogData, key: "DogData")
         saveCharacterData(data: CatData, key: "CatData")
         saveCharacterData(data: RabbitData, key: "RabbitData")
@@ -195,10 +198,10 @@ class UserData:ObservableObject{
     // マイグレーション処理
     func migrateLegacyData() {
         // 既に移行済みの場合は何もせず
-//        print("Before isCharacterDataMigrated: ",isCharacterDataMigrated)
-//        if isCharacterDataMigrated {
-//        loadAllharacterData()
-//        }else{
+        print("Before isCharacterDataMigrated: ",isCharacterDataMigrated)
+        if isCharacterDataMigrated {
+        loadAllharacterData()
+        }else{
             // 選択中のキャラクターに合わせて成長値をコピー
             switch selectedCharacter {
             case "Rabbit":
@@ -229,7 +232,7 @@ class UserData:ObservableObject{
             // 移行済みフラグを立てる
             isCharacterDataMigrated = true
             print("Migration completed successfully.")
-//        }
+        }
     }
     // キャラクターデータを保存する関数
     func saveCharacterData(data:Character,key:String){
@@ -251,60 +254,42 @@ class UserData:ObservableObject{
     }
 
   //キャラクターが変更可能か判断する関数
-    func canSwitchCharacter(currentharacter:Character,targetCharacter:Character) -> SwitchStatus {
-        if isFirstCharacterChange{
-          if currentharacter.growthStage == 3{
-                return .currentEligible
-            }else{
-                return .notEligible
-            }
+    func canSwitchCharacter(currentharacter:Character) -> SwitchStatus {
+        if currentharacter.growthStage == 3{
+            return .success
         }else{
-            if currentharacter.growthStage == 3 && inTrainingCharactar != targetCharacter.name{
-            return .notMatchedTraining
-            }else if targetCharacter.growthStage == 3{
-                return .targetEligible
-            }else if currentharacter.growthStage == 3{
-                return .currentEligible
-            }else{
-                return .notEligible
-            }
+            return .fails
         }
     }
     func switchCharacter(switchStatus: SwitchStatus,targetCharacter: Character) {
-        if isFirstCharacterChange{
-            switch switchStatus {
-            case .currentEligible:
-                currentCharacter = targetCharacter
-                selectedCharacter = currentCharacter.name
-                inTrainingCharactar = currentCharacter.name
-            case .notEligible:
-                currentCharacter = targetCharacter
-                selectedCharacter = currentCharacter.name
-            case .notMatchedTraining:
-                break
-            case .targetEligible:
-                break
+        if switchStatus == .success{
+            if targetCharacter.growthStage == 0{
+               switch targetCharacter.name{
+               case "Dog":
+                   DogData.growthStage = 1
+               case "Cat":
+                   CatData.growthStage = 1
+               case "Rabbit":
+                   RabbitData.growthStage = 1
+               default:
+                   break
+               }
+            }
+            switch targetCharacter.name{
+            case "Dog":
+                currentCharacter = DogData
+                selectedCharacter = "Dog"
+            case "Cat":
+                currentCharacter = CatData
+                selectedCharacter = "Cat"
+            case "Rabbit":
+                currentCharacter = RabbitData
+                selectedCharacter = "Rabbit"
             default:
                 break
             }
         }else{
-            switch switchStatus {
-            case .targetEligible:
-                //セレクトのみ変更
-                currentCharacter = targetCharacter
-                selectedCharacter = currentCharacter.name
-                
-            case .currentEligible:
-                currentCharacter = targetCharacter
-                selectedCharacter = currentCharacter.name
-                inTrainingCharactar = currentCharacter.name
-            case .notMatchedTraining:
-                break
-            case .notEligible:
-                break
-            default:
-                break
-            }
+            print("エラーが発生しました。")
         }
         saveAllCharacter()
     }
@@ -327,8 +312,6 @@ struct Character:Codable,Equatable{
 }
 
 enum SwitchStatus:String{
-    case targetEligible
-    case currentEligible
-    case notMatchedTraining
-    case notEligible
+    case success
+    case fails
 }

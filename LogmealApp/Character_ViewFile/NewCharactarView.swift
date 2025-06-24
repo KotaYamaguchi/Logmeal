@@ -67,14 +67,14 @@ struct NewCharacterView: View {
                         character: userData.selectedCharacter
                     )
                     // ─────────────────────────────────────────
-                                 // デバッグ用パネルを左上に追加
-                                 DebugControls()
-                                     .environmentObject(userData)
-                                     .position(
-                                         x: geo.size.width * 0.5,
-                                         y: geo.size.height * 0.5
-                                     )
-                                 // ─────────────────────────────────────────
+//                                 // デバッグ用パネルを左上に追加
+//                                 DebugOverlay()
+//                                     .environmentObject(userData)
+//                                     .position(
+//                                         x: geo.size.width * 0.5,
+//                                         y: geo.size.height * 0.5
+//                                     )
+//                                 // ─────────────────────────────────────────
 
                 }
                 .onAppear {
@@ -319,78 +319,263 @@ struct NewCharacterView_Previews: PreviewProvider {
             .environmentObject(UserData())
     }
 }
-// MARK: - デバッグ用コントロール
-
-// MARK: - デバッグ用コントロール
-private struct DebugControls: View {
+// MARK: - デバッグ用オーバーレイコントロール
+private struct DebugOverlay: View {
     @EnvironmentObject var userData: UserData
-
+    @State private var isExpanded = true
+    @State private var dragOffset = CGSize.zero
+    @State private var position = CGPoint(x: 50, y: 100)
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("🐞 Debug Controls")
-                .font(.headline)
-                .foregroundColor(.white)
-
-            // 現在のキャラ Level／EXP
-            Stepper("Level: \(userData.currentCharacter.level)", value: Binding(
-                get: { userData.currentCharacter.level },
-                set: { new in
-                    userData.currentCharacter.level = new
-                }
-            ), in: 0...50)
-
-            Stepper("EXP: \(userData.currentCharacter.exp)", value: Binding(
-                get: { userData.currentCharacter.exp },
-                set: { new in
-                    userData.currentCharacter.exp = new
-                }
-            ), in: 0...1000)
-
-            Divider().background(Color.white)
-
-            // DogData.growthStage
-            Stepper("Dog Growth: \(userData.DogData.growthStage)", value: Binding(
-                get: { userData.DogData.growthStage },
-                set: { new in
-                    userData.DogData.growthStage = new
-                    if userData.selectedCharacter == "Dog" {
-                        userData.currentCharacter.growthStage = new
-                    }
-                }
-            ), in: 0...3)
-
-            // RabbitData.growthStage
-            Stepper("Rabbit Growth: \(userData.RabbitData.growthStage)", value: Binding(
-                get: { userData.RabbitData.growthStage },
-                set: { new in
-                    userData.RabbitData.growthStage = new
-                    if userData.selectedCharacter == "Rabbit" {
-                        userData.currentCharacter.growthStage = new
-                    }
-                }
-            ), in: 0...3)
-
-            // CatData.growthStage
-            Stepper("Cat Growth: \(userData.CatData.growthStage)", value: Binding(
-                get: { userData.CatData.growthStage },
-                set: { new in
-                    userData.CatData.growthStage = new
-                    if userData.selectedCharacter == "Cat" {
-                        userData.currentCharacter.growthStage = new
-                    }
-                }
-            ), in: 0...3)
-
-            // 必要に応じて永続化用ボタン
-            Button("Save Characters") {
-                userData.saveAllCharacter()
+        VStack(spacing: 0) {
+            // ヘッダー部分（常に表示）
+            headerView
+            
+            // 展開可能なコンテンツ
+            if isExpanded {
+                debugContent
+                    .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .top)))
             }
-            .font(.subheadline)
-            .foregroundColor(.white)
-            .padding(.top, 8)
         }
-        .padding(12)
-        .background(Color.black.opacity(0.6))
-        .cornerRadius(8)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+        )
+        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isExpanded)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: dragOffset)
+    }
+    
+    private var headerView: some View {
+        HStack {
+            Image(systemName: "ladybug.circle.fill")
+                .foregroundColor(.orange)
+                .font(.title2)
+            
+            Text("Debug Panel")
+                .font(.headline.weight(.semibold))
+                .foregroundColor(.primary)
+            
+            Spacer()
+            
+            Button(action: { withAnimation { isExpanded.toggle() } }) {
+                Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
+                    .foregroundColor(.secondary)
+                    .font(.title2)
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.clear)
+    }
+    
+    private var debugContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Divider()
+            
+            // キャラクター基本情報
+            characterBasicSection
+            
+            Divider()
+            
+            // 成長段階コントロール
+            growthStageSection
+            
+            Divider()
+            
+            // アクションボタン
+            actionButtonsSection
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
+    }
+    
+    private var characterBasicSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("📊 Character Stats")
+            
+            VStack(spacing: 8) {
+                stepperRow(
+                    label: "Level",
+                    value: userData.currentCharacter.level,
+                    range: 0...50,
+                    onChange: { userData.currentCharacter.level = $0 }
+                )
+                
+                stepperRow(
+                    label: "EXP",
+                    value: userData.currentCharacter.exp,
+                    range: 0...1000,
+                    onChange: { userData.currentCharacter.exp = $0 }
+                )
+            }
+        }
+    }
+    
+    private var growthStageSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("🌱 Growth Stages")
+            
+            VStack(spacing: 8) {
+                // Dog
+                stepperRow(
+                    label: "🐕 Dog",
+                    value: userData.DogData.growthStage,
+                    range: 0...3,
+                    onChange: { newValue in
+                        userData.DogData.growthStage = newValue
+                        if userData.selectedCharacter == "Dog" {
+                            userData.currentCharacter.growthStage = newValue
+                        }
+                    }
+                )
+                
+                // Rabbit
+                stepperRow(
+                    label: "🐰 Rabbit",
+                    value: userData.RabbitData.growthStage,
+                    range: 0...3,
+                    onChange: { newValue in
+                        userData.RabbitData.growthStage = newValue
+                        if userData.selectedCharacter == "Rabbit" {
+                            userData.currentCharacter.growthStage = newValue
+                        }
+                    }
+                )
+                
+                // Cat
+                stepperRow(
+                    label: "🐱 Cat",
+                    value: userData.CatData.growthStage,
+                    range: 0...3,
+                    onChange: { newValue in
+                        userData.CatData.growthStage = newValue
+                        if userData.selectedCharacter == "Cat" {
+                            userData.currentCharacter.growthStage = newValue
+                        }
+                    }
+                )
+            }
+        }
+    }
+    
+    private var actionButtonsSection: some View {
+        VStack(spacing: 8) {
+            Button(action: { userData.saveAllCharacter() }) {
+                HStack {
+                    Image(systemName: "square.and.arrow.down")
+                    Text("Save All Characters")
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(Color.blue.opacity(0.2))
+                .foregroundColor(.blue)
+                .cornerRadius(8)
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            // 追加のデバッグアクション
+            HStack(spacing: 8) {
+                Button("Reset") {
+                    userData.currentCharacter.level = 1
+                    userData.currentCharacter.exp = 0
+                }
+                .buttonStyle(compactButtonStyle(color: .red))
+                
+                Button("Max Level") {
+                    userData.currentCharacter.level = 50
+                    userData.currentCharacter.exp = 1000
+                }
+                .buttonStyle(compactButtonStyle(color: .green))
+            }
+        }
+    }
+    
+    // MARK: - Helper Views
+    
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.subheadline.weight(.semibold))
+            .foregroundColor(.secondary)
+    }
+    
+    private func stepperRow<T: BinaryInteger>(
+        label: String,
+        value: T,
+        range: ClosedRange<T>,
+        onChange: @escaping (T) -> Void
+    ) -> some View {
+        HStack {
+            Text(label)
+                .font(.caption.weight(.medium))
+                .foregroundColor(.primary)
+                .frame(width: 60, alignment: .leading)
+            
+            Spacer()
+            
+            Text("\(value)")
+                .font(.caption.monospacedDigit())
+                .foregroundColor(.secondary)
+                .frame(width: 40, alignment: .trailing)
+            
+            Stepper("", value: Binding(
+                get: { value },
+                set: onChange
+            ), in: range)
+            .labelsHidden()
+            .scaleEffect(0.8)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(6)
+    }
+    
+    private func compactButtonStyle(color: Color) -> some ButtonStyle {
+        CompactDebugButtonStyle(color: color)
+    }
+    
+    // MARK: - Gestures
+    
+    private var dragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                dragOffset = value.translation
+            }
+            .onEnded { value in
+                position.x += value.translation.width
+                position.y += value.translation.height
+                
+                // 画面境界内に収める
+                let screenWidth = UIScreen.main.bounds.width
+                let screenHeight = UIScreen.main.bounds.height
+                
+                position.x = max(75, min(screenWidth - 75, position.x))
+                position.y = max(100, min(screenHeight - 100, position.y))
+                
+                dragOffset = .zero
+            }
+    }
+}
+
+// MARK: - カスタムボタンスタイル
+private struct CompactDebugButtonStyle: ButtonStyle {
+    let color: Color
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.caption.weight(.medium))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(color.opacity(configuration.isPressed ? 0.3 : 0.2))
+            .foregroundColor(color)
+            .cornerRadius(6)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }

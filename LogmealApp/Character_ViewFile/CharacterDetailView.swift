@@ -140,8 +140,7 @@ private struct DogDetailView: View {
             if userData.currentCharacter.growthStage == 3 {
                 SelectButton(title: "このキャラにする！") {
                     let status = userData.canSwitchCharacter(
-                        currentharacter: userData.currentCharacter,
-                        targetCharacter: userData.DogData
+                        currentharacter: userData.currentCharacter
                     )
                     userData.switchCharacter(switchStatus: status, targetCharacter: userData.DogData)
                 }
@@ -168,8 +167,7 @@ private struct RabbitDetailView: View {
                 if userData.currentCharacter.growthStage == 3 {
                     SelectButton(title: "このキャラにする！") {
                         let status = userData.canSwitchCharacter(
-                            currentharacter: userData.currentCharacter,
-                            targetCharacter: userData.RabbitData
+                            currentharacter: userData.currentCharacter
                         )
                         userData.switchCharacter(switchStatus: status, targetCharacter: userData.RabbitData)
                     }
@@ -197,8 +195,7 @@ private struct CatDetailView: View {
                 if userData.currentCharacter.growthStage == 3 {
                     SelectButton(title: "このキャラにする！") {
                         let status = userData.canSwitchCharacter(
-                            currentharacter: userData.currentCharacter,
-                            targetCharacter: userData.CatData
+                            currentharacter: userData.currentCharacter
                         )
                         userData.switchCharacter(switchStatus: status, targetCharacter: userData.CatData)
                     }
