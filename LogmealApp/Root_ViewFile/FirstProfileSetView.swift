@@ -462,7 +462,7 @@ struct ForstProfileSetView:View {
                     .padding(.vertical)
                     
                 }
-                Image("\(userData.selectedCharacter)_normal_1")
+                Image("\(userData.currentCharacter.name)_normal_1")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 180)

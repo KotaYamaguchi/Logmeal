@@ -10,7 +10,7 @@ struct NewHomeView: View {
     @State var selectedIndex: Int? = nil
     @State var showDetailView:Bool = false
     private var displayContentColor:Color{
-        switch user.selectedCharacter{
+        switch user.currentCharacter.name {
         case "Dog": Color(red: 248/255, green: 201/255, blue: 201/255)
         case "Cat": Color(red: 198/255, green: 166/255, blue: 208/255)
         case "Rabbit": Color(red: 251/255, green: 233/255, blue: 184/255)
@@ -19,7 +19,7 @@ struct NewHomeView: View {
         }
     }
     private var backgoundImage:String{
-        switch user.selectedCharacter{
+        switch user.currentCharacter.name{
         case "Dog":"bg_home_Dog"
         case "Cat":"bg_home_Cat"
         case "Rabbit":"bg_home_Rabbit"
@@ -28,7 +28,7 @@ struct NewHomeView: View {
         }
     }
     private var addButtonImage:String{
-        switch user.selectedCharacter{
+        switch user.currentCharacter.name{
         case "Dog":"bt_add_Dog"
         case "Cat":"bt_add_Cat"
         case "Rabbit":"bt_add_Rabbit"
@@ -46,10 +46,11 @@ struct NewHomeView: View {
                     logGrid(geometry: geometry)
                 }
                 addLogButton(geometry: geometry)
-               
+                
             }
             .onAppear(){
                 print("ーーーーーーーーーーーーアプリを起動しました！ーーーーーーーーーーーー")
+                user.initCharacterData()
             }
             .onChange(of: selectedIndex) { _, newValue in
                 showDetailView = (newValue != nil)
@@ -67,15 +68,15 @@ struct NewHomeView: View {
             }
         }
     }
-
+    
     private func backgroundImage(geometry: GeometryProxy) -> some View {
-        Image("bg_home_\(user.selectedCharacter)")
+        Image("bg_home_\(user.currentCharacter.name)")
             .resizable()
             .scaledToFill()
             .ignoresSafeArea()
             .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
     }
-
+    
     private func userInfoPanel(geometry: GeometryProxy) -> some View {
         HStack{
             Spacer()
@@ -126,7 +127,7 @@ struct NewHomeView: View {
                     ForEach([
                         ("\(allData.count)", "ろぐ"),
                         ("\(user.point)", "ポイント"),
-                        ("\(user.level)", "レベル")
+                        ("\(user.currentCharacter.level)", "レベル")
                     ], id: \.1) { value, label in
                         VStack {
                             Text(value)
@@ -146,7 +147,7 @@ struct NewHomeView: View {
         }
         .padding(.top, geometry.size.height * 0.05)
     }
-
+    
     private func logGrid(geometry: GeometryProxy) -> some View {
         ScrollView {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: geometry.size.width * 0.005) {
@@ -183,7 +184,7 @@ struct NewHomeView: View {
             .padding(.horizontal)
         }
     }
-
+    
     private func addLogButton(geometry: GeometryProxy) -> some View {
         Button {
             showWritingView = true

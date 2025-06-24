@@ -28,7 +28,7 @@ struct NewShopView:View {
     @State private var selectedItemIndex:Int? = nil
     @State private var displayImage = ""
     private var displayContentColor:Color{
-        switch user.selectedCharacter{
+        switch user.currentCharacter.name{
         case "Dog": Color(red: 248/255, green: 201/255, blue: 201/255)
         case "Cat": Color(red: 198/255, green: 166/255, blue: 208/255)
         case "Rabbit": Color(red: 251/255, green: 233/255, blue: 184/255)
@@ -37,7 +37,7 @@ struct NewShopView:View {
         }
     }
     private var backgoundImage:String{
-        switch user.selectedCharacter{
+        switch user.currentCharacter.name{
         case "Dog":"bg_shop_Dog"
         case "Cat":"bg_shop_Cat"
         case "Rabbit":"bg_shop_Rabbit"
@@ -224,6 +224,7 @@ struct NewShopView:View {
             Text("所持ポイントが不足しているため、購入できません。")
         }
         .onAppear {
+            user.initCharacterData()
             loadProducts()
             // ローカルに保存されている購入済み商品の読み込み（必要に応じて実装）
             boughtProducts = products.filter { $0.isBought }
@@ -280,7 +281,7 @@ struct NewShopView:View {
         }
         .frame(width:.infinity,height: .infinity)
         .onAppear(){
-            switch user.selectedCharacter {
+            switch user.currentCharacter.name{
             case "Dog":
                 products = [
                     Product(name: "Dog3_animation_applause", price: 200, img: "img_dog_applause", isBought: false),
@@ -372,7 +373,7 @@ struct NewShopView:View {
     }
     // ユーザーの選択に応じた商品リストのロード（キャラクターごとの分岐処理）
     private func loadProducts() {
-        switch user.selectedCharacter {
+        switch user.currentCharacter.name {
         case "Dog":
             products = [
                 Product(name: "Dog3_animation_applause", price: 200, img: "img_dog_applause", isBought: false),

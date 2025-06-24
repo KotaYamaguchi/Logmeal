@@ -108,11 +108,11 @@ struct NewWritingView: View {
                     updateUserExperience(by: totalCharacterCount)
                     // ポイント更新：1文字につき1ポイント（バランス調整可能）
                     updateUserPoints(by: totalCharacterCount)
-                    if user.level >= 12{
-                        user.growthStage = 3
+                    if user.currentCharacter.level >= 12{
+                        user.currentCharacter.growthStage = 3
                         user.isGrowthed = true
-                    }else if user.level >= 5{
-                        user.growthStage = 2
+                    }else if user.currentCharacter.level >= 5{
+                        user.currentCharacter.growthStage = 2
                         user.isGrowthed = true
                     }
             } catch {
@@ -120,25 +120,38 @@ struct NewWritingView: View {
                 saveResultMessage = "保存に失敗しました…"
             }
         }
+        
         showSaveResultAlert = true
     }
     // ユーザー経験値の更新処理
         private func updateUserExperience(by gainedExp: Int) {
-            user.exp += gainedExp / 10 //　10文字につき1exp
+            user.initCharacterData()
+            user.currentCharacter.exp += gainedExp / 10 //　10文字につき1exp
             
             let levelThresholds: [Int] = [0, 10, 20, 30, 50, 70, 90, 110, 130, 150, 170, 200, 220, 250, 290, 350]
             var newLevel = 0
             // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
             for threshold in levelThresholds {
-                if user.exp >= threshold {
+                if user.currentCharacter.exp >= threshold {
                     newLevel += 1
                 } else {
                     break
                 }
             }
-            user.level = newLevel
+            user.currentCharacter.level = newLevel
             user.isIncreasedLevel = true
-            print("獲得経験値: \(gainedExp), 総経験値: \(user.exp), 新しいレベル: \(user.level)")
+            switch user.selectedCharacter{
+            case "Dog":
+                user.DogData = user.currentCharacter
+            case "Cat":
+                user.CatData = user.currentCharacter
+            case "Rabbit":
+                user.RabbitData = user.currentCharacter
+            default:
+                break
+            }
+            user.saveAllCharacter()
+            print("獲得経験値: \(gainedExp), 総経験値: \(user.currentCharacter.exp), 新しいレベル: \(user.currentCharacter.level)")
         }
     // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
       private func updateUserPoints(by gainedExp: Int) {

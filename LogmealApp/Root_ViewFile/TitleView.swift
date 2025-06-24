@@ -51,6 +51,9 @@ struct TitleView: View {
                             .scaleEffect(textScaleEffectValue)
                             .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.8)
                     }
+                    .onAppear(){
+                        user.migrateLegacyData()
+                    }
                     .onTapGesture {
                         withAnimation {
                             user.isTitle = false
@@ -100,6 +103,14 @@ struct TitleView: View {
                 } footer: {
                     Text("アプリ内のすべてのデータを初期化して初めからプレイします.この操作は取り消すことができません")
                         .font(.custom("GenJyuuGothicX-Bold", size: 10))
+                }
+                Section("開発者コンテンツ"){
+                    Button{
+                        user.isCharacterDataMigrated = false
+                        
+                    }label:{
+                    Text("マイグレーションリセット")
+                    }
                 }
             }
             .foregroundStyle(Color.textColor)

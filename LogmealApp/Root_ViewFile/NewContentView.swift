@@ -12,7 +12,19 @@ struct NewContentView: View {
     @State private var navigationFlag:Bool = false
     @State private var navigationDestination:NavigationDestinations = .home
     @State private var navigationDestinations:[NavigationDestinations] = [.home, .column, .setting]
-    var body: some View {
+    func characterName(current:Character) -> String{
+        switch current.name {
+        case "Dog":
+            return "レーク"
+        case "Rabbit":
+            return "ラン"
+        case "Cat":
+            return "ティナ"
+        default:
+            return "レーク"
+        }
+    }
+        var body: some View {
         if showCharactarView{
             NewCharacterView(showCharacterView: $showCharactarView)
         }else{
@@ -25,8 +37,8 @@ struct NewContentView: View {
                 }
                 if user.showAnimation{
                     if user.showGrowthAnimation{
-                        GrowthAnimationView(text1: "おや、\(user.characterName)のようすが…",
-                                            text2: "おめでとう！\(user.characterName)が進化したよ！",
+                        GrowthAnimationView(text1: "おや、\(characterName(current: user.currentCharacter))のようすが…",
+                                            text2: "おめでとう！\(characterName(current: user.currentCharacter))が進化したよ！",
                                             useBackGroundColor: true)
                         .onTapGesture{
                             user.showGrowthAnimation = false
@@ -35,9 +47,9 @@ struct NewContentView: View {
                         }
                     }else if user.showLevelUPAnimation{
                         LevelUpAnimationView(
-                            characterGifName: "\(user.selectedCharacter)\(user.growthStage)_animation_breath",
-                            text: "\(user.characterName)がレベルアップしたよ！",
-                            backgroundImage: "mt_RewardView_callout_\(user.selectedCharacter)",
+                            characterGifName: "\(user.currentCharacter.name)\(user.growthStage)_animation_breath",
+                            text: "\(characterName(current: user.currentCharacter))がレベルアップしたよ！",
+                            backgroundImage: "mt_RewardView_callout_\(user.currentCharacter.name)",
                             useBackGroundColor: true
                         )
                         .onTapGesture{
@@ -47,9 +59,9 @@ struct NewContentView: View {
                         }
                     }else{
                         NormalAnimetionView(
-                            characterGifName: "\(user.selectedCharacter)\(user.growthStage)_animation_breath",
+                            characterGifName: "\(user.currentCharacter.name)\(user.currentCharacter.growthStage)_animation_breath",
                             text: "今日も記録してくれてありがとう！",
-                            backgroundImage: "mt_RewardView_callout_\(user.selectedCharacter)",
+                            backgroundImage: "mt_RewardView_callout_\(user.currentCharacter.name)",
                             useBackGroundColor: true
                         )
                         .onTapGesture {
@@ -57,6 +69,9 @@ struct NewContentView: View {
                         }
                     }
                 }
+            }
+            .onAppear(){
+                user.initCharacterData()
             }
         }
     }
@@ -102,7 +117,7 @@ struct NewContentView: View {
                     showCharactarView = true
                 }
             }label: {
-                Image("\(user.selectedCharacter)_window_\(user.growthStage)")
+                Image("\(user.currentCharacter.name)_window_\(user.currentCharacter.growthStage)")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 280)
@@ -176,9 +191,9 @@ struct NewContentView: View {
         }
     }
     private func changeGifData() {
-        switch user.growthStage {
+        switch user.currentCharacter.growthStage {
         case 1:
-            switch user.selectedCharacter {
+            switch user.currentCharacter.name {
             case "Dog":
                 gifData = NSDataAsset(name: "Dog1_animation_breath")?.data
                 gifArray = ["Dog1_animation_breath",
@@ -196,7 +211,7 @@ struct NewContentView: View {
                 gifArray = []
             }
         case 2:
-            switch user.selectedCharacter {
+            switch user.currentCharacter.name {
             case "Dog":
                 gifData = NSDataAsset(name: "Dog2_animation_breath")?.data
                 gifArray = ["Dog2_animation_breath",
@@ -214,7 +229,7 @@ struct NewContentView: View {
                 gifArray = []
             }
         case 3:
-            switch user.selectedCharacter {
+            switch user.currentCharacter.name {
             case "Dog":
                 gifData = NSDataAsset(name: "Dog3_animation_breath")?.data
                 gifArray = [
