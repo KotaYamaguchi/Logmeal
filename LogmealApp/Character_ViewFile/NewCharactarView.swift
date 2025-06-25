@@ -87,7 +87,7 @@ struct NewCharacterView: View {
                     setupGIF(in: geo.size)
                     refreshID = UUID()
                 }
-                .onChange(of: userData.selectedCharacter) { _ in
+                .onChange(of: userData.selectedCharacter) { _, _ in
                     userData.setCurrentCharacter()
                     boughtProducts = userData.loadProducts(key: "boughtItem")
                     setupGIF(in: geo.size)

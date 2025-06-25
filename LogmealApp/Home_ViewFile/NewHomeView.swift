@@ -74,6 +74,7 @@ struct NewHomeView: View {
             .resizable()
             .scaledToFill()
             .ignoresSafeArea()
+            .scaleEffect(1.1)
             .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
     }
     
