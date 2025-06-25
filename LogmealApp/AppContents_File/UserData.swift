@@ -116,6 +116,7 @@ class UserData:ObservableObject{
     func initCharacterData(){
         loadAllharacterData()
         setCurrentCharacter()
+        saveAllCharacter()
     }
     func setCurrentCharacter() {
         switch selectedCharacter {
@@ -132,10 +133,19 @@ class UserData:ObservableObject{
         
     // ユーザーデフォルトのキャラクターデータを全てロード
     func loadAllharacterData(){
-       currentCharacter = loadCharacterata(key: "currentCharacter") ?? Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
         RabbitData = loadCharacterata(key: "RabbitData") ?? Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
         DogData = loadCharacterata(key: "DogData") ?? Character(name: "Dog", level: 0, exp: 0, growthStage: 0)
         CatData = loadCharacterata(key: "CatData") ?? Character(name: "Cat", level: 0, exp: 0, growthStage: 0)
+        switch selectedCharacter{
+        case "Rabbit":
+            currentCharacter = RabbitData
+        case "Dog":
+            currentCharacter = DogData
+        case "Cat":
+            currentCharacter = CatData
+        default:
+            currentCharacter = DogData
+        }
         print("=== Loaded Character Data ===\n")
         print("=== Current Character Debug Info ===")
         print("  Name: \(currentCharacter.name)")
@@ -171,27 +181,27 @@ class UserData:ObservableObject{
         saveCharacterData(data: DogData, key: "DogData")
         saveCharacterData(data: CatData, key: "CatData")
         saveCharacterData(data: RabbitData, key: "RabbitData")
-        print("=== Saved Character Data ===\n")
-        print("=== Current Character Debug Info ===")
-        print("  Name: \(currentCharacter.name)")
-        print("  Level: \(currentCharacter.level)")
-        print("  EXP: \(currentCharacter.exp)")
-        print("  Growth Stage: \(currentCharacter.growthStage)")
-
-        print("=== Current Dog Debug Info ===")
-        print("  Level: \(DogData.level)")
-        print("  EXP: \(DogData.exp)")
-        print("  Growth Stage: \(DogData.growthStage)")
-
-        print("=== Current Rabbit Debug Info ===")
-        print("  Level: \(RabbitData.level)")
-        print("  EXP: \(RabbitData.exp)")
-        print("  Growth Stage: \(RabbitData.growthStage)")
-
-        print("=== Current Cat Debug Info ===")
-        print("  Level: \(CatData.level)")
-        print("  EXP: \(CatData.exp)")
-        print("  Growth Stage: \(CatData.growthStage)")
+//        print("=== Saved Character Data ===\n")
+//        print("=== Current Character Debug Info ===")
+//        print("  Name: \(currentCharacter.name)")
+//        print("  Level: \(currentCharacter.level)")
+//        print("  EXP: \(currentCharacter.exp)")
+//        print("  Growth Stage: \(currentCharacter.growthStage)")
+//
+//        print("=== Current Dog Debug Info ===")
+//        print("  Level: \(DogData.level)")
+//        print("  EXP: \(DogData.exp)")
+//        print("  Growth Stage: \(DogData.growthStage)")
+//
+//        print("=== Current Rabbit Debug Info ===")
+//        print("  Level: \(RabbitData.level)")
+//        print("  EXP: \(RabbitData.exp)")
+//        print("  Growth Stage: \(RabbitData.growthStage)")
+//
+//        print("=== Current Cat Debug Info ===")
+//        print("  Level: \(CatData.level)")
+//        print("  EXP: \(CatData.exp)")
+//        print("  Growth Stage: \(CatData.growthStage)")
 
     }
 
@@ -205,18 +215,21 @@ class UserData:ObservableObject{
             // 選択中のキャラクターに合わせて成長値をコピー
             switch selectedCharacter {
             case "Rabbit":
+                RabbitData.name = "Rabbit"
                 RabbitData.growthStage = growthStage
                 RabbitData.level = level
                 RabbitData.exp = exp
         
                 saveCharacterData(data: RabbitData,key: "RabbitData")
             case "Dog":
+                DogData.name = "Dog"
                 DogData.growthStage = growthStage
                 DogData.level = level
                 DogData.exp = exp
            
                 saveCharacterData(data: DogData, key: "DogData")
             case "Cat":
+                CatData.name = "Cat"
                 CatData.growthStage = growthStage
                 CatData.level = level
                 CatData.exp = exp
@@ -250,7 +263,7 @@ class UserData:ObservableObject{
                 return savedCharacterData
             }
         }
-        return Character(name: "Rabbit", level: 0, exp: 0, growthStage: 0)
+        return nil
     }
 
   //キャラクターが変更可能か判断する関数
@@ -262,6 +275,7 @@ class UserData:ObservableObject{
         }
     }
     func switchCharacter(switchStatus: SwitchStatus,targetCharacter: Character) {
+      print("targetCharacter.name: \(targetCharacter.name)")
         if switchStatus == .success{
             if targetCharacter.growthStage == 0{
                switch targetCharacter.name{
@@ -288,6 +302,31 @@ class UserData:ObservableObject{
             default:
                 break
             }
+            print("=== switchCharacter ===")
+            print("=== SwitchStatus\(switchStatus) ===")
+            print("=== Current Character Debug Info ===")
+            print("  Name: \(currentCharacter.name)")
+            print("  Level: \(currentCharacter.level)")
+            print("  EXP: \(currentCharacter.exp)")
+            print("  Growth Stage: \(currentCharacter.growthStage)")
+
+            print("=== Current Dog Debug Info ===")
+            print("  Name: \(DogData.name)")
+            print("  Level: \(DogData.level)")
+            print("  EXP: \(DogData.exp)")
+            print("  Growth Stage: \(DogData.growthStage)")
+
+            print("=== Current Rabbit Debug Info ===")
+            print("  Name: \(RabbitData.name)")
+            print("  Level: \(RabbitData.level)")
+            print("  EXP: \(RabbitData.exp)")
+            print("  Growth Stage: \(RabbitData.growthStage)")
+
+            print("=== Current Cat Debug Info ===")
+            print("  Name: \(CatData.name)")
+            print("  Level: \(CatData.level)")
+            print("  EXP: \(CatData.exp)")
+            print("  Growth Stage: \(CatData.growthStage)")
         }else{
             print("エラーが発生しました。")
         }

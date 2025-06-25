@@ -41,6 +41,9 @@ struct NewCharacterView: View {
                         size: geo.size,
                         characterData: userData.currentCharacter
                     )
+                    .onAppear(){
+                        userData.setCurrentCharacter()
+                    }
                     .position(
                         x: geo.size.width * (350 / baseSize.width),
                         y: geo.size.height * (300 / baseSize.height)
@@ -64,17 +67,18 @@ struct NewCharacterView: View {
 
                     CloseButton(
                         size: geo.size,
-                        character: userData.selectedCharacter
+                        character: userData.selectedCharacter,
+                        showCharacterView: $showCharacterView
                     )
+//                    ─────────────────────────────────────────
+                    // デバッグ用パネルを左上に追加
+                    DebugOverlay()
+                        .environmentObject(userData)
+                        .position(
+                            x: geo.size.width * 0.5,
+                            y: geo.size.height * 0.5
+                        )
                     // ─────────────────────────────────────────
-//                                 // デバッグ用パネルを左上に追加
-//                                 DebugOverlay()
-//                                     .environmentObject(userData)
-//                                     .position(
-//                                         x: geo.size.width * 0.5,
-//                                         y: geo.size.height * 0.5
-//                                     )
-//                                 // ─────────────────────────────────────────
 
                 }
                 .onAppear {
@@ -136,6 +140,8 @@ private struct AllGIFView: View {
     @Binding var timer: Timer?
     @Binding var gifPosition: CGPoint
     @Binding var baseGifPosition: CGPoint
+
+    @State private var isDrag = false
 
     var body: some View {
         ZStack {
@@ -203,14 +209,50 @@ private struct AllGIFView: View {
     private func dragGesture(size: CGSize) -> some Gesture {
         DragGesture()
             .onChanged { value in
+                isDrag = true
                 playGif = false
-                gifPosition = value.location
+                gifData = NSDataAsset(name: "\(character)\(growthStage)_Drag")?.data
+                withAnimation(.easeOut(duration: 0.2)) {
+                    gifPosition = value.location
+                }
             }
             .onEnded { value in
-                playGif = true
-                withAnimation(.easeOut) {
-                    gifPosition = baseGifPosition
+                let velocity = CGPoint(
+                    x: value.predictedEndLocation.x - value.location.x,
+                    y: value.predictedEndLocation.y - value.location.y
+                )
+                withAnimation(.easeOut(duration: 0.5)) {
+                    gifPosition.x += velocity.x * 0.5
+                    gifPosition.y += velocity.y * 0.5
                 }
+                // Clamp to screen bounds
+                let screenWidth = UIScreen.main.bounds.width
+                let screenHeight = UIScreen.main.bounds.height
+                let gifHalfWidth = gifWidth / 2
+                let gifHalfHeight = gifHeight / 2
+                if gifPosition.x - gifHalfWidth < 0 {
+                    gifPosition.x = gifHalfWidth
+                } else if gifPosition.x + gifHalfWidth > screenWidth {
+                    gifPosition.x = screenWidth - gifHalfWidth
+                }
+                if gifPosition.y - gifHalfHeight < 0 {
+                    gifPosition.y = gifHalfHeight
+                } else if gifPosition.y + gifHalfHeight > screenHeight {
+                    gifPosition.y = screenHeight - gifHalfHeight
+                }
+                // If y position is over 400, animate to a specified y
+                let dropY: CGFloat = screenWidth * 0.45
+                if gifPosition.y <= 400 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation(.easeIn(duration: 0.7)) {
+                            gifPosition.y = dropY
+                        }
+                    }
+                }
+                isDrag = false
+                // Restore GIF data to a random normal gif
+                gifData = NSDataAsset(name: gifArray.randomElement() ?? "")?.data
+                playGif = true
             }
     }
 }
@@ -249,7 +291,7 @@ private struct TopActionButtons: View {
 private struct CharacterInfoView: View {
     let size: CGSize
     let characterData: Character
-
+    @EnvironmentObject var userData: UserData
     private let baseSize = CGSize(width: 1210, height: 785)
 
     var body: some View {
@@ -260,24 +302,48 @@ private struct CharacterInfoView: View {
                 .frame(height: 590 * (size.width / baseSize.width))
                 .offset(x: -50 * (size.width / baseSize.width),
                         y: 130 * (size.height / baseSize.height))
-
             VStack {
-                HStack {
-                    Text("Lv: \(characterData.level)")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                    Text("EXP: \(characterData.exp)")
-                        .font(.subheadline)
-                        .foregroundColor(.white)
+                HStack(spacing:20){
+                    Image("mt_PointBadge")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width:50)
+                    Text("\(userData.point)")
+                        .foregroundStyle(.green)
+                        .font(.custom("GenJyuuGothicX-Bold", size: 35))
+                    Text("pt")
+                        .foregroundStyle(.green)
+                        .font(.custom("GenJyuuGothicX-Bold", size: 30))
                 }
-
-                ProgressView(value: Float(characterData.exp),
-                             total: Float(max(characterData.level * 100, 1)))
-                    .progressViewStyle(LinearProgressViewStyle(tint: .red))
-                    .frame(width: size.width * (260 / baseSize.width))
+                .offset(x: -95 * (size.width / baseSize.width),
+                        y: -25 * (size.height / baseSize.height))
+                VStack(spacing:0){
+                    Text("\(userData.name)のレーク")
+                        .foregroundStyle(.white)
+                        .font(.custom("GenJyuuGothicX-Bold", size: 30))
+                    HStack(spacing:0){
+                        Image("mt_LvBadge")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width:50)
+                        ZStack(alignment:.leading){
+                            RoundedRectangle(cornerRadius: 20)
+                                .frame(width:260,height: 15)
+                                .foregroundStyle(.white)
+                            
+                            RoundedRectangle(cornerRadius: 20)
+                                .frame(width:CGFloat(userData.exp)/260,height: 15)
+                                .foregroundStyle(.red)
+                        }
+                        Text("LV.\(userData.level)")
+                            .foregroundStyle(.white)
+                            .font(.custom("GenJyuuGothicX-Bold", size: 30))
+                            .padding(.horizontal)
+                    }
+                }
+                .offset(x: -35 * (size.width / baseSize.width),
+                        y: -1 * (size.height / baseSize.height))
             }
-            .offset(x: -25 * (size.width / baseSize.width),
-                    y: 40 * (size.height / baseSize.height))
         }
     }
 }
@@ -286,15 +352,14 @@ private struct CharacterInfoView: View {
 private struct CloseButton: View {
     let size: CGSize
     let character: String
-
     private let baseSize = CGSize(width: 1210, height: 785)
-
+    @Binding var showCharacterView:Bool
     var body: some View {
         VStack {
             HStack {
                 Spacer()
                 Button {
-                    NotificationCenter.default.post(name: .closeCharacterView, object: nil)
+                    showCharacterView = false
                 } label: {
                     Image("bt_toHome_\(character)")
                         .resizable()
@@ -308,9 +373,6 @@ private struct CloseButton: View {
     }
 }
 
-extension Notification.Name {
-    static let closeCharacterView = Notification.Name("closeCharacterView")
-}
 
 // Dummy-Fallback for Preview
 struct NewCharacterView_Previews: PreviewProvider {
@@ -579,3 +641,4 @@ private struct CompactDebugButtonStyle: ButtonStyle {
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
+

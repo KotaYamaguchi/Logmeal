@@ -194,9 +194,11 @@ private struct CatDetailView: View {
             } else {
                 if userData.currentCharacter.growthStage == 3 {
                     SelectButton(title: "このキャラにする！") {
+                        print("button tapped")
                         let status = userData.canSwitchCharacter(
                             currentharacter: userData.currentCharacter
                         )
+                        
                         userData.switchCharacter(switchStatus: status, targetCharacter: userData.CatData)
                     }
                 } else {
