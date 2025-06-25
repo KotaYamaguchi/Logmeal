@@ -20,8 +20,7 @@ struct NewCharacterDetailView: View {
 
                 CharacterDetailContent(selected: selectedTab)
                     .environmentObject(userData)
-
-                Spacer()
+                    .padding(.bottom, 20)
             }
         }
     }
