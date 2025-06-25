@@ -5,6 +5,10 @@ struct NewCharacterDetailView: View {
     @State private var selectedTab: CharacterType = .dog
     @EnvironmentObject var userData: UserData
 
+    @State private var showConfirm = false
+    @State private var confirmTarget: Character? = nil
+    @State private var confirmType: CharacterType? = nil
+
     var body: some View {
         ZStack {
             // 動的背景画像
@@ -18,9 +22,30 @@ struct NewCharacterDetailView: View {
 
                 Spacer()
 
-                CharacterDetailContent(selected: selectedTab)
-                    .environmentObject(userData)
-                    .padding(.bottom, 20)
+                CharacterDetailContent(selected: selectedTab, onRequestSwitch: { type, character in
+                    confirmType = type
+                    confirmTarget = character
+                    showConfirm = true
+                })
+                .environmentObject(userData)
+                .padding(.bottom, 20)
+            }
+
+            if showConfirm, let target = confirmTarget, let type = confirmType {
+                CharacterSwitchConfirmView(
+                    current: userData.currentCharacter,
+                    target: target,
+                    onConfirm: {
+                        let status = userData.canSwitchCharacter(currentharacter: userData.currentCharacter)
+                        userData.switchCharacter(switchStatus: status, targetCharacter: target)
+                        showConfirm = false
+                    },
+                    onCancel: {
+                        showConfirm = false
+                    }
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black.opacity(0.4).ignoresSafeArea())
             }
         }
     }
@@ -111,15 +136,16 @@ private struct CharacterTabSelector: View {
 private struct CharacterDetailContent: View {
     @EnvironmentObject var userData: UserData
     let selected: CharacterType
+    let onRequestSwitch: (CharacterType, Character) -> Void
 
     var body: some View {
         switch selected {
         case .dog:
-            DogDetailView()
+            DogDetailView(onRequestSwitch: onRequestSwitch)
         case .rabbit:
-            RabbitDetailView()
+            RabbitDetailView(onRequestSwitch: onRequestSwitch)
         case .cat:
-            CatDetailView()
+            CatDetailView(onRequestSwitch: onRequestSwitch)
         }
     }
 }
@@ -129,6 +155,7 @@ private struct CharacterDetailContent: View {
 /// DogDetailView: currentCharacter.growthStage == 3 のときのみ切り替え可能
 private struct DogDetailView: View {
     @EnvironmentObject var userData: UserData
+    let onRequestSwitch: (CharacterType, Character) -> Void
 
     var body: some View {
         if userData.selectedCharacter == "Dog" {
@@ -138,10 +165,7 @@ private struct DogDetailView: View {
             // 現在のキャラが成長段階3なら切り替え可能
             if userData.currentCharacter.growthStage == 3 {
                 SelectButton(title: "このキャラにする！") {
-                    let status = userData.canSwitchCharacter(
-                        currentharacter: userData.currentCharacter
-                    )
-                    userData.switchCharacter(switchStatus: status, targetCharacter: userData.DogData)
+                    onRequestSwitch(.dog, userData.DogData)
                 }
             } else {
                 DisabledButton(title: "選択不可")
@@ -153,22 +177,17 @@ private struct DogDetailView: View {
 /// RabbitDetailView: currentCharacter.growthStage == 3 のときのみ切り替え可能
 private struct RabbitDetailView: View {
     @EnvironmentObject var userData: UserData
+    let onRequestSwitch: (CharacterType, Character) -> Void
 
     var body: some View {
         VStack(spacing: 24) {
-            Text("うさぎ")
-                .font(.system(size: 32, weight: .bold))
-                .foregroundColor(.white)
-
+           
             if userData.selectedCharacter == "Rabbit" {
                 DisabledButton(title: "選択中")
             } else {
                 if userData.currentCharacter.growthStage == 3 {
                     SelectButton(title: "このキャラにする！") {
-                        let status = userData.canSwitchCharacter(
-                            currentharacter: userData.currentCharacter
-                        )
-                        userData.switchCharacter(switchStatus: status, targetCharacter: userData.RabbitData)
+                        onRequestSwitch(.rabbit, userData.RabbitData)
                     }
                 } else {
                     DisabledButton(title: "選択不可")
@@ -181,24 +200,18 @@ private struct RabbitDetailView: View {
 /// CatDetailView: currentCharacter.growthStage == 3 のときのみ切り替え可能
 private struct CatDetailView: View {
     @EnvironmentObject var userData: UserData
+    let onRequestSwitch: (CharacterType, Character) -> Void
 
     var body: some View {
         VStack(spacing: 24) {
-            Text("ねこ")
-                .font(.system(size: 32, weight: .bold))
-                .foregroundColor(.white)
+    
 
             if userData.selectedCharacter == "Cat" {
                 DisabledButton(title: "選択中")
             } else {
                 if userData.currentCharacter.growthStage == 3 {
                     SelectButton(title: "このキャラにする！") {
-                        print("button tapped")
-                        let status = userData.canSwitchCharacter(
-                            currentharacter: userData.currentCharacter
-                        )
-                        
-                        userData.switchCharacter(switchStatus: status, targetCharacter: userData.CatData)
+                        onRequestSwitch(.cat, userData.CatData)
                     }
                 } else {
                     DisabledButton(title: "選択不可")
@@ -215,14 +228,15 @@ private struct SelectButton: View {
 
     var body: some View {
         Button(action: action) {
-            RoundedRectangle(cornerRadius: 50)
-                .frame(width: 400, height: 80)
-                .foregroundStyle(.green)
-                .overlay(
                     Text(title)
                         .foregroundColor(.white)
                         .font(.custom("GenJyuuGothicX-Bold", size: 40))
-                )
+                        .padding(.horizontal)
+                        .background(){
+                            RoundedRectangle(cornerRadius: 50)
+                                .frame(width:500, height: 80)
+                                .foregroundStyle(.green)
+                        }
         }
     }
 }
@@ -239,5 +253,112 @@ private struct DisabledButton: View {
                     .foregroundColor(.white)
                     .font(.custom("GenJyuuGothicX-Bold", size: 40))
             )
+    }
+}
+
+// MARK: - 仮・キャラクター切り替え確認View
+private struct CharacterSwitchConfirmView: View {
+    let current: Character
+    let target: Character
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
+    let screenSize:CGSize = UIScreen.main.bounds.size
+    var currentImageName: String {
+        switch current.name {
+        case "Dog":
+            return "img_dog_question"
+        case "Rabbit":
+            return "img_rabbit_question"
+        case "Cat":
+            return "img_cat_question"
+        default:
+            return "img_default_question"
+        }
+    }
+    var targetImageName: String {
+        switch target.name {
+        case "Dog":
+            switch target.growthStage {
+            case 1:
+                return "Dog1_characterDetail_black"
+            case 2:
+                return "Dog2_characterDetail_black"
+            case 3:
+                return "Dog3_characterDetail_black"
+            default:
+                return "Dog1_characterDetail_black"
+            }
+        case "Cat":
+            switch target.growthStage {
+            case 1:
+                return "Cat1_characterDetail_black"
+            case 2:
+                return "Cat2_characterDetail_black"
+            case 3:
+                return "Cat3_characterDetail_1"
+            default:
+                return "Cat1_characterDetail_black"
+            }
+        case "Rabbit":
+            switch target.growthStage {
+            case 1:
+                return "Rabbit1_characterDetail_black"
+            case 2:
+                return "Rabbit2_characterDetail_black"
+            case 3:
+                return "Rabbit3_characterDetail_1"
+            default:
+                return "Rabbit1_characterDetail_black"
+            }
+        default:
+            return "Rabbit1_characterDetail_black"
+        }
+    }
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            Text("キャラクターを変える？\n変えると次のキャラクターを育て終わるまで変えられないよ!")
+                .font(.custom("GenJyuuGothicX-Bold", size: 30))
+            HStack(spacing: 32) {
+                VStack {
+                    Image(currentImageName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 200)
+                    Text("違う子を育てる？")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                        .foregroundColor(.gray)
+                }
+                Image(systemName: "arrow.right")
+                    .font(.largeTitle)
+                VStack {
+                    Image(targetImageName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 200)
+                    Text("これからよろしくね！")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                        .foregroundColor(.gray)
+                }
+            }
+            HStack(spacing: 32) {
+                Button("キャンセル", action: onCancel)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                    .padding()
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(12)
+                Button("切り替える", action: onConfirm)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+            }
+        }
+        .frame(width: screenSize.width * 0.8, height: screenSize.height * 0.6)
+        .padding()
+        .background(Color.white)
+        .cornerRadius(24)
+        .shadow(radius: 10)
     }
 }
