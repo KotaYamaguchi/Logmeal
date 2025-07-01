@@ -493,7 +493,7 @@ struct ForstProfileSetView:View {
             HStack{
                 Text("お名前")
                     .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                TextField("例）山田雄斗, やまだゆうと", text: $userName)
+                TextField("例）山田太郎、 やまだたろう", text: $userName)
                     .font(.custom("GenJyuuGothicX-Bold", size: 30))
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .frame(width: size.width*0.43)
