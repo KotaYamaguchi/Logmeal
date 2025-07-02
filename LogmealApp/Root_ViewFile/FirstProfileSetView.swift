@@ -424,9 +424,9 @@ struct ForstProfileSetView:View {
                             case 0:
                                 nameSetView(size: geometry.size)
                             case 1:
-                                classSetView(size:geometry.size)
-                            case 2:
                                 gradeSetView(size: geometry.size)
+                            case 2:
+                                classSetView(size:geometry.size)
                             case 3:
                                 ageSetView(size: geometry.size)
                             case 4:
@@ -450,15 +450,13 @@ struct ForstProfileSetView:View {
                             Text("つぎへ")
                                 .font(.custom("GenJyuuGothicX-Bold",size:15))
                                 .frame(width: 200, height: 60)
-                                .background(Color.buttonColor)
+                                .background(Color.buttonColor.opacity(isFilled() ? 0.6 : 1.0))
                                 .foregroundStyle(.white)
                                 .clipShape(RoundedRectangle(cornerRadius: 15))
-                                .overlay{
-                                    RoundedRectangle(cornerRadius: 15)
-                                        .stroke(Color.buttonColor ,lineWidth: 4)
-                                }
+                                
                         }
                         .disabled(isAnimating)
+                        .disabled(isFilled())
                     }
                     .padding(.vertical)
                     
@@ -476,22 +474,38 @@ struct ForstProfileSetView:View {
             }
         }
     }
-    // 進捗バーをcurrentPageに応じて動的に進める
-        private func progressBar(size:CGSize, currentPage: Int) -> some View{
-            // ページ数: 0,1,2,3,4 の5ステップ
-            let totalSteps = 5
-            // currentPageは0〜4なので、進捗は (currentPage+1) / totalSteps
-            let progress = CGFloat(currentPage + 1) / CGFloat(totalSteps)
-            return ZStack(alignment:.leading){
-                RoundedRectangle(cornerRadius: 30)
-                    .frame(width:size.width*0.6,height: size.height*0.05)
-                    .foregroundStyle(.gray)
-                RoundedRectangle(cornerRadius: 30)
-                    .frame(width:size.width*0.6*progress,height: size.height*0.05)
-                    .foregroundStyle(.green)
-                    .animation(.easeInOut(duration: 0.3), value: progress)
-            }
+    private func isFilled() -> Bool{
+        switch currentPage{
+        case 0:
+            if userName.isEmpty{ return true }else{ return false }
+        case 1:
+            if userGrade == nil { return true }else{ return false }
+        case 2:
+            if userClass.isEmpty{ return true }else{ return false }
+        case 3:
+            if userAge == nil { return true }else{ return false }
+        case 4:
+            if userImage == nil{ return true }else{ return false }
+        default:
+            return false
         }
+    }
+    // 進捗バーをcurrentPageに応じて動的に進める
+    private func progressBar(size:CGSize, currentPage: Int) -> some View{
+        // ページ数: 0,1,2,3,4 の5ステップ
+        let totalSteps = 5
+        // currentPageは0〜4なので、進捗は (currentPage+1) / totalSteps
+        let progress = CGFloat(currentPage + 1) / CGFloat(totalSteps)
+        return ZStack(alignment:.leading){
+            RoundedRectangle(cornerRadius: 30)
+                .frame(width:size.width*0.6,height: size.height*0.05)
+                .foregroundStyle(.gray)
+            RoundedRectangle(cornerRadius: 30)
+                .frame(width:size.width*0.6*progress,height: size.height*0.05)
+                .foregroundStyle(.green)
+                .animation(.easeInOut(duration: 0.3), value: progress)
+        }
+    }
     private func nameSetView(size:CGSize) -> some View{
         VStack{
             TypeWriterTextView("あなたのお名前を教えてね？", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 30), textColor: .textColor, onAnimationCompleted: {
@@ -588,9 +602,9 @@ struct ForstProfileSetView:View {
                                     .scaledToFill()
                                     .frame(width: size.width * 0.28)
                                     .clipShape(Circle())
-                                    
-                                    
-
+                                
+                                
+                                
                             }else{
                                 Image(uiImage: userImage)
                                     .resizable()
@@ -599,7 +613,7 @@ struct ForstProfileSetView:View {
                                     .clipShape(Circle())
                                     .padding(.vertical,35)
                             }
-
+                            
                         }else{
                             Image("mt_newSettingView_userImage")
                                 .resizable()
