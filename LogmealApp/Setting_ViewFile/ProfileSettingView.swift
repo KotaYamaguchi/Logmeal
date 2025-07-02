@@ -12,6 +12,8 @@ struct ProfileSettingView: View {
     @State private var userImage:UIImage? = nil
     @State private var showNameAlert = false
     @State private var nameTextColor = Color.black
+    //AsyncImageをUIImageに変換して取得したサイズ
+    @State private var asyncImageSize: CGSize? = nil
     let gradeArray = ["1","2","3","4","5","6"]
     let classArray = ["1","2","3","4","5","6","7","8","9","10"]
     let bannedWords: [String] = [
@@ -304,58 +306,107 @@ struct ProfileSettingView: View {
     var body: some View {
         GeometryReader{ geometry in
             ZStack {
-              
-                    Image("bg_newSettingView.png")
-                        .resizable()
-                        .ignoresSafeArea()
                 
-                    RoundedRectangle(cornerRadius: 20)
-                        .frame(width: geometry.size.width*0.8, height: geometry.size.height*0.9)
-                        .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
-                        .shadow(radius: 5)
-                        .overlay {
-                            VStack{
-                                HStack{
-                                    Spacer()
-                                    Button{
-                                        saveNewProfile()
-                                        showSaveSuccess = true
-                                    }label: {
-                                        Text("ほぞんする")
-                                            .font(.custom("GenJyuuGothicX-Bold",size:15))
-                                            .frame(width: 160, height: 50)
-                                            .background(Color.white)
-                                            .foregroundStyle(Color.buttonColor)
-                                            .clipShape(RoundedRectangle(cornerRadius: 15))
-                                            .overlay{
-                                                RoundedRectangle(cornerRadius: 15)
-                                                    .stroke(Color.buttonColor ,lineWidth: 4)
-                                            }
-                                    }
-                                }
-                                Spacer()
-                            }
-                            .padding()
-                        }
+                Image("bg_newSettingView.png")
+                    .resizable()
+                    .ignoresSafeArea()
+                
+                RoundedRectangle(cornerRadius: 20)
+                    .frame(width: geometry.size.width*0.8, height: geometry.size.height*0.9)
+                    .foregroundStyle(Color(red: 220/255, green: 221/255, blue: 221/255))
+                    .shadow(radius: 5)
                 ScrollView{
-                    PhotosPicker(selection: $selectedPhotoItem) {
-                        if let userImage = self.userImage{
+                    if let userImage = self.userImage{
+                        if userImage.size.width < userImage.size.height{
                             Image(uiImage: userImage)
                                 .resizable()
                                 .scaledToFill()
-                                .frame(width:350)
                                 .clipShape(Circle())
+                                .frame(width: geometry.size.width * 0.2)
+                                
+
                         }else{
-                            Image("mt_newSettingView_userImage")
+                            Image(uiImage: userImage)
                                 .resizable()
                                 .scaledToFill()
-                                .frame(width: geometry.size.width*0.3)
-                                .padding()
                                 .clipShape(Circle())
+                                .frame(width: geometry.size.width * 0.28)
+                                .padding(.vertical,35)
+                        }
+                    }else{
+                        AsyncImage(url: userData.userImage) { phase in
+                            switch phase {
+                            case .empty:
+                                Image("no_user_image")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: geometry.size.width * 0.2)
+                                    .overlay {
+                                        Circle()
+                                            .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
+                                    }
+                            case .success(let image):
+                                // 画像サイズ取得用
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width:asyncImageSize?.width ?? 1 < asyncImageSize?.height ?? 0 ? geometry.size.width * 0.2 : geometry.size.width * 0.28)
+                                    .clipShape(Circle())
+                                    .padding(.vertical, asyncImageSize?.width ?? 1 < asyncImageSize?.height ?? 0 ? 0 :35)
+                                    .background(
+                                        GeometryReader { geo in
+                                            Color.clear
+                                                .onAppear {
+                                                    if asyncImageSize == nil {
+                                                        // UIImageを取得してサイズ判定
+                                                        if let url = userData.userImage,
+                                                            let data = try? Data(contentsOf: url),
+                                                            let uiImage = UIImage(data: data) {
+                                                            asyncImageSize = uiImage.size
+                                                        }
+                                                    }
+                                                }
+                                        }
+                                    )
+                            case .failure(_):
+                                Image("no_user_image")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: geometry.size.width * 0.2)
+                                    .overlay {
+                                        Circle()
+                                            .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
+                                    }
+                            @unknown default:
+                                Image("no_user_image")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: geometry.size.width * 0.2)
+                                    .overlay {
+                                        Circle()
+                                            .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
+                                    }
+                            }
                         }
                     }
-                    PhotosPicker(selection: $selectedPhotoItem) {
-                        Label("写真を選ぶ", systemImage: "photo")
+                    
+                    HStack{
+                        PhotosPicker(selection: $selectedPhotoItem) {
+                            Label("写真を選ぶ", systemImage: "photo")
+                                .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                        }
+                        if userImage != nil{
+                            Button{
+                                withAnimation {
+                                    userImage = nil
+                                }
+                            }label:{
+                                Text("写真をリセット")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                    
+                            }
+                            .padding(.horizontal)
+                        }
                     }
                     Image("mt_newSettingView_profileHeadline")
                         .resizable()
@@ -374,6 +425,7 @@ struct ProfileSettingView: View {
                                 Spacer()
                                 TextField("ここに名前を入力してください", text: $userName)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 18))
                                     .frame(width: geometry.size.width*0.43)
                                     .foregroundStyle(nameTextColor)
                                     .padding(.horizontal)
@@ -382,7 +434,7 @@ struct ProfileSettingView: View {
                                         let containsBannedWord = bannedWords.contains { word in
                                             newValue.localizedCaseInsensitiveContains(word)
                                         }
-
+                                        
                                         if containsBannedWord {
                                             showNameAlert = true
                                             nameTextColor = .red
@@ -408,9 +460,11 @@ struct ProfileSettingView: View {
                                 Picker("選択してください", selection: $userGrade) {
                                     ForEach(gradeArray, id: \.self) { grade in
                                         Text("\(grade)年").tag(grade)
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 18))
                                     }
                                 }
                                 .pickerStyle(MenuPickerStyle())
+                                .font(.custom("GenJyuuGothicX-Bold", size: 18))
                                 .frame(width: 150)
                             }
                             
@@ -430,12 +484,14 @@ struct ProfileSettingView: View {
                                 Picker("選択してください", selection: $userClass) {
                                     ForEach(classArray, id: \.self) { classNum in
                                         Text("\(classNum)組").tag(classNum)
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 18))
                                     }
                                 }
                                 .pickerStyle(MenuPickerStyle())
+                                .font(.custom("GenJyuuGothicX-Bold", size: 18))
                                 .frame(width: 150)
                             }
-               
+                            
                         }
                     
                     // 年齢選択
@@ -452,15 +508,40 @@ struct ProfileSettingView: View {
                                 Picker("選択してください", selection: $userAge) {
                                     ForEach(6...18, id: \.self) { age in
                                         Text("\(age)歳").tag(age)
+                                            .font(.custom("GenJyuuGothicX-Bold", size: 18))
                                     }
                                 }
                                 .pickerStyle(MenuPickerStyle())
+                                .font(.custom("GenJyuuGothicX-Bold", size: 18))
                                 .frame(width: 150)
                             }
-                         
+                            
                         }
                 }
                 .frame(width: geometry.size.width*0.8, height: geometry.size.height*0.85)
+                .padding()
+                VStack{
+                    HStack{
+                        Spacer()
+                        Button{
+                            saveNewProfile()
+                            showSaveSuccess = true
+                            print("押された")
+                        }label: {
+                            Text("ほぞんする")
+                                .font(.custom("GenJyuuGothicX-Bold",size:15))
+                                .frame(width: 160, height: 50)
+                                .background(Color.white)
+                                .foregroundStyle(Color.cyan)
+                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 15)
+                                        .stroke(Color.cyan ,lineWidth: 4)
+                                }
+                        }
+                    }
+                    Spacer()
+                }
                 .padding()
             }
             .onAppear(){
@@ -485,9 +566,9 @@ struct ProfileSettingView: View {
             }
             .alert(isPresented: $showSaveSuccess) {
                 Alert(
-                    title: Text("プロフィールを更新しました"),
+                    title: Text("プロフィールを更新しました").font(.custom("GenJyuuGothicX-Bold", size: 18)),
                     dismissButton: .default(Text("OK")) {
-                      
+                        
                     }
                 )
             }
