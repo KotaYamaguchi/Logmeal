@@ -392,7 +392,7 @@ struct ForstProfileSetView:View {
                                     }
                             }
                             .disabled(currentPage == 0)
-                            progressBar(size: geometry.size)
+                            progressBar(size: geometry.size, currentPage: currentPage)
                                 .padding()
                             Button{
                                 if currentPage < 4{
@@ -476,16 +476,22 @@ struct ForstProfileSetView:View {
             }
         }
     }
-    private func progressBar(size:CGSize) -> some View{
-        ZStack(alignment:.leading){
-            RoundedRectangle(cornerRadius: 30)
-                .frame(width:size.width*0.6,height: size.height*0.05)
-                .foregroundStyle(.gray)
-            RoundedRectangle(cornerRadius: 30)
-                .frame(width:size.width*0.3,height: size.height*0.05)
-                .foregroundStyle(.green)
+    // 進捗バーをcurrentPageに応じて動的に進める
+        private func progressBar(size:CGSize, currentPage: Int) -> some View{
+            // ページ数: 0,1,2,3,4 の5ステップ
+            let totalSteps = 5
+            // currentPageは0〜4なので、進捗は (currentPage+1) / totalSteps
+            let progress = CGFloat(currentPage + 1) / CGFloat(totalSteps)
+            return ZStack(alignment:.leading){
+                RoundedRectangle(cornerRadius: 30)
+                    .frame(width:size.width*0.6,height: size.height*0.05)
+                    .foregroundStyle(.gray)
+                RoundedRectangle(cornerRadius: 30)
+                    .frame(width:size.width*0.6*progress,height: size.height*0.05)
+                    .foregroundStyle(.green)
+                    .animation(.easeInOut(duration: 0.3), value: progress)
+            }
         }
-    }
     private func nameSetView(size:CGSize) -> some View{
         VStack{
             TypeWriterTextView("あなたのお名前を教えてね？", speed: 0.1, font: .custom("GenJyuuGothicX-Bold", size: 30), textColor: .textColor, onAnimationCompleted: {
@@ -576,11 +582,24 @@ struct ForstProfileSetView:View {
                 PhotosPicker(selection: $selectedPhotoItem) {
                     VStack{
                         if let userImage = self.userImage{
-                            Image(uiImage: userImage)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: size.width*0.3)
-                                .clipShape(Circle())
+                            if userImage.size.width < userImage.size.height{
+                                Image(uiImage: userImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: size.width * 0.28)
+                                    .clipShape(Circle())
+                                    
+                                    
+
+                            }else{
+                                Image(uiImage: userImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: size.width * 0.28)
+                                    .clipShape(Circle())
+                                    .padding(.vertical,35)
+                            }
+
                         }else{
                             Image("mt_newSettingView_userImage")
                                 .resizable()
