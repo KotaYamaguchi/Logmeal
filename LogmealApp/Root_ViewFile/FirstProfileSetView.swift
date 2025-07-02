@@ -14,9 +14,9 @@ struct ForstProfileSetView:View {
     @State var showSaveSuccess:Bool = false
     @State private var isAllProfileSet:Bool = false
     @State private var userName: String = ""
-    @State private var userGrade: Int = 1
+    @State private var userGrade: Int? = nil
     @State private var userClass: String = ""
-    @State private var userAge: Int = 6
+    @State private var userAge: Int? = nil
     @State private var selectedPhotoItem: PhotosPickerItem? = nil
     @State private var userImage:UIImage? = nil
     @State private var showNameAlert = false
@@ -297,9 +297,10 @@ struct ForstProfileSetView:View {
     private func saveNewProfile(){
         if let userImage = self.userImage{
             userData.name = self.userName
-            userData.age = self.userAge
+            userData.age = self.userAge ?? 0
             userData.yourClass = self.userClass
-            userData.grade = String(self.userGrade)
+            let intGrade = self.userGrade ?? 1
+            userData.grade = String(intGrade)
             userData.userImage = getDocumentPath(saveData: userImage, fileName: "userImage")
         }
     }
