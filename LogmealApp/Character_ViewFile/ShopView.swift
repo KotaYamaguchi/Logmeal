@@ -490,6 +490,7 @@ extension NewShopView {
         // キャラごとのキーで保存
         let charName = user.currentCharacter.name
         products[index].isBought = true
+        user.point -= products[index].price
         boughtProducts.append(selectedProduct)
         user.saveProducts(products: products, key: "\(charName)_products")
         user.saveProducts(products: boughtProducts, key: "\(charName)_boughtItem")
