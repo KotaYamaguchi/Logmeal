@@ -143,7 +143,7 @@ struct NewColumnView: View {
                                     }
                                 }
                             }
-                            Spacer()
+                            
                             Button{
                                 showQRscanner = true
                             }label:{
@@ -156,8 +156,10 @@ struct NewColumnView: View {
                                             .foregroundStyle(.white)
                                     }
                             }
+                            .padding(.horizontal)
                             Spacer()
                         }
+                        .padding()
                         ScrollView {
                             ForEach(filteredColumns) { column in
                                 ZStack(alignment: .topLeading) {
