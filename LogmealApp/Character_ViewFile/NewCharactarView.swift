@@ -36,19 +36,7 @@ struct NewCharacterView: View {
                         x: geo.size.width * (1000 / baseSize.width),
                         y: geo.size.height * (600 / baseSize.height)
                     )
-
-                    CharacterInfoView(
-                        size: geo.size,
-                        characterData: userData.currentCharacter
-                    )
-                    .onAppear(){
-                        userData.setCurrentCharacter()
-                    }
-                    .position(
-                        x: geo.size.width * (350 / baseSize.width),
-                        y: geo.size.height * (300 / baseSize.height)
-                    )
-
+                    
                     AllGIFView(
                         geometry: geo,
                         character: userData.selectedCharacter,
@@ -64,6 +52,18 @@ struct NewCharacterView: View {
                         baseGifPosition: $baseGifPosition
                     )
                     .id(refreshID)
+
+                    CharacterInfoView(
+                        size: geo.size,
+                        characterData: userData.currentCharacter
+                    )
+                    .onAppear(){
+                        userData.setCurrentCharacter()
+                    }
+                    .position(
+                        x: geo.size.width * (350 / baseSize.width),
+                        y: geo.size.height * (300 / baseSize.height)
+                    )
 
                     CloseButton(
                         size: geo.size,
