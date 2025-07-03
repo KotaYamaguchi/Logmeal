@@ -418,7 +418,7 @@ extension NewShopView {
         let charName = user.currentCharacter.name
         let productKey = "\(charName)_products"
         print("currentCharacter: \(charName), 使用キー: \(productKey)")
-        var loadedProducts = user.loadProducts(key: productKey)
+        let loadedProducts = user.loadProducts(key: productKey)
         
         // キャラごとの初期商品リスト作成
         let defaultProducts: [Product]

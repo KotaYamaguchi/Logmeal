@@ -426,163 +426,145 @@ private struct DebugOverlay: View {
     @EnvironmentObject var userData: UserData
     @State private var isExpanded = true
     @State private var dragOffset = CGSize.zero
-    @State private var position = CGPoint(x: 50, y: 100)
-    
+    @State private var position = CGPoint(x: 100, y: 200) // ★初期位置: 左寄せ
+
+    // サイズを小さく、正方形に
+    private let panelSize: CGFloat = 220
+
     var body: some View {
         VStack(spacing: 0) {
-            // ヘッダー部分（常に表示）
             headerView
-            
-            // 展開可能なコンテンツ
+
             if isExpanded {
-                debugContent
-                    .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .top)))
+                ScrollView { // ★内容をスクロール可能に
+                    debugContent
+                        .frame(width: panelSize - 24) // パディング分を引く
+                }
+                .frame(width: panelSize, height: panelSize - 48) // header分を引く
+                .clipped()
+                .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .top)))
             }
         }
+        .frame(width: panelSize, height: panelSize) // ★正方形
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 14)
                 .fill(.ultraThinMaterial)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.white.opacity(0.22), lineWidth: 1)
                 )
         )
-        .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isExpanded)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: dragOffset)
+        .shadow(color: .black.opacity(0.23), radius: 8, x: 0, y: 4)
+        .position(x:500, y:200)
+//        .offset(x: position.x + dragOffset.width - panelSize/2, y: position.y + dragOffset.height - panelSize/2)
+//       .gesture(dragGesture)
+//        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isExpanded)
+//        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: dragOffset)
+        .zIndex(999)
     }
     
     private var headerView: some View {
-        HStack {
+        HStack(spacing: 10) {
             Image(systemName: "ladybug.circle.fill")
                 .foregroundColor(.orange)
                 .font(.title2)
             
-            Text("Debug Panel")
+            Text("Debug")
                 .font(.headline.weight(.semibold))
                 .foregroundColor(.primary)
             
             Spacer()
-            
-            Button(action: { withAnimation { isExpanded.toggle() } }) {
-                Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle.fill")
-                    .foregroundColor(.secondary)
-                    .font(.title2)
-            }
-            .buttonStyle(PlainButtonStyle())
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background(Color.clear)
     }
     
     private var debugContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             Divider()
-            
-            // キャラクター基本情報
             characterBasicSection
-            
             Divider()
-            
-            // 成長段階コントロール
             growthStageSection
-            
             Divider()
-            
-            // アクションボタン
             actionButtonsSection
         }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 16)
+        .padding(.vertical, 8)
     }
     
     private var characterBasicSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             sectionHeader("📊 Character Stats")
-            
-            VStack(spacing: 8) {
-                stepperRow(
-                    label: "Level",
-                    value: userData.currentCharacter.level,
-                    range: 0...50,
-                    onChange: { userData.currentCharacter.level = $0 }
-                )
-                
-                stepperRow(
-                    label: "EXP",
-                    value: userData.currentCharacter.exp,
-                    range: 0...1000,
-                    onChange: { userData.currentCharacter.exp = $0 }
-                )
-            }
+            stepperRow(
+                label: "Level",
+                value: userData.currentCharacter.level,
+                range: 0...50,
+                onChange: { userData.currentCharacter.level = $0 }
+            )
+            stepperRow(
+                label: "EXP",
+                value: userData.currentCharacter.exp,
+                range: 0...1000,
+                onChange: { userData.currentCharacter.exp = $0 }
+            )
         }
     }
     
     private var growthStageSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             sectionHeader("🌱 Growth Stages")
-            
-            VStack(spacing: 8) {
-                // Dog
-                stepperRow(
-                    label: "🐕 Dog",
-                    value: userData.DogData.growthStage,
-                    range: 0...3,
-                    onChange: { newValue in
-                        userData.DogData.growthStage = newValue
-                        if userData.selectedCharacter == "Dog" {
-                            userData.currentCharacter.growthStage = newValue
-                        }
+            stepperRow(
+                label: "🐕 Dog",
+                value: userData.DogData.growthStage,
+                range: 0...3,
+                onChange: { newValue in
+                    userData.DogData.growthStage = newValue
+                    if userData.selectedCharacter == "Dog" {
+                        userData.currentCharacter.growthStage = newValue
                     }
-                )
-                
-                // Rabbit
-                stepperRow(
-                    label: "🐰 Rabbit",
-                    value: userData.RabbitData.growthStage,
-                    range: 0...3,
-                    onChange: { newValue in
-                        userData.RabbitData.growthStage = newValue
-                        if userData.selectedCharacter == "Rabbit" {
-                            userData.currentCharacter.growthStage = newValue
-                        }
+                }
+            )
+            stepperRow(
+                label: "🐰 Rabbit",
+                value: userData.RabbitData.growthStage,
+                range: 0...3,
+                onChange: { newValue in
+                    userData.RabbitData.growthStage = newValue
+                    if userData.selectedCharacter == "Rabbit" {
+                        userData.currentCharacter.growthStage = newValue
                     }
-                )
-                
-                // Cat
-                stepperRow(
-                    label: "🐱 Cat",
-                    value: userData.CatData.growthStage,
-                    range: 0...3,
-                    onChange: { newValue in
-                        userData.CatData.growthStage = newValue
-                        if userData.selectedCharacter == "Cat" {
-                            userData.currentCharacter.growthStage = newValue
-                        }
+                }
+            )
+            stepperRow(
+                label: "🐱 Cat",
+                value: userData.CatData.growthStage,
+                range: 0...3,
+                onChange: { newValue in
+                    userData.CatData.growthStage = newValue
+                    if userData.selectedCharacter == "Cat" {
+                        userData.currentCharacter.growthStage = newValue
                     }
-                )
-            }
+                }
+            )
         }
     }
     
     private var actionButtonsSection: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 6) {
             Button(action: { userData.saveAllCharacter() }) {
                 HStack {
                     Image(systemName: "square.and.arrow.down")
-                    Text("Save All Characters")
+                    Text("Save All")
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(Color.blue.opacity(0.2))
+                .padding(.vertical, 6)
+                .background(Color.blue.opacity(0.16))
                 .foregroundColor(.blue)
-                .cornerRadius(8)
+                .cornerRadius(7)
             }
             .buttonStyle(PlainButtonStyle())
             
-            // 追加のデバッグアクション
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 Button("Reset") {
                     userData.currentCharacter.level = 1
                     userData.currentCharacter.exp = 0
@@ -599,7 +581,6 @@ private struct DebugOverlay: View {
     }
     
     // MARK: - Helper Views
-    
     private func sectionHeader(_ title: String) -> some View {
         Text(title)
             .font(.subheadline.weight(.semibold))
@@ -616,15 +597,12 @@ private struct DebugOverlay: View {
             Text(label)
                 .font(.caption.weight(.medium))
                 .foregroundColor(.primary)
-                .frame(width: 60, alignment: .leading)
-            
+                .frame(width: 50, alignment: .leading)
             Spacer()
-            
             Text("\(value)")
                 .font(.caption.monospacedDigit())
                 .foregroundColor(.secondary)
-                .frame(width: 40, alignment: .trailing)
-            
+                .frame(width: 28, alignment: .trailing)
             Stepper("", value: Binding(
                 get: { value },
                 set: onChange
@@ -632,10 +610,10 @@ private struct DebugOverlay: View {
             .labelsHidden()
             .scaleEffect(0.8)
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(6)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(Color.gray.opacity(0.07))
+        .cornerRadius(5)
     }
     
     private func compactButtonStyle(color: Color) -> some ButtonStyle {
@@ -643,7 +621,6 @@ private struct DebugOverlay: View {
     }
     
     // MARK: - Gestures
-    
     private var dragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
@@ -652,14 +629,15 @@ private struct DebugOverlay: View {
             .onEnded { value in
                 position.x += value.translation.width
                 position.y += value.translation.height
-                
-                // 画面境界内に収める
+                // 左寄せ・画面境界内に収める
                 let screenWidth = UIScreen.main.bounds.width
                 let screenHeight = UIScreen.main.bounds.height
-                
-                position.x = max(75, min(screenWidth - 75, position.x))
-                position.y = max(100, min(screenHeight - 100, position.y))
-                
+                let minX = panelSize / 2 + 8
+                let maxX = screenWidth / 2
+                let minY = panelSize / 2 + 8
+                let maxY = screenHeight - panelSize / 2 - 8
+                position.x = min(max(position.x, minX), maxX)
+                position.y = min(max(position.y, minY), maxY)
                 dragOffset = .zero
             }
     }
@@ -668,17 +646,16 @@ private struct DebugOverlay: View {
 // MARK: - カスタムボタンスタイル
 private struct CompactDebugButtonStyle: ButtonStyle {
     let color: Color
-    
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.caption.weight(.medium))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(color.opacity(configuration.isPressed ? 0.3 : 0.2))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(color.opacity(configuration.isPressed ? 0.3 : 0.18))
             .foregroundColor(color)
-            .cornerRadius(6)
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .cornerRadius(5)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
-
