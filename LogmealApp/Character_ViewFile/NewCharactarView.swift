@@ -12,7 +12,7 @@ struct NewCharacterView: View {
     @State private var baseGifPosition: CGPoint = .zero
     @State private var timer: Timer? = nil
     @State private var boughtProducts: [Product] = []
-
+    @AppStorage("isProductMigrated") var isProductMigrated: Bool = false  // ★マイグレーションフラグ追加
     // Refresh ID
     @State private var refreshID = UUID()
 
@@ -59,6 +59,10 @@ struct NewCharacterView: View {
                     )
                     .onAppear(){
                         userData.setCurrentCharacter()
+                        Task{
+                            await migrateOldProductsIfNeeded()
+                        }
+                        
                     }
                     .position(
                         x: geo.size.width * (350 / baseSize.width),
@@ -83,7 +87,19 @@ struct NewCharacterView: View {
                 }
                 .onAppear {
                     userData.setCurrentCharacter()
-                    boughtProducts = userData.loadProducts(key: "boughtItem")
+                    switch userData.currentCharacter.name{
+                    case "Dog":
+                        boughtProducts = userData.loadProducts(key: "Dog_boughtItem")
+                        print(boughtProducts)
+                    case "Cat":
+                        boughtProducts = userData.loadProducts(key: "Cat_boughtItem")
+                        print(boughtProducts)
+                    case "Rabbit":
+                        boughtProducts = userData.loadProducts(key: "Rabbit_boughtItem")
+                        print(boughtProducts)
+                    default:
+                        boughtProducts = userData.loadProducts(key: "boughtProducts")
+                    }
                     setupGIF(in: geo.size)
                     refreshID = UUID()
                 }
@@ -95,7 +111,7 @@ struct NewCharacterView: View {
             }
         }
     }
-
+    // MARK: Functions
     // Initialize GIF settings
     private func setupGIF(in size: CGSize) {
         userData.gifWidth = size.width * 0.2
@@ -123,6 +139,28 @@ struct NewCharacterView: View {
             gifArray += boughtProducts.map { $0.name }
         }
         gifData = NSDataAsset(name: gifArray.randomElement() ?? baseName)?.data
+    }
+    private func migrateOldProductsIfNeeded() async {
+        guard !isProductMigrated else { return }
+        print("=== migrateOldProductsIfNeeded: Start ===")
+        let oldProducts = userData.loadProducts(key: "products")
+        let oldBoughtItems = userData.loadProducts(key: "boughtItem")
+        let characterKeys = ["Dog", "Cat", "Rabbit"]
+
+        // 商品をキャラごとに分配
+        for char in characterKeys {
+            let filteredProducts = oldProducts.filter { $0.name.contains(char) }
+            let filteredBoughtItems = oldBoughtItems.filter { $0.name.contains(char) }
+            userData.saveProducts(products: filteredProducts, key: "\(char)_products")
+            userData.saveProducts(products: filteredBoughtItems, key: "\(char)_boughtItem")
+            print("Migrated \(filteredProducts.count) products and \(filteredBoughtItems.count) boughtItems to \(char)_products / \(char)_boughtItem")
+        }
+
+        // 必要なら旧データを消す（任意）
+        userData.saveProducts(products: [], key: "products")
+        userData.saveProducts(products: [], key: "boughtItem")
+        isProductMigrated = true
+        print("=== migrateOldProductsIfNeeded: Complete ===")
     }
 }
 
@@ -381,6 +419,8 @@ struct NewCharacterView_Previews: PreviewProvider {
             .environmentObject(UserData())
     }
 }
+
+
 // MARK: - デバッグ用オーバーレイコントロール
 private struct DebugOverlay: View {
     @EnvironmentObject var userData: UserData
