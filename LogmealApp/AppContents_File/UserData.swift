@@ -181,28 +181,6 @@ class UserData:ObservableObject{
         saveCharacterData(data: DogData, key: "DogData")
         saveCharacterData(data: CatData, key: "CatData")
         saveCharacterData(data: RabbitData, key: "RabbitData")
-//        print("=== Saved Character Data ===\n")
-//        print("=== Current Character Debug Info ===")
-//        print("  Name: \(currentCharacter.name)")
-//        print("  Level: \(currentCharacter.level)")
-//        print("  EXP: \(currentCharacter.exp)")
-//        print("  Growth Stage: \(currentCharacter.growthStage)")
-//
-//        print("=== Current Dog Debug Info ===")
-//        print("  Level: \(DogData.level)")
-//        print("  EXP: \(DogData.exp)")
-//        print("  Growth Stage: \(DogData.growthStage)")
-//
-//        print("=== Current Rabbit Debug Info ===")
-//        print("  Level: \(RabbitData.level)")
-//        print("  EXP: \(RabbitData.exp)")
-//        print("  Growth Stage: \(RabbitData.growthStage)")
-//
-//        print("=== Current Cat Debug Info ===")
-//        print("  Level: \(CatData.level)")
-//        print("  EXP: \(CatData.exp)")
-//        print("  Growth Stage: \(CatData.growthStage)")
-
     }
 
     // マイグレーション処理

@@ -70,8 +70,8 @@ struct NewCharacterView: View {
                         character: userData.selectedCharacter,
                         showCharacterView: $showCharacterView
                     )
-//                    ─────────────────────────────────────────
-                    // デバッグ用パネルを左上に追加
+                    // ─────────────────────────────────────────
+                    // debug
                     DebugOverlay()
                         .environmentObject(userData)
                         .position(
