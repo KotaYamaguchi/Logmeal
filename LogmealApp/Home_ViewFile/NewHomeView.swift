@@ -41,7 +41,7 @@ struct NewHomeView: View {
         GeometryReader { geometry in
             ZStack {
                 backgroundImage(geometry: geometry)
-                VStack {
+                ScrollView {
                     userInfoPanel(geometry: geometry)
                     logGrid(geometry: geometry)
                 }
@@ -150,7 +150,6 @@ struct NewHomeView: View {
     }
     
     private func logGrid(geometry: GeometryProxy) -> some View {
-        ScrollView {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: geometry.size.width * 0.005) {
                 ForEach(0..<allData.count, id: \.self) { index in
                     Button {
@@ -183,7 +182,6 @@ struct NewHomeView: View {
             }
             .frame(width: geometry.size.width * 0.8)
             .padding(.horizontal)
-        }
     }
     
     private func addLogButton(geometry: GeometryProxy) -> some View {

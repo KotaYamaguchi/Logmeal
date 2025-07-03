@@ -34,7 +34,9 @@ struct NewContentView: View {
                         .toolbar(removing: .sidebarToggle)
                 } detail: {
                     NewHomeView()
+                      
                 }
+               
                 if user.showAnimation{
                     if user.showGrowthAnimation{
                         GrowthAnimationView(text1: "おや、\(characterName(current: user.currentCharacter))のようすが…",
