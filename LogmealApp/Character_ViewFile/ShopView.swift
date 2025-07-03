@@ -285,9 +285,9 @@ extension NewShopView {
             Spacer()
             VStack(alignment: .trailing) {
                 VStack(alignment: .leading) {
-                    Text("つままれる")
+                    Text(product.displayName ?? "")
                         .font(.system(size: 16 * scale))
-                    Text("ポチッとつまんで、キャラクターと遊ぼう！")
+                    Text(product.description ?? "")
                         .font(.system(size: 13 * scale))
                 }
                 HStack {
@@ -425,47 +425,46 @@ extension NewShopView {
         switch charName {
         case "Dog":
             defaultProducts = [
-                Product(name: "Dog3_animation_applause", price: 200, img: "img_dog_applause", isBought: false),
-                Product(name: "Dog3_animation_bow", price: 400, img: "img_dog_bow", isBought: false),
-                Product(name: "Dog3_animation_byebye", price: 600, img: "img_dog_byebye", isBought: false),
-                Product(name: "Dog3_animation_eat", price: 800, img: "img_dog_eat", isBought: false),
-                Product(name: "Dog3_animation_question", price: 1000, img: "img_dog_question", isBought: false),
-                Product(name: "Dog3_animation_sit", price: 300, img: "img_dog_sit", isBought: false),
-                Product(name: "Dog3_animation_sleep", price: 500, img: "img_dog_sleep", isBought: false),
-                Product(name: "Dog3_animation_surprised", price: 700, img: "img_dog_surprised", isBought: false),
-                Product(name: "Dog3_animation_yawn", price: 900, img: "img_dog_yawn", isBought: false),
-                Product(name: "Dog3_animation_yell", price: 150, img: "img_dog_yell", isBought: false)
+                Product(name: "Dog3_animation_applause", displayName: "拍手", description: "手をたたいて応援するよ！", price: 200, img: "img_dog_applause", isBought: false),
+                Product(name: "Dog3_animation_bow", displayName: "おじぎ", description: "ペコっとあいさつするよ。", price: 400, img: "img_dog_bow", isBought: false),
+                Product(name: "Dog3_animation_byebye", displayName: "バイバイ", description: "手をふってさようなら！", price: 600, img: "img_dog_byebye", isBought: false),
+                Product(name: "Dog3_animation_eat", displayName: "食べる", description: "おいしくごはんを食べるよ。", price: 800, img: "img_dog_eat", isBought: false),
+                Product(name: "Dog3_animation_question", displayName: "はてな", description: "首をかしげて考え中。", price: 1000, img: "img_dog_question", isBought: false),
+                Product(name: "Dog3_animation_sit", displayName: "おすわり", description: "ちゃんとすわって待つよ。", price: 300, img: "img_dog_sit", isBought: false),
+                Product(name: "Dog3_animation_sleep", displayName: "ねる", description: "すやすやおやすみタイム。", price: 500, img: "img_dog_sleep", isBought: false),
+                Product(name: "Dog3_animation_surprised", displayName: "びっくり", description: "びっくりして目をまるくするよ。", price: 700, img: "img_dog_surprised", isBought: false),
+                Product(name: "Dog3_animation_yawn", displayName: "あくび", description: "おおきな口であくびをするよ。", price: 900, img: "img_dog_yawn", isBought: false),
+                Product(name: "Dog3_animation_yell", displayName: "わん！", description: "元気に「わん！」と鳴くよ。", price: 150, img: "img_dog_yell", isBought: false)
             ]
         case "Cat":
             defaultProducts = [
-                Product(name: "Cat3_animation_applause", price: 250, img: "img_cat_applause", isBought: false),
-                Product(name: "Cat3_animation_bow", price: 500, img: "img_cat_bow", isBought: false),
-                Product(name: "Cat3_animation_byebye", price: 750, img: "img_cat_byebye", isBought: false),
-                Product(name: "Cat3_animation_eat", price: 1000, img: "img_cat_eat", isBought: false),
-                Product(name: "Cat3_animation_question", price: 350, img: "img_cat_question", isBought: false),
-                Product(name: "Cat3_animation_sit", price: 600, img: "img_cat_sit", isBought: false),
-                Product(name: "Cat3_animation_sleep", price: 850, img: "img_cat_sleep", isBought: false),
-                Product(name: "Cat3_animation_surprised", price: 150, img: "img_cat_surprised", isBought: false),
-                Product(name: "Cat3_animation_yawn", price: 400, img: "img_cat_yawn", isBought: false),
-                Product(name: "Cat3_animation_yell", price: 650, img: "img_cat_yell", isBought: false)
+                Product(name: "Cat3_animation_applause", displayName: "拍手", description: "手をたたいて応援するよ！", price: 250, img: "img_cat_applause", isBought: false),
+                Product(name: "Cat3_animation_bow", displayName: "おじぎ", description: "ペコっとあいさつするよ。", price: 500, img: "img_cat_bow", isBought: false),
+                Product(name: "Cat3_animation_byebye", displayName: "バイバイ", description: "手をふってさようなら！", price: 750, img: "img_cat_byebye", isBought: false),
+                Product(name: "Cat3_animation_eat", displayName: "食べる", description: "おいしくごはんを食べるよ。", price: 1000, img: "img_cat_eat", isBought: false),
+                Product(name: "Cat3_animation_question", displayName: "はてな", description: "首をかしげて考え中。", price: 350, img: "img_cat_question", isBought: false),
+                Product(name: "Cat3_animation_sit", displayName: "おすわり", description: "ちゃんとすわって待つよ。", price: 600, img: "img_cat_sit", isBought: false),
+                Product(name: "Cat3_animation_sleep", displayName: "ねる", description: "すやすやおやすみタイム。", price: 850, img: "img_cat_sleep", isBought: false),
+                Product(name: "Cat3_animation_surprised", displayName: "びっくり", description: "びっくりして目をまるくするよ。", price: 150, img: "img_cat_surprised", isBought: false),
+                Product(name: "Cat3_animation_yawn", displayName: "あくび", description: "おおきな口であくびをするよ。", price: 400, img: "img_cat_yawn", isBought: false),
+                Product(name: "Cat3_animation_yell", displayName: "にゃー！", description: "かわいく「にゃー！」と鳴くよ。", price: 650, img: "img_cat_yell", isBought: false)
             ]
         case "Rabbit":
             defaultProducts = [
-                Product(name: "Rabbit3_animation_applause", price: 150, img: "img_rabbit_applause", isBought: false),
-                Product(name: "Rabbit3_animation_bow", price: 300, img: "img_rabbit_bow", isBought: false),
-                Product(name: "Rabbit3_animation_byebye", price: 450, img: "img_rabbit_byebye", isBought: false),
-                Product(name: "Rabbit3_animation_eat", price: 600, img: "img_rabbit_eat", isBought: false),
-                Product(name: "Rabbit3_animation_question", price: 750, img: "img_rabbit_question", isBought: false),
-                Product(name: "Rabbit3_animation_sit", price: 900, img: "img_rabbit_sit", isBought: false),
-                Product(name: "Rabbit3_animation_sleep", price: 1000, img: "img_rabbit_sleep", isBought: false),
-                Product(name: "Rabbit3_animation_surprised", price: 200, img: "img_rabbit_surprised", isBought: false),
-                Product(name: "Rabbit3_animation_yawn", price: 350, img: "img_rabbit_yawn", isBought: false),
-                Product(name: "Rabbit3_animation_yell", price: 500, img: "img_rabbit_yell", isBought: false)
+                Product(name: "Rabbit3_animation_applause", displayName: "拍手", description: "手をたたいて応援するよ！", price: 150, img: "img_rabbit_applause", isBought: false),
+                Product(name: "Rabbit3_animation_bow", displayName: "おじぎ", description: "ペコっとあいさつするよ。", price: 300, img: "img_rabbit_bow", isBought: false),
+                Product(name: "Rabbit3_animation_byebye", displayName: "バイバイ", description: "手をふってさようなら！", price: 450, img: "img_rabbit_byebye", isBought: false),
+                Product(name: "Rabbit3_animation_eat", displayName: "食べる", description: "おいしくごはんを食べるよ。", price: 600, img: "img_rabbit_eat", isBought: false),
+                Product(name: "Rabbit3_animation_question", displayName: "はてな", description: "首をかしげて考え中。", price: 750, img: "img_rabbit_question", isBought: false),
+                Product(name: "Rabbit3_animation_sit", displayName: "おすわり", description: "ちゃんとすわって待つよ。", price: 900, img: "img_rabbit_sit", isBought: false),
+                Product(name: "Rabbit3_animation_sleep", displayName: "ねる", description: "すやすやおやすみタイム。", price: 1000, img: "img_rabbit_sleep", isBought: false),
+                Product(name: "Rabbit3_animation_surprised", displayName: "びっくり", description: "びっくりして目をまるくするよ。", price: 200, img: "img_rabbit_surprised", isBought: false),
+                Product(name: "Rabbit3_animation_yawn", displayName: "あくび", description: "おおきな口であくびをするよ。", price: 350, img: "img_rabbit_yawn", isBought: false),
+                Product(name: "Rabbit3_animation_yell", displayName: "ぴょん！", description: "元気に「ぴょん！」と鳴くよ。", price: 500, img: "img_rabbit_yell", isBought: false)
             ]
         default:
             defaultProducts = []
         }
-        
         // すでに保存されている商品＋初期商品（重複を排除）
         let existingNames = Set(loadedProducts.map { $0.name })
         let merged = loadedProducts + defaultProducts.filter { !existingNames.contains($0.name) }
@@ -500,6 +499,8 @@ extension NewShopView {
     }
 }
 
+// ...省略...
+
 extension NewShopView {
     var debugBorder: some View {
         RoundedRectangle(cornerRadius: 16)
@@ -533,11 +534,11 @@ extension NewShopView {
                                     .fill(.red.opacity(0.2))
                             )
                     }
-                    Button{
+                    Button {
                         dogLoaded = false
                         rabbitLoaded = false
                         catLoaded = false
-                    }label:{
+                    } label: {
                         Label("Reset AppStrage", systemImage: "arrow.counterclockwise")
                             .font(.headline)
                             .foregroundColor(.red)
@@ -547,9 +548,82 @@ extension NewShopView {
                                     .fill(.red.opacity(0.2))
                             )
                     }
+                    Button {
+                        resetAllProductsAndUserDefaults()
+                    } label: {
+                        Label("Reset Products", systemImage: "trash")
+                            .font(.headline)
+                            .foregroundColor(.orange)
+                            .frame(width: 140, height: 44)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(.orange.opacity(0.2))
+                            )
+                    }
                 }
                 .padding()
             }
+    }
+
+    // Productsと購入済みリストのユーザーデフォルトをリセットして初期化
+    private func resetAllProductsAndUserDefaults() {
+        let characterKeys = ["Dog", "Cat", "Rabbit"]
+        for char in characterKeys {
+            let defaultProducts: [Product]
+            switch char {
+            case "Dog":
+                defaultProducts = [
+                    Product(name: "Dog3_animation_applause", displayName: "拍手", description: "手をたたいて応援するよ！", price: 200, img: "img_dog_applause", isBought: false),
+                    Product(name: "Dog3_animation_bow", displayName: "おじぎ", description: "ペコっとあいさつするよ。", price: 400, img: "img_dog_bow", isBought: false),
+                    Product(name: "Dog3_animation_byebye", displayName: "バイバイ", description: "手をふってさようなら！", price: 600, img: "img_dog_byebye", isBought: false),
+                    Product(name: "Dog3_animation_eat", displayName: "食べる", description: "おいしくごはんを食べるよ。", price: 800, img: "img_dog_eat", isBought: false),
+                    Product(name: "Dog3_animation_question", displayName: "はてな", description: "首をかしげて考え中。", price: 1000, img: "img_dog_question", isBought: false),
+                    Product(name: "Dog3_animation_sit", displayName: "おすわり", description: "ちゃんとすわって待つよ。", price: 300, img: "img_dog_sit", isBought: false),
+                    Product(name: "Dog3_animation_sleep", displayName: "ねる", description: "すやすやおやすみタイム。", price: 500, img: "img_dog_sleep", isBought: false),
+                    Product(name: "Dog3_animation_surprised", displayName: "びっくり", description: "びっくりして目をまるくするよ。", price: 700, img: "img_dog_surprised", isBought: false),
+                    Product(name: "Dog3_animation_yawn", displayName: "あくび", description: "おおきな口であくびをするよ。", price: 900, img: "img_dog_yawn", isBought: false),
+                    Product(name: "Dog3_animation_yell", displayName: "わん！", description: "元気に「わん！」と鳴くよ。", price: 150, img: "img_dog_yell", isBought: false)
+                ]
+            case "Cat":
+                defaultProducts = [
+                    Product(name: "Cat3_animation_applause", displayName: "拍手", description: "手をたたいて応援するよ！", price: 250, img: "img_cat_applause", isBought: false),
+                    Product(name: "Cat3_animation_bow", displayName: "おじぎ", description: "ペコっとあいさつするよ。", price: 500, img: "img_cat_bow", isBought: false),
+                    Product(name: "Cat3_animation_byebye", displayName: "バイバイ", description: "手をふってさようなら！", price: 750, img: "img_cat_byebye", isBought: false),
+                    Product(name: "Cat3_animation_eat", displayName: "食べる", description: "おいしくごはんを食べるよ。", price: 1000, img: "img_cat_eat", isBought: false),
+                    Product(name: "Cat3_animation_question", displayName: "はてな", description: "首をかしげて考え中。", price: 350, img: "img_cat_question", isBought: false),
+                    Product(name: "Cat3_animation_sit", displayName: "おすわり", description: "ちゃんとすわって待つよ。", price: 600, img: "img_cat_sit", isBought: false),
+                    Product(name: "Cat3_animation_sleep", displayName: "ねる", description: "すやすやおやすみタイム。", price: 850, img: "img_cat_sleep", isBought: false),
+                    Product(name: "Cat3_animation_surprised", displayName: "びっくり", description: "びっくりして目をまるくするよ。", price: 150, img: "img_cat_surprised", isBought: false),
+                    Product(name: "Cat3_animation_yawn", displayName: "あくび", description: "おおきな口であくびをするよ。", price: 400, img: "img_cat_yawn", isBought: false),
+                    Product(name: "Cat3_animation_yell", displayName: "にゃー！", description: "かわいく「にゃー！」と鳴くよ。", price: 650, img: "img_cat_yell", isBought: false)
+                ]
+            case "Rabbit":
+                defaultProducts = [
+                    Product(name: "Rabbit3_animation_applause", displayName: "拍手", description: "手をたたいて応援するよ！", price: 150, img: "img_rabbit_applause", isBought: false),
+                    Product(name: "Rabbit3_animation_bow", displayName: "おじぎ", description: "ペコっとあいさつするよ。", price: 300, img: "img_rabbit_bow", isBought: false),
+                    Product(name: "Rabbit3_animation_byebye", displayName: "バイバイ", description: "手をふってさようなら！", price: 450, img: "img_rabbit_byebye", isBought: false),
+                    Product(name: "Rabbit3_animation_eat", displayName: "食べる", description: "おいしくごはんを食べるよ。", price: 600, img: "img_rabbit_eat", isBought: false),
+                    Product(name: "Rabbit3_animation_question", displayName: "はてな", description: "首をかしげて考え中。", price: 750, img: "img_rabbit_question", isBought: false),
+                    Product(name: "Rabbit3_animation_sit", displayName: "おすわり", description: "ちゃんとすわって待つよ。", price: 900, img: "img_rabbit_sit", isBought: false),
+                    Product(name: "Rabbit3_animation_sleep", displayName: "ねる", description: "すやすやおやすみタイム。", price: 1000, img: "img_rabbit_sleep", isBought: false),
+                    Product(name: "Rabbit3_animation_surprised", displayName: "びっくり", description: "びっくりして目をまるくするよ。", price: 200, img: "img_rabbit_surprised", isBought: false),
+                    Product(name: "Rabbit3_animation_yawn", displayName: "あくび", description: "おおきな口であくびをするよ。", price: 350, img: "img_rabbit_yawn", isBought: false),
+                    Product(name: "Rabbit3_animation_yell", displayName: "ぴょん！", description: "元気に「ぴょん！」と鳴くよ。", price: 500, img: "img_rabbit_yell", isBought: false)
+                ]
+            default:
+                defaultProducts = []
+            }
+            // ユーザーデフォルトから削除して再セット
+            let productsKey = "\(char)_products"
+            let boughtKey = "\(char)_boughtItem"
+            UserDefaults.standard.removeObject(forKey: productsKey)
+            UserDefaults.standard.removeObject(forKey: boughtKey)
+            user.saveProducts(products: defaultProducts, key: productsKey)
+            user.saveProducts(products: [], key: boughtKey)
+        }
+        // 現在表示中のキャラにも即時反映する
+        loadProducts()
+        updateBoughtProducts()
     }
 }
 

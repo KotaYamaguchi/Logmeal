@@ -9,6 +9,8 @@ enum Homepath: Hashable {
 struct Product: Identifiable, Codable {
     var id = UUID()
     var name: String
+    var displayName: String?
+    var description:String?
     var price: Int
     var img: String
     var isBought: Bool
