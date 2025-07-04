@@ -36,21 +36,7 @@ struct NewCharacterView: View {
                         x: geo.size.width * (1000 / baseSize.width),
                         y: geo.size.height * (600 / baseSize.height)
                     )
-                    
-                    AllGIFView(
-                        geometry: geo,
-                        character: userData.selectedCharacter,
-                        growthStage: userData.currentCharacter.growthStage,
-                        bought: boughtProducts,
-                        gifWidth: $userData.gifWidth,
-                        gifHeight: $userData.gifHeight,
-                        gifData: $gifData,
-                        playGif: $playGif,
-                        gifArray: $gifArray,
-                        timer: $timer,
-                        gifPosition: $gifPosition,
-                        baseGifPosition: $baseGifPosition
-                    )
+                    bgClouds(size: geo.size)
                     .id(refreshID)
 
                     CharacterInfoView(
@@ -68,7 +54,20 @@ struct NewCharacterView: View {
                         x: geo.size.width * (350 / baseSize.width),
                         y: geo.size.height * (300 / baseSize.height)
                     )
-
+                    AllGIFView(
+                        geometry: geo,
+                        character: userData.selectedCharacter,
+                        growthStage: userData.currentCharacter.growthStage,
+                        bought: boughtProducts,
+                        gifWidth: $userData.gifWidth,
+                        gifHeight: $userData.gifHeight,
+                        gifData: $gifData,
+                        playGif: $playGif,
+                        gifArray: $gifArray,
+                        timer: $timer,
+                        gifPosition: $gifPosition,
+                        baseGifPosition: $baseGifPosition
+                    )
                     CloseButton(
                         size: geo.size,
                         character: userData.selectedCharacter,
@@ -162,35 +161,6 @@ struct NewCharacterView: View {
         isProductMigrated = true
         print("=== migrateOldProductsIfNeeded: Complete ===")
     }
-}
-
-// MARK: - GIF Container
-private struct AllGIFView: View {
-    let geometry: GeometryProxy
-    let character: String
-    let growthStage: Int
-    let bought: [Product]
-    @Binding var gifWidth: CGFloat
-    @Binding var gifHeight: CGFloat
-    @Binding var gifData: Data?
-    @Binding var playGif: Bool
-    @Binding var gifArray: [String]
-    @Binding var timer: Timer?
-    @Binding var gifPosition: CGPoint
-    @Binding var baseGifPosition: CGPoint
-
-    @State private var isDrag = false
-
-    var body: some View {
-        ZStack {
-            bgClouds(size: geometry.size)
-            gifView(size: geometry.size)
-        }
-        .onAppear {
-            initializeGif(size: geometry.size)
-        }
-    }
-
     // Background clouds
     private func bgClouds(size: CGSize) -> some View {
         ZStack {
@@ -215,6 +185,35 @@ private struct AllGIFView: View {
         default: return .zero
         }
     }
+}
+
+// MARK: - GIF Container
+private struct AllGIFView: View {
+    let geometry: GeometryProxy
+    let character: String
+    let growthStage: Int
+    let bought: [Product]
+    @Binding var gifWidth: CGFloat
+    @Binding var gifHeight: CGFloat
+    @Binding var gifData: Data?
+    @Binding var playGif: Bool
+    @Binding var gifArray: [String]
+    @Binding var timer: Timer?
+    @Binding var gifPosition: CGPoint
+    @Binding var baseGifPosition: CGPoint
+
+    @State private var isDrag = false
+
+    var body: some View {
+        ZStack {
+            gifView(size: geometry.size)
+        }
+        .onAppear {
+            initializeGif(size: geometry.size)
+        }
+    }
+
+
 
     // GIF character
     @ViewBuilder
