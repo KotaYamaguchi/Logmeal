@@ -61,6 +61,7 @@ struct LogEditView: View {
             // 既存のファイルを上書き
             do {
                 try uiImage.jpegData(compressionQuality: 1.0)?.write(to: imagePath, options: .atomic)
+                print("画像の上書きに成功しました")
             } catch {
                 print("画像の上書きに失敗しました: \(error)")
             }

@@ -55,91 +55,105 @@ struct NewWritingView: View {
         uiImage: UIImage,
         menu: [String]
     ) {
-        let imagePath = getDocumentPath(saveData: uiImage, fileName: dateFormatter(date: saveDay))
-            let newData = AjiwaiCardData(
-                saveDay: saveDay,
-                times: times,
-                sight: sight,
-                taste: taste,
-                smell: smell,
-                tactile: tactile,
-                hearing: hearing,
-                imagePath: imagePath,
-                menu: menu
-            )
-            context.insert(newData)
-            do {
-                try context.save()
-                saveResultMessage = "保存に成功しました！"
-                print("メニュー = \(newData.menu)")
-                print("五感(聴覚) = \(newData.hearing)")
-           
-                    // ① 各文字列の文字数を計算して配列に変換
-                    let characterCounts = editedSenseText.map { $0.count }
-                    // ② その総和を求める
-                    let totalCharacterCount = characterCounts.reduce(0, +)
-                    print("合計文字数\(totalCharacterCount)")
-                    // 経験値更新：10文字につき1exp（バランス調整可能）
-                    updateUserExperience(by: totalCharacterCount)
-                    // ポイント更新：1文字につき1ポイント（バランス調整可能）
-                    updateUserPoints(by: totalCharacterCount)
-                    if user.currentCharacter.level >= 12{
-                        user.currentCharacter.growthStage = 3
-                        user.isGrowthed = true
-                    }else if user.currentCharacter.level >= 5{
-                        user.currentCharacter.growthStage = 2
-                        user.isGrowthed = true
-                    }
-            } catch {
-                print("保存に失敗しました: \(error)")
-                saveResultMessage = "保存に失敗しました…"
+        // 新規作成時のみ一意のファイル名を生成
+        let fileName: String
+        fileName = generateUniqueImageFileName(saveDay: saveDay, timeStamp: times)
+        let imagePath = getDocumentPath(saveData: uiImage, fileName: fileName)
+        print("imagePath:\(imagePath)")
+        let newData = AjiwaiCardData(
+            saveDay: saveDay,
+            times: times,
+            sight: sight,
+            taste: taste,
+            smell: smell,
+            tactile: tactile,
+            hearing: hearing,
+            imagePath: imagePath,
+            menu: menu
+        )
+        context.insert(newData)
+        do {
+            try context.save()
+            saveResultMessage = "保存に成功しました！"
+            print("メニュー = \(newData.menu)")
+            print("五感(聴覚) = \(newData.hearing)")
+            
+            // ① 各文字列の文字数を計算して配列に変換
+            let characterCounts = editedSenseText.map { $0.count }
+            // ② その総和を求める
+            let totalCharacterCount = characterCounts.reduce(0, +)
+            print("合計文字数\(totalCharacterCount)")
+            // 経験値更新：10文字につき1exp（バランス調整可能）
+            updateUserExperience(by: totalCharacterCount)
+            // ポイント更新：1文字につき1ポイント（バランス調整可能）
+            updateUserPoints(by: totalCharacterCount)
+            if user.currentCharacter.level >= 12{
+                user.currentCharacter.growthStage = 3
+                user.isGrowthed = true
+            }else if user.currentCharacter.level >= 5{
+                user.currentCharacter.growthStage = 2
+                user.isGrowthed = true
             }
+        } catch {
+            print("保存に失敗しました: \(error)")
+            saveResultMessage = "保存に失敗しました…"
+        }
         
         
         showSaveResultAlert = true
     }
     // ユーザー経験値の更新処理
-        private func updateUserExperience(by gainedExp: Int) {
-            user.initCharacterData()
-            user.currentCharacter.exp += gainedExp / 10 //　10文字につき1exp
-            
-            let levelThresholds: [Int] = [0, 10, 20, 30, 50, 70, 90, 110, 130, 150, 170, 200, 220, 250, 290, 350]
-            var newLevel = 0
-            // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
-            for threshold in levelThresholds {
-                if user.currentCharacter.exp >= threshold {
-                    newLevel += 1
-                } else {
-                    break
-                }
-            }
-            user.currentCharacter.level = newLevel
-            user.isIncreasedLevel = true
-            switch user.selectedCharacter{
-            case "Dog":
-                user.DogData = user.currentCharacter
-            case "Cat":
-                user.CatData = user.currentCharacter
-            case "Rabbit":
-                user.RabbitData = user.currentCharacter
-            default:
+    private func updateUserExperience(by gainedExp: Int) {
+        user.initCharacterData()
+        user.currentCharacter.exp += gainedExp / 10 //　10文字につき1exp
+        
+        let levelThresholds: [Int] = [0, 10, 20, 30, 50, 70, 90, 110, 130, 150, 170, 200, 220, 250, 290, 350]
+        var newLevel = 0
+        // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
+        for threshold in levelThresholds {
+            if user.currentCharacter.exp >= threshold {
+                newLevel += 1
+            } else {
                 break
             }
-            user.saveAllCharacter()
-            print("獲得経験値: \(gainedExp), 総経験値: \(user.currentCharacter.exp), 新しいレベル: \(user.currentCharacter.level)")
         }
+        user.currentCharacter.level = newLevel
+        user.isIncreasedLevel = true
+        switch user.selectedCharacter{
+        case "Dog":
+            user.DogData = user.currentCharacter
+        case "Cat":
+            user.CatData = user.currentCharacter
+        case "Rabbit":
+            user.RabbitData = user.currentCharacter
+        default:
+            break
+        }
+        user.saveAllCharacter()
+        print("獲得経験値: \(gainedExp), 総経験値: \(user.currentCharacter.exp), 新しいレベル: \(user.currentCharacter.level)")
+    }
     // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
-      private func updateUserPoints(by gainedExp: Int) {
-          // 獲得ポイントは経験値の計算結果を基にスケールする
-          let gainedPoints = gainedExp  / 10 // 10文字につき1ポイント
-          user.point += gainedPoints
-          print("獲得ポイント: \(gainedPoints), 新しいポイント: \(user.point)")
-      }
+    private func updateUserPoints(by gainedExp: Int) {
+        // 獲得ポイントは経験値の計算結果を基にスケールする
+        let gainedPoints = gainedExp  / 10 // 10文字につき1ポイント
+        user.point += gainedPoints
+        print("獲得ポイント: \(gainedPoints), 新しいポイント: \(user.point)")
+    }
+    private func generateUniqueImageFileName(saveDay: Date, timeStamp: TimeStamp) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        let dateString = dateFormatter.string(from: saveDay)
+        let timeString = timeStamp.rawValue // "morning" "lunch" "dinner" など
+        let uuidString = UUID().uuidString
+        print("generateUniqueImageFileName:\(dateString)_\(timeString)_\(uuidString)")
+        return "\(dateString)_\(timeString)_\(uuidString)"
+    }
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
         do {
             try saveData.jpegData(compressionQuality: 1.0)?.write(to: fileURL)
+            print("画像の保存に成功しました")
         } catch {
             print("画像の保存に失敗しました: \(error)")
         }
@@ -182,7 +196,7 @@ struct NewWritingView: View {
                             Text("いつのごはん？")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 25))
                                 .padding(.leading)
-
+                            
                             HStack(spacing: 20) {
                                 ForEach([TimeStamp.morning, .lunch, .dinner], id: \.self) { time in
                                     Button {
@@ -287,25 +301,25 @@ struct NewWritingView: View {
                                 
                             }
                             VStack{
-//                                VStack{
-//                                    Text("ごはんはどうだった？")
-//                                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
-//                                    Text("食べた感想を教えてね！")
-//                                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
-//                                    Image("mt_AjiwaiCard")
-//                                        .resizable()
-//                                        .scaledToFit()
-//                                        .frame(height: geometry.size.height*0.4)
-//                                        .overlay{
-//
-//                                            TextField("カレーの色が家のものと違って明るくて、甘い味でした。フルーツヨーグルトが...",text: $editedText,axis:.vertical)
-//                                                .frame(width: geometry.size.width*0.34,height:geometry.size.height*0.15)
-//                                        }
-//                                }
-//                                .padding()
-//                                .background{
-//                                    backgroundCard(geometry: geometry)
-//                                }
+                                //                                VStack{
+                                //                                    Text("ごはんはどうだった？")
+                                //                                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
+                                //                                    Text("食べた感想を教えてね！")
+                                //                                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                                //                                    Image("mt_AjiwaiCard")
+                                //                                        .resizable()
+                                //                                        .scaledToFit()
+                                //                                        .frame(height: geometry.size.height*0.4)
+                                //                                        .overlay{
+                                //
+                                //                                            TextField("カレーの色が家のものと違って明るくて、甘い味でした。フルーツヨーグルトが...",text: $editedText,axis:.vertical)
+                                //                                                .frame(width: geometry.size.width*0.34,height:geometry.size.height*0.15)
+                                //                                        }
+                                //                                }
+                                //                                .padding()
+                                //                                .background{
+                                //                                    backgroundCard(geometry: geometry)
+                                //                                }
                                 VStack{
                                     VStack{
                                         Text("五感で味わってみよう！")
@@ -349,7 +363,7 @@ struct NewWritingView: View {
                     Spacer()
                     HStack{
                         Spacer()
-                       
+                        
                         Button{
                             if let timeStanp = timeStanp, let uiImage = uiImage {
                                 saveCurrentData(
@@ -363,7 +377,7 @@ struct NewWritingView: View {
                                     uiImage: uiImage,
                                     menu: editedMenu
                                 )
-                                    user.showAnimation = true
+                                user.showAnimation = true
                                 
                             }
                         } label:{
@@ -382,7 +396,7 @@ struct NewWritingView: View {
                             Alert(
                                 title: Text(saveResultMessage ?? ""),
                                 dismissButton: .default(Text("OK")) {
-                                   if saveResultMessage == "保存に成功しました！"{
+                                    if saveResultMessage == "保存に成功しました！"{
                                         dismiss()
                                     }
                                 }
@@ -493,9 +507,9 @@ struct NewWritingView: View {
                     }
             }
             .buttonStyle(PlainButtonStyle())
-        .popover(isPresented: $showDatePicker) {
-            calendarPopoverContent()
-        }
+            .popover(isPresented: $showDatePicker) {
+                calendarPopoverContent()
+            }
         }
     }
     private func changeTimeStamp() -> String{
@@ -510,7 +524,7 @@ struct NewWritingView: View {
             return "ー"
         }
     }
-
+    
     private func labelFor(time: TimeStamp) -> String {
         switch time {
         case .morning:

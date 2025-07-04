@@ -36,7 +36,52 @@ struct NewHomeView: View {
             "bt_add_Dog"
         }
     }
-    @State var isEditing:Bool = false
+    @State private var showDebugPanel = false
+    // 削除処理
+    private func resetAllAjiwaiCardDataAndImages() {
+        // 1. SwiftDataのAjiwaiCardDataを全削除
+        for item in allData {
+            context.delete(item)
+        }
+        try? context.save()
+        // 2. Documentディレクトリの画像ファイルを全削除
+        let fileManager = FileManager.default
+        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        if let fileURLs = try? fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil) {
+            for url in fileURLs where url.pathExtension.lowercased() == "jpeg" {
+                try? fileManager.removeItem(at: url)
+            }
+        }
+    }
+    private func debugPanel() -> some View {
+        // デバッグ用オーバーレイパネル
+        ZStack{
+            VStack{
+                HStack{
+                    VStack(spacing: 20) {
+                        Text("デバッグパネル")
+                            .font(.title)
+                            .foregroundColor(.black)
+                        Button(role: .destructive) {
+                            resetAllAjiwaiCardDataAndImages()
+                        } label: {
+                            Text("AjiwaiCardDataと画像を全て削除")
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.red)
+                                .cornerRadius(10)
+                        }
+                    }
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemGray6)).opacity(0.95))
+                    .frame(maxWidth: 350)
+                    Spacer()
+                }
+                Spacer()
+            }
+            .padding()
+        }
+    }
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -46,7 +91,7 @@ struct NewHomeView: View {
                     logGrid(geometry: geometry)
                 }
                 addLogButton(geometry: geometry)
-                
+                debugPanel()
             }
             .onAppear(){
                 print("ーーーーーーーーーーーーアプリを起動しました！ーーーーーーーーーーーー")
@@ -178,6 +223,9 @@ struct NewHomeView: View {
                                     .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
                             }
                         }
+                    }
+                    .onAppear(){
+                        print(allData[index].imagePath)
                     }
                 }
             }
