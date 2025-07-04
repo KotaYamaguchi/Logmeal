@@ -165,8 +165,9 @@ struct NewHomeView: View {
                             case .success(let image):
                                 image
                                     .resizable()
-                                    .scaledToFit()
-                                    .frame(width: (geometry.size.width * 0.8) / 3)
+                                    .scaledToFill()
+                                    .frame(width: (geometry.size.width * 0.8) / 3,height:(geometry.size.width * 0.8) / 3)
+                                    .clipped()
                             case .failure(_):
                                 Rectangle()
                                     .frame(width: (geometry.size.width * 0.8) / 3, height: geometry.size.height * 0.25)
