@@ -9,7 +9,26 @@ struct NewColumnView: View {
     @EnvironmentObject var user:UserData
     @Query private var allColumn: [ColumnData]
     @Environment(\.modelContext) private var context
-    
+    //キャラごとのコラム追加ボタン
+    private var addButtonImage:String{
+        switch user.currentCharacter.name{
+        case "Dog":"bt_add_Dog"
+        case "Cat":"bt_add_Cat"
+        case "Rabbit":"bt_add_Rabbit"
+        default:
+            "bt_add_Dog"
+        }
+    }
+    private var displayContentColor:Color{
+        switch user.currentCharacter.name {
+        case "Dog": Color(red: 248/255, green: 201/255, blue: 201/255)
+        case "Cat": Color(red: 198/255, green: 166/255, blue: 208/255)
+        case "Rabbit": Color(red: 251/255, green: 233/255, blue: 184/255)
+        default:
+            Color.white
+        }
+    }
+
     private var randomSystemImageName: String {
         let candidates = [
             "fork.knife",
@@ -114,12 +133,12 @@ struct NewColumnView: View {
                                         }
                                     } label: {
                                         RoundedRectangle(cornerRadius: 30)
-                                            .foregroundStyle(Color(red: 243/255, green: 180/255, blue: 187/255))
+                                            .foregroundStyle(displayContentColor)
                                             .frame(width: geometry.size.width * 0.2, height: geometry.size.height * 0.06)
                                             .overlay {
                                                 Text("今日のコラム")
                                                     .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.02))
-                                                    .foregroundStyle(.white)
+                                                    .foregroundStyle(Color.textColor)
                                             }
                                     }
                                     Button {
@@ -147,14 +166,10 @@ struct NewColumnView: View {
                             Button{
                                 showQRscanner = true
                             }label:{
-                                Circle()
-                                    .foregroundStyle(.cyan)
-                                    .frame(width:60)
-                                    .overlay{
-                                        Image(systemName:"plus")
-                                            .font(.system(size: 40))
-                                            .foregroundStyle(.white)
-                                    }
+                                Image(addButtonImage)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width:geometry.size.width*0.1)
                             }
                             .padding(.horizontal)
                             Spacer()
