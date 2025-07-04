@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 import SwiftData
 
-struct NewWritingView: View {
+struct LogEditView: View {
     @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -10,7 +10,7 @@ struct NewWritingView: View {
     @Query private var allMenu:[MenuData]
     @State private var timeStanp:TimeStamp? = nil
     @State private var currentDate: Date = Date()
-    @Binding var showWritingView: Bool
+    @Binding var isEditing: Bool
     @State private var selectedPhotoItem: PhotosPickerItem? = nil
     @State private var uiImage: UIImage? = nil
     @State private var editedText: String = ""
@@ -37,10 +37,6 @@ struct NewWritingView: View {
         Color(red: 139 / 255, green: 194 / 255, blue: 222 / 255),
         Color(red: 196 / 255, green: 160 / 255, blue: 193 / 255)
     ]
-    
-    
-    
-    @Binding var isEditing:Bool
     let dataIndex:Int
     private func dateFormatter(date: Date) -> String {
         let formatter = DateFormatter()
@@ -60,8 +56,14 @@ struct NewWritingView: View {
         uiImage: UIImage,
         menu: [String]
     ) {
-        let imagePath: URL = getDocumentPath(saveData: uiImage, fileName: dateFormatter(date: saveDay))
-        if isEditing {
+        let imagePath: URL
+            imagePath = allData[dataIndex].imagePath
+            // 既存のファイルを上書き
+            do {
+                try uiImage.jpegData(compressionQuality: 1.0)?.write(to: imagePath, options: .atomic)
+            } catch {
+                print("画像の上書きに失敗しました: \(error)")
+            }
             // 各プロパティを更新
             allData[dataIndex].saveDay = saveDay
             allData[dataIndex].time = times
@@ -80,86 +82,8 @@ struct NewWritingView: View {
                 print("保存に失敗しました: \(error)")
                 saveResultMessage = "保存に失敗しました…"
             }
-        }else{
-            let newData = AjiwaiCardData(
-                saveDay: saveDay,
-                times: times,
-                sight: sight,
-                taste: taste,
-                smell: smell,
-                tactile: tactile,
-                hearing: hearing,
-                imagePath: imagePath,
-                menu: menu
-            )
-            context.insert(newData)
-            do {
-                try context.save()
-                saveResultMessage = "保存に成功しました！"
-                print("メニュー = \(newData.menu)")
-                print("五感(聴覚) = \(newData.hearing)")
-           
-                    // ① 各文字列の文字数を計算して配列に変換
-                    let characterCounts = editedSenseText.map { $0.count }
-                    // ② その総和を求める
-                    let totalCharacterCount = characterCounts.reduce(0, +)
-                    print("合計文字数\(totalCharacterCount)")
-                    // 経験値更新：10文字につき1exp（バランス調整可能）
-                    updateUserExperience(by: totalCharacterCount)
-                    // ポイント更新：1文字につき1ポイント（バランス調整可能）
-                    updateUserPoints(by: totalCharacterCount)
-                    if user.currentCharacter.level >= 12{
-                        user.currentCharacter.growthStage = 3
-                        user.isGrowthed = true
-                    }else if user.currentCharacter.level >= 5{
-                        user.currentCharacter.growthStage = 2
-                        user.isGrowthed = true
-                    }
-            } catch {
-                print("保存に失敗しました: \(error)")
-                saveResultMessage = "保存に失敗しました…"
-            }
-        }
-        
         showSaveResultAlert = true
     }
-    // ユーザー経験値の更新処理
-        private func updateUserExperience(by gainedExp: Int) {
-            user.initCharacterData()
-            user.currentCharacter.exp += gainedExp / 10 //　10文字につき1exp
-            
-            let levelThresholds: [Int] = [0, 10, 20, 30, 50, 70, 90, 110, 130, 150, 170, 200, 220, 250, 290, 350]
-            var newLevel = 0
-            // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
-            for threshold in levelThresholds {
-                if user.currentCharacter.exp >= threshold {
-                    newLevel += 1
-                } else {
-                    break
-                }
-            }
-            user.currentCharacter.level = newLevel
-            user.isIncreasedLevel = true
-            switch user.selectedCharacter{
-            case "Dog":
-                user.DogData = user.currentCharacter
-            case "Cat":
-                user.CatData = user.currentCharacter
-            case "Rabbit":
-                user.RabbitData = user.currentCharacter
-            default:
-                break
-            }
-            user.saveAllCharacter()
-            print("獲得経験値: \(gainedExp), 総経験値: \(user.currentCharacter.exp), 新しいレベル: \(user.currentCharacter.level)")
-        }
-    // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
-      private func updateUserPoints(by gainedExp: Int) {
-          // 獲得ポイントは経験値の計算結果を基にスケールする
-          let gainedPoints = gainedExp  / 10 // 10文字につき1ポイント
-          user.point += gainedPoints
-          print("獲得ポイント: \(gainedPoints), 新しいポイント: \(user.point)")
-      }
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
@@ -312,25 +236,6 @@ struct NewWritingView: View {
                                 
                             }
                             VStack{
-//                                VStack{
-//                                    Text("ごはんはどうだった？")
-//                                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
-//                                    Text("食べた感想を教えてね！")
-//                                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
-//                                    Image("mt_AjiwaiCard")
-//                                        .resizable()
-//                                        .scaledToFit()
-//                                        .frame(height: geometry.size.height*0.4)
-//                                        .overlay{
-//
-//                                            TextField("カレーの色が家のものと違って明るくて、甘い味でした。フルーツヨーグルトが...",text: $editedText,axis:.vertical)
-//                                                .frame(width: geometry.size.width*0.34,height:geometry.size.height*0.15)
-//                                        }
-//                                }
-//                                .padding()
-//                                .background{
-//                                    backgroundCard(geometry: geometry)
-//                                }
                                 VStack{
                                     VStack{
                                         Text("五感で味わってみよう！")
@@ -374,7 +279,6 @@ struct NewWritingView: View {
                     Spacer()
                     HStack{
                         Spacer()
-                        if isEditing{
                             Button{
                                 isEditing = false
                             }label: {
@@ -389,7 +293,7 @@ struct NewWritingView: View {
                                             .stroke(Color.red ,lineWidth: 4)
                                     }
                             }
-                        }
+                        
                         Button{
                             if let timeStanp = timeStanp, let uiImage = uiImage {
                                 saveCurrentData(
@@ -422,11 +326,9 @@ struct NewWritingView: View {
                             Alert(
                                 title: Text(saveResultMessage ?? ""),
                                 dismissButton: .default(Text("OK")) {
-                                    if isEditing{
+
                                         isEditing = false
-                                    }else if saveResultMessage == "保存に成功しました！"{
-                                        dismiss()
-                                    }
+                                    
                                 }
                             )
                         }
@@ -435,7 +337,6 @@ struct NewWritingView: View {
                 .padding()
             }
             .onAppear(){
-                if self.isEditing{
                     self.uiImage = getImageByUrl(url: allData[dataIndex].imagePath)
                     self.currentDate = allData[dataIndex].saveDay
                     self.timeStanp = allData[dataIndex].time
@@ -445,13 +346,6 @@ struct NewWritingView: View {
                     self.editedSenseText[3] = allData[dataIndex].taste
                     self.editedSenseText[4] = allData[dataIndex].tactile
                     self.editedMenu = allData[dataIndex].menu
-                }else{
-                    print("allMenu",allMenu.first{$0.day == dateFormatter(date: currentDate)}?.menu
-                    )
-                    print("emptyMenu",editedMenu)
-                    editedMenu = allMenu.first{ $0.day == dateFormatter(date: currentDate)}?.menu ?? []
-                    print("addedMenu",editedMenu)
-                }
             }
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiImage, sourceType: .camera)
@@ -592,14 +486,3 @@ struct NewWritingView: View {
         .frame(width: 450)
     }
 }
-
-//#Preview {
-//    NewWritingView(showWritingView: .constant(true), isEditing: true)
-//        .environmentObject(UserData())
-//        .modelContainer(for: AjiwaiCardData.self)
-//}
-//#Preview {
-//    NewContentView()
-//        .environmentObject(UserData())
-//        .modelContainer(for: AjiwaiCardData.self)
-//}

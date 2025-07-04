@@ -56,11 +56,11 @@ struct NewHomeView: View {
                 showDetailView = (newValue != nil)
             }
             .fullScreenCover(isPresented: $showWritingView) {
-                NewWritingView(showWritingView: $showWritingView,isEditing: $isEditing, dataIndex: 0)
+                NewWritingView(showWritingView: $showWritingView)
             }
             .fullScreenCover(isPresented: $showDetailView) {
                 if let index = selectedIndex {
-                    NewLogDetailView(dataIndex: index)
+                    LogCardlView(dataIndex: index)
                         .onDisappear(){
                             selectedIndex = nil
                         }
@@ -170,11 +170,11 @@ struct NewHomeView: View {
                                     .clipped()
                             case .failure(_):
                                 Rectangle()
-                                    .frame(width: (geometry.size.width * 0.8) / 3, height: geometry.size.height * 0.25)
+                                    .frame(width: (geometry.size.width * 0.8) / 3, height: (geometry.size.width * 0.8) / 3)
                                     .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
                             @unknown default:
                                 Rectangle()
-                                    .frame(width: (geometry.size.width * 0.8) / 3, height: geometry.size.height * 0.25)
+                                    .frame(width: (geometry.size.width * 0.8) / 3, height:(geometry.size.width * 0.8) / 3)
                                     .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
                             }
                         }

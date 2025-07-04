@@ -2,16 +2,14 @@ import SwiftUI
 import SwiftData
 import PhotosUI
 
-struct NewLogDetailView: View {
+struct LogCardlView: View {
     
     @Environment(\.modelContext) private var context
     @EnvironmentObject var user: UserData
     
     @State private var isEditing = false
-    @State var showWritingView:Bool = false
     
     let dataIndex: Int
-//    @Binding var showDetailView: Bool
     @Query private var allData: [AjiwaiCardData]
     
     private let senseIcons = ["mt_Eye_icon", "mt_Ear_icon", "mt_Nose_icon", "mt_Tongue_icon", "mt_Hand_Icon"]
@@ -19,9 +17,9 @@ struct NewLogDetailView: View {
     var body: some View {
         ZStack{
             if isEditing{
-                NewWritingView(showWritingView: $showWritingView, isEditing: $isEditing, dataIndex: dataIndex)
+                LogEditView(isEditing: $isEditing, dataIndex: dataIndex)
             }else{
-                NewLogEditView(dataIndex: dataIndex)
+                LogDetailView(dataIndex: dataIndex)
             }
             VStack{
                 Spacer()
@@ -50,7 +48,7 @@ struct NewLogDetailView: View {
     }
 }
 
-struct NewLogEditView:View {
+struct LogDetailView:View {
     @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -356,9 +354,4 @@ struct NewLogEditView:View {
             return "よる"
         }
     }
-}
-#Preview {
-    NewLogDetailView(dataIndex: 0)
-        .environmentObject(UserData())
-        .modelContainer(for: AjiwaiCardData.self)
 }
