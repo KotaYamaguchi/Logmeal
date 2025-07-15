@@ -102,7 +102,7 @@ class UserData:ObservableObject{
     @Published var showGrowthAnimation:Bool = false
     @Published var showLevelUPAnimation:Bool = false
     @Published var showAnimation:Bool = false
-    
+    let levelThresholds: [Int] = [0, 10, 20, 30, 50, 70, 90, 110, 130, 150, 170, 200, 220, 250, 290, 350]
     //キャラ別管理
     @AppStorage("isCharacterDataMigrated") var isCharacterDataMigrated: Bool = false
     @AppStorage("isFirstCharacterChange") var isFirstCharacterChange: Bool = true

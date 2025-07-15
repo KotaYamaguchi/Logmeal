@@ -107,10 +107,10 @@ struct NewWritingView: View {
         user.initCharacterData()
         user.currentCharacter.exp += gainedExp / 10 //　10文字につき1exp
         
-        let levelThresholds: [Int] = [0, 10, 20, 30, 50, 70, 90, 110, 130, 150, 170, 200, 220, 250, 290, 350]
+       
         var newLevel = 0
         // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
-        for threshold in levelThresholds {
+        for threshold in user.levelThresholds {
             if user.currentCharacter.exp >= threshold {
                 newLevel += 1
             } else {
