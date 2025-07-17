@@ -75,12 +75,12 @@ struct NewCharacterView: View {
                     )
                     // ─────────────────────────────────────────
                     // debug
-                    DebugOverlay()
-                        .environmentObject(userData)
-                        .position(
-                            x: geo.size.width * 0.5,
-                            y: geo.size.height * 0.5
-                        )
+//                    DebugOverlay()
+//                        .environmentObject(userData)
+//                        .position(
+//                            x: geo.size.width * 0.5,
+//                            y: geo.size.height * 0.5
+//                        )
                     // ─────────────────────────────────────────
 
                 }

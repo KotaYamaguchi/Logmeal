@@ -57,32 +57,32 @@ struct LogEditView: View {
         menu: [String]
     ) {
         let imagePath: URL
-            imagePath = allData[dataIndex].imagePath
-            // 既存のファイルを上書き
-            do {
-                try uiImage.jpegData(compressionQuality: 1.0)?.write(to: imagePath, options: .atomic)
-                print("画像の上書きに成功しました")
-            } catch {
-                print("画像の上書きに失敗しました: \(error)")
-            }
-            // 各プロパティを更新
-            allData[dataIndex].saveDay = saveDay
-            allData[dataIndex].time = times
-            allData[dataIndex].sight = sight
-            allData[dataIndex].taste = taste
-            allData[dataIndex].smell = smell
-            allData[dataIndex].tactile = tactile
-            allData[dataIndex].hearing = hearing
-            allData[dataIndex].imagePath = getDocumentPath(saveData: uiImage, fileName: dateFormatter(date: saveDay))
-            allData[dataIndex].menu = menu
-
-            do {
-                try context.save()
-                saveResultMessage = "保存に成功しました！"
-            } catch {
-                print("保存に失敗しました: \(error)")
-                saveResultMessage = "保存に失敗しました…"
-            }
+        imagePath = allData[dataIndex].imagePath
+        // 既存のファイルを上書き
+        do {
+            try uiImage.jpegData(compressionQuality: 1.0)?.write(to: imagePath, options: .atomic)
+            print("画像の上書きに成功しました")
+        } catch {
+            print("画像の上書きに失敗しました: \(error)")
+        }
+        // 各プロパティを更新
+        allData[dataIndex].saveDay = saveDay
+        allData[dataIndex].time = times
+        allData[dataIndex].sight = sight
+        allData[dataIndex].taste = taste
+        allData[dataIndex].smell = smell
+        allData[dataIndex].tactile = tactile
+        allData[dataIndex].hearing = hearing
+        allData[dataIndex].imagePath = getDocumentPath(saveData: uiImage, fileName: dateFormatter(date: saveDay))
+        allData[dataIndex].menu = menu
+        
+        do {
+            try context.save()
+            saveResultMessage = "保存に成功しました！"
+        } catch {
+            print("保存に失敗しました: \(error)")
+            saveResultMessage = "保存に失敗しました…"
+        }
         showSaveResultAlert = true
     }
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
@@ -108,21 +108,37 @@ struct LogEditView: View {
     private func frameSize(for image: UIImage) -> CGSize {
         // ① 画像の縦横比は CGFloat ÷ CGFloat → CGFloat
         let aspectRatio = image.size.width / image.size.height
-
+        
         // ② 比較用定数も CGFloat に揃える
         let targetRatio: CGFloat = 3.0 / 4.0
         let tolerance: CGFloat = 0.01
-
+        
         // ③ 三項演算子の結果を CGFloat にする
         //    ※リテラルを 300.0／400.0 とするか、CGFloat(300)／CGFloat(400) とすれば幅が CGFloat 型になります
         let width: CGFloat = abs(aspectRatio - targetRatio) < tolerance ? 300.0 : 400.0
-
+        
         // ④ 高さは CGFloat ÷ CGFloat
         let height = width / aspectRatio
-
+        
         return CGSize(width: width, height: height)
     }
-
+    
+    
+    @State private var showValidationOverlay = false           // ←追加
+    @State private var validationMessage: String = ""        // ←追加
+    /// 足りない入力項目を列挙する
+    private var missingFields: [String] {
+        var fields: [String] = []
+        if timeStanp == nil {
+            fields.append("「あさ」か「ひる」か「よる」を選んでね")
+        }
+        if uiImage == nil {
+            fields.append("写真をとるかライブラリから選んでね")
+        }
+        // ほかに必須のテキストなどがあれば同様に append
+        return fields
+    }
+    
     var body: some View {
         GeometryReader{ geometry in
             ZStack{
@@ -151,7 +167,7 @@ struct LogEditView: View {
                             Text("いつのごはん？")
                                 .font(.custom("GenJyuuGothicX-Bold", size: 25))
                                 .padding(.leading)
-
+                            
                             HStack(spacing: 20) {
                                 ForEach([TimeStamp.morning, .lunch, .dinner], id: \.self) { time in
                                     Button {
@@ -301,36 +317,41 @@ struct LogEditView: View {
                     Spacer()
                     HStack{
                         Spacer()
-                            Button{
-                                isEditing = false
-                            }label: {
-                                Text("キャンセル")
-                                    .font(.custom("GenJyuuGothicX-Bold",size:15))
-                                    .frame(width: 180, height: 50)
-                                    .background(Color.white)
-                                    .foregroundStyle(Color.red)
-                                    .clipShape(RoundedRectangle(cornerRadius: 15))
-                                    .overlay{
-                                        RoundedRectangle(cornerRadius: 15)
-                                            .stroke(Color.red ,lineWidth: 4)
-                                    }
-                            }
-                        
                         Button{
-                            if let timeStanp = timeStanp, let uiImage = uiImage {
+                            isEditing = false
+                        }label: {
+                            Text("キャンセル")
+                                .font(.custom("GenJyuuGothicX-Bold",size:15))
+                                .frame(width: 180, height: 50)
+                                .background(Color.white)
+                                .foregroundStyle(Color.red)
+                                .clipShape(RoundedRectangle(cornerRadius: 15))
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 15)
+                                        .stroke(Color.red ,lineWidth: 4)
+                                }
+                        }
+                        
+                        Button {
+                            let missing = missingFields
+                            if missing.isEmpty {
+                                // 必須項目がそろっていれば、もともとの保存処理を実行
                                 saveCurrentData(
                                     saveDay: currentDate,
-                                    times: timeStanp,
+                                    times: timeStanp!,
                                     sight: editedSenseText[0],
                                     taste: editedSenseText[3],
                                     smell: editedSenseText[2],
                                     tactile: editedSenseText[4],
                                     hearing: editedSenseText[1],
-                                    uiImage: uiImage,
+                                    uiImage: uiImage!,
                                     menu: editedMenu
                                 )
-                                    user.showAnimation = true
-                                
+                                user.showAnimation = true
+                            } else {
+                                // 足りない項目があれば、改行区切りでメッセージを作ってアラート表示
+                                validationMessage = missing.joined(separator: "\n")
+                                showValidationOverlay = true
                             }
                         } label:{
                             Text("ほぞんする")
@@ -348,8 +369,8 @@ struct LogEditView: View {
                             Alert(
                                 title: Text(saveResultMessage ?? ""),
                                 dismissButton: .default(Text("OK")) {
-
-                                        isEditing = false
+                                    
+                                    isEditing = false
                                     
                                 }
                             )
@@ -359,15 +380,15 @@ struct LogEditView: View {
                 .padding()
             }
             .onAppear(){
-                    self.uiImage = getImageByUrl(url: allData[dataIndex].imagePath)
-                    self.currentDate = allData[dataIndex].saveDay
-                    self.timeStanp = allData[dataIndex].time
-                    self.editedSenseText[0] = allData[dataIndex].sight
-                    self.editedSenseText[1] = allData[dataIndex].hearing
-                    self.editedSenseText[2] = allData[dataIndex].smell
-                    self.editedSenseText[3] = allData[dataIndex].taste
-                    self.editedSenseText[4] = allData[dataIndex].tactile
-                    self.editedMenu = allData[dataIndex].menu
+                self.uiImage = getImageByUrl(url: allData[dataIndex].imagePath)
+                self.currentDate = allData[dataIndex].saveDay
+                self.timeStanp = allData[dataIndex].time
+                self.editedSenseText[0] = allData[dataIndex].sight
+                self.editedSenseText[1] = allData[dataIndex].hearing
+                self.editedSenseText[2] = allData[dataIndex].smell
+                self.editedSenseText[3] = allData[dataIndex].taste
+                self.editedSenseText[4] = allData[dataIndex].tactile
+                self.editedMenu = allData[dataIndex].menu
             }
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiImage, sourceType: .camera)
@@ -381,6 +402,8 @@ struct LogEditView: View {
                     }
                 }
             }
+            .overlay(validationOverlay)
+            .animation(.easeInOut, value: showValidationOverlay)
         }
     }
     @ViewBuilder private func backgroundCard(geometry:GeometryProxy) -> some View{
@@ -461,9 +484,9 @@ struct LogEditView: View {
                     }
             }
             .buttonStyle(PlainButtonStyle())
-        .popover(isPresented: $showDatePicker) {
-            calendarPopoverContent()
-        }
+            .popover(isPresented: $showDatePicker) {
+                calendarPopoverContent()
+            }
         }
     }
     private func changeTimeStamp() -> String{
@@ -478,7 +501,7 @@ struct LogEditView: View {
             return "ー"
         }
     }
-
+    
     private func labelFor(time: TimeStamp) -> String {
         switch time {
         case .morning:
@@ -506,5 +529,39 @@ struct LogEditView: View {
                 .padding()
         }
         .frame(width: 450)
+    }
+    /// バリデーションエラー用の自作オーバーレイ
+    @ViewBuilder
+    private var validationOverlay: some View {
+        if showValidationOverlay {
+            // 1) 背景を半透明で覆う
+            Color.black.opacity(0.6)
+                .ignoresSafeArea()
+            
+            // 2) メッセージ本体
+            VStack(spacing: 20) {
+                Text(validationMessage)
+                    .font(.system(size: 28, weight: .bold))   // ← 修正済み
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                
+                Button("閉じる") {
+                    withAnimation {
+                        showValidationOverlay = false
+                    }
+                }
+                .font(.system(size: 20))
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .clipShape(Capsule())
+            }
+            .padding(20)
+            .background(Color.white.opacity(0.8))
+            .cornerRadius(12)
+            .padding(40)
+            .transition(.opacity)
+        }
     }
 }

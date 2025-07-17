@@ -91,7 +91,7 @@ struct NewHomeView: View {
                     logGrid(geometry: geometry)
                 }
                 addLogButton(geometry: geometry)
-                debugPanel()
+//                debugPanel()
             }
             .onAppear(){
                 print("ーーーーーーーーーーーーアプリを起動しました！ーーーーーーーーーーーー")

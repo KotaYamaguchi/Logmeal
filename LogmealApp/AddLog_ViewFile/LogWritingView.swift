@@ -107,7 +107,7 @@ struct NewWritingView: View {
         user.initCharacterData()
         user.currentCharacter.exp += gainedExp / 10 //　10文字につき1exp
         
-       
+        
         var newLevel = 0
         // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
         for threshold in user.levelThresholds {
@@ -169,23 +169,40 @@ struct NewWritingView: View {
         return UIImage()
     }
     /// 画像の比率から表示すべきフレームサイズを返す
-      private func frameSize(for image: UIImage) -> CGSize {
-          // ① 画像の縦横比は CGFloat ÷ CGFloat → CGFloat
-          let aspectRatio = image.size.width / image.size.height
-
-          // ② 比較用定数も CGFloat に揃える
-          let targetRatio: CGFloat = 3.0 / 4.0
-          let tolerance: CGFloat = 0.01
-
-          // ③ 三項演算子の結果を CGFloat にする
-          //    ※リテラルを 300.0／400.0 とするか、CGFloat(300)／CGFloat(400) とすれば幅が CGFloat 型になります
-          let width: CGFloat = abs(aspectRatio - targetRatio) < tolerance ? 300.0 : 400.0
-
-          // ④ 高さは CGFloat ÷ CGFloat
-          let height = width / aspectRatio
-
-          return CGSize(width: width, height: height)
-      }
+    private func frameSize(for image: UIImage) -> CGSize {
+        // ① 画像の縦横比は CGFloat ÷ CGFloat → CGFloat
+        let aspectRatio = image.size.width / image.size.height
+        
+        // ② 比較用定数も CGFloat に揃える
+        let targetRatio: CGFloat = 3.0 / 4.0
+        let tolerance: CGFloat = 0.01
+        
+        // ③ 三項演算子の結果を CGFloat にする
+        //    ※リテラルを 300.0／400.0 とするか、CGFloat(300)／CGFloat(400) とすれば幅が CGFloat 型になります
+        let width: CGFloat = abs(aspectRatio - targetRatio) < tolerance ? 300.0 : 400.0
+        
+        // ④ 高さは CGFloat ÷ CGFloat
+        let height = width / aspectRatio
+        
+        return CGSize(width: width, height: height)
+    }
+    
+    @State private var showValidationOverlay = false           // ←追加
+    @State private var validationMessage: String = ""        // ←追加
+    
+    /// 足りない入力項目を列挙する
+    private var missingFields: [String] {
+        var fields: [String] = []
+        if timeStanp == nil {
+            fields.append("「あさ」か「ひる」か「よる」を選んでね")
+        }
+        if uiImage == nil {
+            fields.append("写真をとるかライブラリから選んでね")
+        }
+        // ほかに必須のテキストなどがあれば同様に append
+        return fields
+    }
+    
     var body: some View {
         GeometryReader{ geometry in
             ZStack{
@@ -384,21 +401,26 @@ struct NewWritingView: View {
                     HStack{
                         Spacer()
                         
-                        Button{
-                            if let timeStanp = timeStanp, let uiImage = uiImage {
+                        Button {
+                            let missing = missingFields
+                            if missing.isEmpty {
+                                // 必須項目がそろっていれば、もともとの保存処理を実行
                                 saveCurrentData(
                                     saveDay: currentDate,
-                                    times: timeStanp,
+                                    times: timeStanp!,
                                     sight: editedSenseText[0],
                                     taste: editedSenseText[3],
                                     smell: editedSenseText[2],
                                     tactile: editedSenseText[4],
                                     hearing: editedSenseText[1],
-                                    uiImage: uiImage,
+                                    uiImage: uiImage!,
                                     menu: editedMenu
                                 )
                                 user.showAnimation = true
-                                
+                            } else {
+                                // 足りない項目があれば、改行区切りでメッセージを作ってアラート表示
+                                validationMessage = missing.joined(separator: "\n")
+                                showValidationOverlay = true
                             }
                         } label:{
                             Text("ほぞんする")
@@ -422,6 +444,7 @@ struct NewWritingView: View {
                                 }
                             )
                         }
+                        
                     }
                 }
                 .padding()
@@ -447,6 +470,8 @@ struct NewWritingView: View {
                     }
                 }
             }
+            .overlay(validationOverlay)
+            .animation(.easeInOut, value: showValidationOverlay)
         }
     }
     @ViewBuilder private func backgroundCard(geometry:GeometryProxy) -> some View{
@@ -572,6 +597,40 @@ struct NewWritingView: View {
                 .padding()
         }
         .frame(width: 450)
+    }
+    /// バリデーションエラー用の自作オーバーレイ
+    @ViewBuilder
+    private var validationOverlay: some View {
+        if showValidationOverlay {
+            // 1) 背景を半透明で覆う
+            Color.black.opacity(0.6)
+                .ignoresSafeArea()
+            
+            // 2) メッセージ本体
+            VStack(spacing: 20) {
+                Text(validationMessage)
+                    .font(.system(size: 28, weight: .bold))   // ← 修正済み
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                
+                Button("閉じる") {
+                    withAnimation {
+                        showValidationOverlay = false
+                    }
+                }
+                .font(.system(size: 20))
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .clipShape(Capsule())
+            }
+            .padding(20)
+            .background(Color.white.opacity(0.8))
+            .cornerRadius(12)
+            .padding(40)
+            .transition(.opacity)
+        }
     }
 }
 

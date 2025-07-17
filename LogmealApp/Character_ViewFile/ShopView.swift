@@ -84,9 +84,9 @@ struct NewShopView: View {
                     }
                     
                     // debug
-                    debugBorder
-                        .position(x: 120 * scale, y: 100 * scale)
-                        .scaleEffect(scale)
+//                    debugBorder
+//                        .position(x: 120 * scale, y: 100 * scale)
+//                        .scaleEffect(scale)
                 }
             }
             .alert("ポイントが足りません", isPresented: $showInsufficientAlert) {
