@@ -168,6 +168,24 @@ struct NewWritingView: View {
         }
         return UIImage()
     }
+    /// 画像の比率から表示すべきフレームサイズを返す
+      private func frameSize(for image: UIImage) -> CGSize {
+          // ① 画像の縦横比は CGFloat ÷ CGFloat → CGFloat
+          let aspectRatio = image.size.width / image.size.height
+
+          // ② 比較用定数も CGFloat に揃える
+          let targetRatio: CGFloat = 3.0 / 4.0
+          let tolerance: CGFloat = 0.01
+
+          // ③ 三項演算子の結果を CGFloat にする
+          //    ※リテラルを 300.0／400.0 とするか、CGFloat(300)／CGFloat(400) とすれば幅が CGFloat 型になります
+          let width: CGFloat = abs(aspectRatio - targetRatio) < tolerance ? 300.0 : 400.0
+
+          // ④ 高さは CGFloat ÷ CGFloat
+          let height = width / aspectRatio
+
+          return CGSize(width: width, height: height)
+      }
     var body: some View {
         GeometryReader{ geometry in
             ZStack{
@@ -232,18 +250,20 @@ struct NewWritingView: View {
                                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                         .foregroundStyle(.secondary)
                                     if let image = uiImage {
+                                        let size = frameSize(for: image)
                                         Image(uiImage: image)
                                             .resizable()
-                                            .scaledToFit()
-                                            .frame(width: geometry.size.width*0.38)
+                                            .scaledToFill()
+                                            .frame(width: size.width, height: size.height)
                                             .cornerRadius(15)
                                             .shadow(radius: 5)
                                             .padding()
+                                        
                                     } else {
                                         Image("mt_No_Image")
                                             .resizable()
-                                            .scaledToFit()
-                                            .frame(width: geometry.size.width*0.38)
+                                            .scaledToFill()
+                                            .frame(width: 400,height: 300)
                                             .padding()
                                     }
                                     

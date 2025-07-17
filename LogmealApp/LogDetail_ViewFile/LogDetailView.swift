@@ -70,6 +70,29 @@ struct LogDetailView:View {
         return formatter.string(from: date)
     }
     let dataIndex :Int
+    @State private var detailUIImage: UIImage? = nil   // ←追加
+
+       // ① UIImage の URL から読み込むユーティリティ
+       private func getImageByUrl(url: URL) -> UIImage? {
+           guard let data = try? Data(contentsOf: url),
+                 let uiImage = UIImage(data: data) else {
+               return nil
+           }
+           return uiImage
+       }
+
+       // ② アスペクト比に応じたサイズを返す関数（NewWritingView と同じ）
+       private func frameSize(for image: UIImage) -> CGSize {
+           let aspectRatio = image.size.width / image.size.height
+           let tolerance: CGFloat = 0.01
+           // 3:4 に「ほぼ一致」→幅300、その他→幅400
+           let width: CGFloat = abs(aspectRatio - (3.0/4.0)) < tolerance
+               ? 300.0
+               : 400.0
+           let height = width / aspectRatio
+           return CGSize(width: width, height: height)
+       }
+
     var body: some View {
         GeometryReader{ geometry in
             ZStack{
@@ -92,7 +115,7 @@ struct LogDetailView:View {
                         Spacer()
                         dateBar(geometry: geometry)
                     }
-             
+                    
                     ScrollView{
                         HStack(alignment:.top){
                             VStack{
@@ -102,33 +125,26 @@ struct LogDetailView:View {
                                     Text("ごはんの写真を撮ろう！")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                         .foregroundStyle(.secondary)
-                                    AsyncImage(url: allData[dataIndex].imagePath) { phase in
-                                        switch phase {
-                                        case .empty:
-                                            ProgressView()
-                                        case .success(let image):
-                                            image
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: geometry.size.width*0.38)
-                                                .cornerRadius(15)
-                                                .shadow(radius: 5)
-                                                .padding()
-                                        case .failure(_):
-                                            Image("mt_No_Image")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: geometry.size.width*0.38)
-                                                .padding()
-                                        @unknown default:
-                                            Image("mt_No_Image")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: geometry.size.width*0.38)
-                                                .padding()
-                                        }
-                                    }
-                                    
+                                    if let image = detailUIImage {
+                                           // ③ フレームサイズを計算
+                                           let size = frameSize(for: image)
+                                           Image(uiImage: image)
+                                               .resizable()
+                                               .scaledToFill()
+                                               .frame(width: size.width, height: size.height)
+                                               .cornerRadius(15)
+                                               .shadow(radius: 5)
+                                               .padding()
+                                       } else {
+                                           // ロード中 or 失敗時
+                                           Image("mt_No_Image")
+                                               .resizable()
+                                               .scaledToFill()
+                                               .frame(width: 400, height: 300)
+                                               .cornerRadius(15)
+                                               .shadow(radius: 5)
+                                               .padding()
+                                       }
                                 }
                                 .padding()
                                 .background{
@@ -249,6 +265,13 @@ struct LogDetailView:View {
                         .padding()
                     }
                 }
+            }
+            .onAppear {
+                // 非同期化せず同期的にロードしていますが、
+                // サイズ計算だけなら問題ありません
+                detailUIImage = getImageByUrl(
+                    url: allData[dataIndex].imagePath
+                )
             }
         }
     }
