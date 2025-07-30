@@ -1,5 +1,5 @@
 import SwiftUI
-import SwiftyGif
+
 
 struct GrowthAnimationView: View {
     let text1: String
@@ -101,7 +101,7 @@ struct GrowthAnimationView: View {
     }
 }
 import SwiftUI
-import SwiftyGif
+
 
 struct LevelUpAnimationView: View {
     var characterGifName: String
@@ -156,7 +156,7 @@ struct LevelUpAnimationView: View {
     }
 }
 import SwiftUI
-import SwiftyGif
+
 
 struct NormalAnimetionView: View {
     var characterGifName: String

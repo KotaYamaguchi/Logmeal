@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8A92485B2E3A03C70035CA7E /* SwiftyGif in Frameworks */ = {isa = PBXBuildFile; productRef = 8A92485A2E3A03C70035CA7E /* SwiftyGif */; };
 		922970452D958C3E00ADD160 /* LogmealApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922970312D958C3E00ADD160 /* LogmealApp.swift */; };
 		923BC75D2CAAE28200A4FA11 /* prologue 2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */; };
 		924FB1092C5E842B00BB3391 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 924FB1082C5E842B00BB3391 /* Assets.xcassets */; };
@@ -16,9 +17,7 @@
 		9263A6192C85EDA700D9E58F /* bgm_home.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9263A6182C85EDA700D9E58F /* bgm_home.mp3 */; };
 		927950CF2C7C08A30016C77D /* se_negative.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 927950CD2C7C08A30016C77D /* se_negative.mp3 */; };
 		927950D02C7C08A30016C77D /* se_positive.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 927950CE2C7C08A30016C77D /* se_positive.mp3 */; };
-		927DD5652D3F76C0005296EE /* SwiftyGif in Frameworks */ = {isa = PBXBuildFile; productRef = 927DD5642D3F76C0005296EE /* SwiftyGif */; };
 		927DD56A2D3F76D9005296EE /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 927DD5692D3F76D9005296EE /* CodeScanner */; };
-		927DD56D2D3F76FA005296EE /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 927DD56C2D3F76FA005296EE /* ConfettiSwiftUI */; };
 		92EE828A2C74C1AD00080109 /* README_GenJyuu.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92EE82882C74C1AD00080109 /* README_GenJyuu.txt */; };
 		92EE828B2C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 92EE82892C74C1AD00080109 /* SIL_Open_Font_License_1.1.txt */; };
 		92EE828D2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 92EE828C2C74C1BD00080109 /* GenJyuuGothicX-Bold.ttf */; };
@@ -57,9 +56,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				927DD56D2D3F76FA005296EE /* ConfettiSwiftUI in Frameworks */,
 				927DD56A2D3F76D9005296EE /* CodeScanner in Frameworks */,
-				927DD5652D3F76C0005296EE /* SwiftyGif in Frameworks */,
+				8A92485B2E3A03C70035CA7E /* SwiftyGif in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,9 +152,8 @@
 			);
 			name = LogmealApp;
 			packageProductDependencies = (
-				927DD5642D3F76C0005296EE /* SwiftyGif */,
 				927DD5692D3F76D9005296EE /* CodeScanner */,
-				927DD56C2D3F76FA005296EE /* ConfettiSwiftUI */,
+				8A92485A2E3A03C70035CA7E /* SwiftyGif */,
 			);
 			productName = Gohan_Navigation_ver.1;
 			productReference = 92BE0D622B2BFCF200CA50A8 /* LogmealApp.app */;
@@ -187,9 +184,8 @@
 			);
 			mainGroup = 92BE0D592B2BFCF200CA50A8;
 			packageReferences = (
-				927DD5632D3F76C0005296EE /* XCRemoteSwiftPackageReference "SwiftyGif" */,
 				927DD5682D3F76D9005296EE /* XCRemoteSwiftPackageReference "CodeScanner" */,
-				927DD56B2D3F76FA005296EE /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
+				8A9248592E3A03C70035CA7E /* XCRemoteSwiftPackageReference "SwiftyGif" */,
 			);
 			productRefGroup = 92BE0D632B2BFCF200CA50A8 /* Products */;
 			projectDirPath = "";
@@ -358,7 +354,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"LogmealApp/Preview Content\"";
 				DEVELOPMENT_TEAM = N8CX38UQC4;
 				ENABLE_PREVIEWS = YES;
@@ -396,7 +392,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"LogmealApp/Preview Content\"";
 				DEVELOPMENT_TEAM = N8CX38UQC4;
 				ENABLE_PREVIEWS = YES;
@@ -452,9 +448,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		927DD5632D3F76C0005296EE /* XCRemoteSwiftPackageReference "SwiftyGif" */ = {
+		8A9248592E3A03C70035CA7E /* XCRemoteSwiftPackageReference "SwiftyGif" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/alexiscreuzot/SwiftyGif";
+			repositoryURL = "https://github.com/alexiscreuzot/SwiftyGif.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 5.4.5;
@@ -468,31 +464,18 @@
 				minimumVersion = 2.5.2;
 			};
 		};
-		927DD56B2D3F76FA005296EE /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/simibac/ConfettiSwiftUI";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.1;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		927DD5642D3F76C0005296EE /* SwiftyGif */ = {
+		8A92485A2E3A03C70035CA7E /* SwiftyGif */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 927DD5632D3F76C0005296EE /* XCRemoteSwiftPackageReference "SwiftyGif" */;
+			package = 8A9248592E3A03C70035CA7E /* XCRemoteSwiftPackageReference "SwiftyGif" */;
 			productName = SwiftyGif;
 		};
 		927DD5692D3F76D9005296EE /* CodeScanner */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 927DD5682D3F76D9005296EE /* XCRemoteSwiftPackageReference "CodeScanner" */;
 			productName = CodeScanner;
-		};
-		927DD56C2D3F76FA005296EE /* ConfettiSwiftUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 927DD56B2D3F76FA005296EE /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */;
-			productName = ConfettiSwiftUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
