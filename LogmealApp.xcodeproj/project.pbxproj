@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8A92485B2E3A03C70035CA7E /* SwiftyGif in Frameworks */ = {isa = PBXBuildFile; productRef = 8A92485A2E3A03C70035CA7E /* SwiftyGif */; };
+		8A9248A32E3A53310035CA7E /* HideContents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9248A22E3A53310035CA7E /* HideContents.swift */; };
 		922970452D958C3E00ADD160 /* LogmealApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 922970312D958C3E00ADD160 /* LogmealApp.swift */; };
 		923BC75D2CAAE28200A4FA11 /* prologue 2.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */; };
 		924FB1092C5E842B00BB3391 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 924FB1082C5E842B00BB3391 /* Assets.xcassets */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8A9248A22E3A53310035CA7E /* HideContents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HideContents.swift; sourceTree = "<group>"; };
 		922970312D958C3E00ADD160 /* LogmealApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogmealApp.swift; sourceTree = "<group>"; };
 		923BC75C2CAAE28200A4FA11 /* prologue 2.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "prologue 2.mp4"; sourceTree = "<group>"; };
 		924FB1082C5E842B00BB3391 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -79,6 +81,7 @@
 		92BE0D592B2BFCF200CA50A8 = {
 			isa = PBXGroup;
 			children = (
+				8A9248A22E3A53310035CA7E /* HideContents.swift */,
 				92BE0D642B2BFCF200CA50A8 /* LogmealApp */,
 				92BE0D632B2BFCF200CA50A8 /* Products */,
 			);
@@ -223,6 +226,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				922970452D958C3E00ADD160 /* LogmealApp.swift in Sources */,
+				8A9248A32E3A53310035CA7E /* HideContents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
