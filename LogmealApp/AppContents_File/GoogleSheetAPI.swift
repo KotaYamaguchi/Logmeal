@@ -8,7 +8,7 @@ struct SpreadSheetResponse: Codable {
 
 class SpreadSheetManager: ObservableObject {
 
-    private let apiKey = "AIzaSyCbh9sY7BuFymjxUGQ8vlajBaGvgdOctzE"
+    private let apiKey = spredsheetId
     @Published private(set) var spreadSheetResponse = SpreadSheetResponse(range: "", majorDimension: "", values: [[""]])
     
     @MainActor
