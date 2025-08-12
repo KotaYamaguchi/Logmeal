@@ -71,28 +71,72 @@ struct LogDetailView:View {
     }
     let dataIndex :Int
     @State private var detailUIImage: UIImage? = nil   // ←追加
-
-       // ① UIImage の URL から読み込むユーティリティ
-       private func getImageByUrl(url: URL) -> UIImage? {
-           guard let data = try? Data(contentsOf: url),
-                 let uiImage = UIImage(data: data) else {
-               return nil
-           }
-           return uiImage
-       }
-
-       // ② アスペクト比に応じたサイズを返す関数（NewWritingView と同じ）
-       private func frameSize(for image: UIImage) -> CGSize {
-           let aspectRatio = image.size.width / image.size.height
-           let tolerance: CGFloat = 0.01
-           // 3:4 に「ほぼ一致」→幅300、その他→幅400
-           let width: CGFloat = abs(aspectRatio - (3.0/4.0)) < tolerance
-               ? 300.0
-               : 400.0
-           let height = width / aspectRatio
-           return CGSize(width: width, height: height)
-       }
-
+    
+    // ① UIImage の URL から読み込むユーティリティ
+    private func getImageByUrl(url: URL) -> UIImage? {
+        guard let data = try? Data(contentsOf: url),
+              let uiImage = UIImage(data: data) else {
+            return nil
+        }
+        return uiImage
+    }
+    
+    // ② アスペクト比に応じたサイズを返す関数（NewWritingView と同じ）
+    private func frameSize(for image: UIImage) -> CGSize {
+        let aspectRatio = image.size.width / image.size.height
+        let tolerance: CGFloat = 0.01
+        // 3:4 に「ほぼ一致」→幅300、その他→幅400
+        let width: CGFloat = abs(aspectRatio - (3.0/4.0)) < tolerance
+        ? 300.0
+        : 400.0
+        let height = width / aspectRatio
+        return CGSize(width: width, height: height)
+    }
+    // ドキュメントディレクトリから画像ファイルを読み込む関数
+    private func loadImageFromDocumentDirectory(fileName: String) -> UIImage? {
+        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        
+        // ファイル名に.jpeg拡張子が含まれていない場合、追加する
+        let fileNameWithExtension: String
+        if !fileName.hasSuffix(".jpeg") {
+            fileNameWithExtension = fileName + ".jpeg"
+        } else {
+            fileNameWithExtension = fileName
+        }
+        
+        let fileURL = documentURL.appendingPathComponent(fileNameWithExtension)
+        
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return UIImage(data: data)
+        } catch {
+            print("画像の読み込みに失敗しました: \(error)")
+            return nil
+        }
+    }
+    
+    // AjiwaiCardDataから画像を安全に読み込む関数
+    private func loadImageSafely(from ajiwaiCardData: AjiwaiCardData) -> UIImage? {
+        var fileName: String? = nil
+        
+        // 1. 新しい imageFileName プロパティを優先して使用
+        if let newFileName = ajiwaiCardData.imageFileName {
+            fileName = newFileName
+        }
+        // 2. imageFileName が nil の場合、旧 imagePath からファイル名を抽出
+        else if let oldImagePathURL = URL(string: ajiwaiCardData.imagePath.absoluteString) {
+            fileName = oldImagePathURL.lastPathComponent
+        }
+        
+        // ファイル名が取得できなければ、nilを返す
+        guard let finalFileName = fileName else {
+            print("ファイル名が取得できませんでした。")
+            return nil
+        }
+        
+        // loadImageFromDocumentDirectory を使って画像を読み込む
+        return loadImageFromDocumentDirectory(fileName: finalFileName)
+    }
     var body: some View {
         GeometryReader{ geometry in
             ZStack{
@@ -125,26 +169,21 @@ struct LogDetailView:View {
                                     Text("ごはんの写真を撮ろう！")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                         .foregroundStyle(.secondary)
-                                    if let image = detailUIImage {
-                                           // ③ フレームサイズを計算
-                                           let size = frameSize(for: image)
-                                           Image(uiImage: image)
-                                               .resizable()
-                                               .scaledToFill()
-                                               .frame(width: size.width, height: size.height)
-                                               .cornerRadius(15)
-                                               .shadow(radius: 5)
-                                               .padding()
-                                       } else {
-                                           // ロード中 or 失敗時
-                                           Image("mt_No_Image")
-                                               .resizable()
-                                               .scaledToFill()
-                                               .frame(width: 400, height: 300)
-                                               .cornerRadius(15)
-                                               .shadow(radius: 5)
-                                               .padding()
-                                       }
+                                    if let image = loadImageSafely(from: allData[dataIndex]) { // ここで修正したloadImageSafelyを使用
+                                        let size = frameSize(for: image)
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: size.width, height: size.height)
+                                            .clipped()
+                                            .cornerRadius(15)
+                                            .shadow(radius: 5)
+                                    } else {
+                                        Rectangle()
+                                            .frame(width: geometry.size.width * 0.4, height: geometry.size.height * 0.4)
+                                            .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
+                                            .cornerRadius(15)
+                                    }
                                 }
                                 .padding()
                                 .background{

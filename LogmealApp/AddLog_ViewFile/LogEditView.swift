@@ -37,7 +37,14 @@ struct LogEditView: View {
         Color(red: 139 / 255, green: 194 / 255, blue: 222 / 255),
         Color(red: 196 / 255, green: 160 / 255, blue: 193 / 255)
     ]
-    let dataIndex:Int
+
+    let dataIndex: Int // 編集対象のデータのインデックスを受け取る
+    
+    // 編集対象のAjiwaiCardData
+    private var ajiawaiData: AjiwaiCardData {
+        allData[dataIndex]
+    }
+
     private func dateFormatter(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -45,6 +52,89 @@ struct LogEditView: View {
         formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: date)
     }
+
+    // MARK: - 画像保存・読み込みヘルパー関数 (LogEditView内で使用)
+
+    // 画像を保存し、そのファイル名を返す関数
+    private func saveImageToDocumentDirectory(image: UIImage, fileName: String) -> String? {
+        guard let data = image.jpegData(compressionQuality: 1.0) else {
+            print("画像のデータ変換に失敗しました")
+            return nil
+        }
+        
+        do {
+            let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            // ここでファイル名に.jpeg拡張子を付与
+            let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
+            try data.write(to: fileURL)
+            print("画像の保存に成功しました: \(fileURL)")
+            // 拡張子を含んだファイル名を保存用として返す
+            return fileName + ".jpeg"
+        } catch {
+            print("画像の保存に失敗しました: \(error)")
+            return nil
+        }
+    }
+
+    // ドキュメントディレクトリから画像ファイルを読み込む関数
+    private func loadImageFromDocumentDirectory(fileName: String) -> UIImage? {
+        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        
+        // ファイル名に.jpeg拡張子が含まれていない場合、追加する
+        let fileNameWithExtension: String
+        if !fileName.hasSuffix(".jpeg") {
+            fileNameWithExtension = fileName + ".jpeg"
+        } else {
+            fileNameWithExtension = fileName
+        }
+        
+        let fileURL = documentURL.appendingPathComponent(fileNameWithExtension)
+        
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return UIImage(data: data)
+        } catch {
+            print("画像の読み込みに失敗しました: \(error)")
+            return nil
+        }
+    }
+
+    // AjiwaiCardDataから画像を安全に読み込む関数
+    private func loadImageSafely(from ajiwaiCardData: AjiwaiCardData) -> UIImage? {
+        var fileName: String? = nil
+
+        // 1. 新しい imageFileName プロパティを優先して使用
+        if let newFileName = ajiwaiCardData.imageFileName {
+            fileName = newFileName
+        }
+        // 2. imageFileName が nil の場合、旧 imagePath からファイル名を抽出
+        else if let oldImagePathURL = URL(string: ajiwaiCardData.imagePath.absoluteString) {
+            fileName = oldImagePathURL.lastPathComponent
+        }
+
+        // ファイル名が取得できなければ、nilを返す
+        guard let finalFileName = fileName else {
+            print("ファイル名が取得できませんでした。")
+            return nil
+        }
+
+        // loadImageFromDocumentDirectory を使って画像を読み込む
+        return loadImageFromDocumentDirectory(fileName: finalFileName)
+    }
+
+    // 一意なファイル名を生成する関数（拡張子なし）
+    private func generateUniqueImageFileName(saveDay: Date, timeStamp: TimeStamp) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd"
+        let dateString = dateFormatter.string(from: saveDay)
+        let timeString = timeStamp.rawValue
+        let uuidString = UUID().uuidString
+        print("generateUniqueImageFileName:\(dateString)_\(timeString)_\(uuidString)")
+        // ここでは拡張子を含めずにファイル名を返す
+        return "\(dateString)_\(timeString)_\(uuidString)"
+    }
+
+
     func saveCurrentData(
         saveDay: Date,
         times: TimeStamp,
@@ -56,44 +146,98 @@ struct LogEditView: View {
         uiImage: UIImage,
         menu: [String]
     ) {
-        let imagePath: URL
-        imagePath = allData[dataIndex].imagePath
-        // 既存のファイルを上書き
-        do {
-            try uiImage.jpegData(compressionQuality: 1.0)?.write(to: imagePath, options: .atomic)
-            print("画像の上書きに成功しました")
-        } catch {
-            print("画像の上書きに失敗しました: \(error)")
+        // 既存のデータを更新
+        ajiawaiData.saveDay = saveDay
+        ajiawaiData.time = times
+        ajiawaiData.sight = sight
+        ajiawaiData.taste = taste
+        ajiawaiData.smell = smell
+        ajiawaiData.tactile = tactile
+        ajiawaiData.hearing = hearing
+        ajiawaiData.menu = menu
+
+        // 画像が変更された場合のみ再保存
+        if let currentUIImage = self.uiImage, currentUIImage == uiImage {
+            // 画像は変更されていないので何もしない
+            print("画像は変更されていません。")
+        } else {
+            // 画像が変更されたか、または新規設定された場合
+            let fileName = generateUniqueImageFileName(saveDay: saveDay, timeStamp: times)
+            if let savedFileNameWithExtension = saveImageToDocumentDirectory(image: uiImage, fileName: fileName) {
+                ajiawaiData.imagePath = URL(string: "file://dummy_old_path")! // 旧バージョン互換性のためダミーURLを更新
+                ajiawaiData.imageFileName = savedFileNameWithExtension // 新しいファイル名を更新
+            } else {
+                saveResultMessage = "画像の保存に失敗しました"
+                showSaveResultAlert = true
+                return
+            }
         }
-        // 各プロパティを更新
-        allData[dataIndex].saveDay = saveDay
-        allData[dataIndex].time = times
-        allData[dataIndex].sight = sight
-        allData[dataIndex].taste = taste
-        allData[dataIndex].smell = smell
-        allData[dataIndex].tactile = tactile
-        allData[dataIndex].hearing = hearing
-        allData[dataIndex].imagePath = getDocumentPath(saveData: uiImage, fileName: dateFormatter(date: saveDay))
-        allData[dataIndex].menu = menu
-        
+
         do {
             try context.save()
             saveResultMessage = "保存に成功しました！"
+            print("メニュー = \(ajiawaiData.menu)")
+            print("五感(聴覚) = \(ajiawaiData.hearing)")
+            
+            // ① 各文字列の文字数を計算して配列に変換
+            let characterCounts = editedSenseText.map { $0.count }
+            // ② その総和を求める
+            let totalCharacterCount = characterCounts.reduce(0, +)
+            print("合計文字数\(totalCharacterCount)")
+            // 経験値更新：10文字につき1exp（バランス調整可能）
+            updateUserExperience(by: totalCharacterCount)
+            // ポイント更新：1文字につき1ポイント（バランス調整可能）
+            updateUserPoints(by: totalCharacterCount)
+            if user.currentCharacter.level >= 12{
+                user.currentCharacter.growthStage = 3
+                user.isGrowthed = true
+            }else if user.currentCharacter.level >= 5{
+                user.currentCharacter.growthStage = 2
+                user.isGrowthed = true
+            }
         } catch {
             print("保存に失敗しました: \(error)")
             saveResultMessage = "保存に失敗しました…"
         }
+        
         showSaveResultAlert = true
     }
-    private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
-        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
-        do {
-            try saveData.jpegData(compressionQuality: 1.0)?.write(to: fileURL)
-        } catch {
-            print("画像の保存に失敗しました: \(error)")
+    // ユーザー経験値の更新処理
+    private func updateUserExperience(by gainedExp: Int) {
+        user.initCharacterData()
+        user.currentCharacter.exp += gainedExp / 10 //　10文字につき1exp
+        
+        
+        var newLevel = 0
+        // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
+        for threshold in user.levelThresholds {
+            if user.currentCharacter.exp >= threshold {
+                newLevel += 1
+            } else {
+                break
+            }
         }
-        return fileURL
+        user.currentCharacter.level = newLevel
+        user.isIncreasedLevel = true
+        switch user.selectedCharacter{
+        case "Dog":
+            user.DogData = user.currentCharacter
+        case "Cat":
+            user.CatData = user.currentCharacter
+        case "Rabbit":
+            user.RabbitData = user.currentCharacter
+        default:
+            break
+        }
+        user.saveAllCharacter()
+        print("獲得経験値: \(gainedExp), 総経験値: \(user.currentCharacter.exp), 新しいレベル: \(user.currentCharacter.level)")
+    }
+    // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
+    private func updateUserPoints(by gainedExp: Int) {
+        // 獲得ポイントは経験値の計算結果を基にスケールする
+        let gainedPoints = gainedExp  / 10 // 10文字につき1ポイント
+        user.point += gainedPoints
+        print("獲得ポイント: \(gainedPoints), 新しいポイント: \(user.point)")
     }
     func getImageByUrl(url: URL) -> UIImage{
         do {
@@ -123,9 +267,9 @@ struct LogEditView: View {
         return CGSize(width: width, height: height)
     }
     
+    @State private var showValidationOverlay = false          // ←追加
+    @State private var validationMessage: String = ""       // ←追加
     
-    @State private var showValidationOverlay = false           // ←追加
-    @State private var validationMessage: String = ""        // ←追加
     /// 足りない入力項目を列挙する
     private var missingFields: [String] {
         var fields: [String] = []
@@ -150,7 +294,7 @@ struct LogEditView: View {
                 VStack{
                     HStack{
                         Button{
-                            dismiss()
+                            isEditing = false // 編集モードを終了
                         }label:{
                             Image("bt_close")
                                 .resizable()
@@ -211,12 +355,12 @@ struct LogEditView: View {
                                             .cornerRadius(15)
                                             .shadow(radius: 5)
                                             .padding()
+                                        
                                     } else {
-                                        // 画像なし時のプレースホルダー
                                         Image("mt_No_Image")
                                             .resizable()
                                             .scaledToFill()
-                                            .frame(width: 400, height: 300)
+                                            .frame(width: 400,height: 300)
                                             .padding()
                                     }
                                     
@@ -317,20 +461,6 @@ struct LogEditView: View {
                     Spacer()
                     HStack{
                         Spacer()
-                        Button{
-                            isEditing = false
-                        }label: {
-                            Text("キャンセル")
-                                .font(.custom("GenJyuuGothicX-Bold",size:15))
-                                .frame(width: 180, height: 50)
-                                .background(Color.white)
-                                .foregroundStyle(Color.red)
-                                .clipShape(RoundedRectangle(cornerRadius: 15))
-                                .overlay{
-                                    RoundedRectangle(cornerRadius: 15)
-                                        .stroke(Color.red ,lineWidth: 4)
-                                }
-                        }
                         
                         Button {
                             let missing = missingFields
@@ -369,26 +499,29 @@ struct LogEditView: View {
                             Alert(
                                 title: Text(saveResultMessage ?? ""),
                                 dismissButton: .default(Text("OK")) {
-                                    
-                                    isEditing = false
-                                    
+                                    if saveResultMessage == "保存に成功しました！"{
+                                        isEditing = false // 保存成功時に編集モードを終了
+                                    }
                                 }
                             )
                         }
+                        
                     }
                 }
                 .padding()
             }
             .onAppear(){
-                self.uiImage = getImageByUrl(url: allData[dataIndex].imagePath)
-                self.currentDate = allData[dataIndex].saveDay
-                self.timeStanp = allData[dataIndex].time
-                self.editedSenseText[0] = allData[dataIndex].sight
-                self.editedSenseText[1] = allData[dataIndex].hearing
-                self.editedSenseText[2] = allData[dataIndex].smell
-                self.editedSenseText[3] = allData[dataIndex].taste
-                self.editedSenseText[4] = allData[dataIndex].tactile
-                self.editedMenu = allData[dataIndex].menu
+                // 編集対象のデータから初期値をセット
+                currentDate = ajiawaiData.saveDay
+                timeStanp = ajiawaiData.time
+                editedSenseText[0] = ajiawaiData.sight
+                editedSenseText[1] = ajiawaiData.hearing
+                editedSenseText[2] = ajiawaiData.smell
+                editedSenseText[3] = ajiawaiData.taste
+                editedSenseText[4] = ajiawaiData.tactile
+                editedMenu = ajiawaiData.menu
+                
+                self.uiImage = loadImageSafely(from: ajiawaiData) // 初期画像を設定
             }
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiImage, sourceType: .camera)
@@ -541,7 +674,7 @@ struct LogEditView: View {
             // 2) メッセージ本体
             VStack(spacing: 20) {
                 Text(validationMessage)
-                    .font(.system(size: 28, weight: .bold))   // ← 修正済み
+                    .font(.system(size: 28, weight: .bold))  // ← 修正済み
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                 
