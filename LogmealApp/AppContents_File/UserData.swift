@@ -6,7 +6,7 @@ class UserData:ObservableObject{
     @AppStorage("class") var yourClass:String = ""
     @AppStorage("age") var age:Int = 6
     @AppStorage("sex") var gender:String = ""
-    @AppStorage("userImage") var userImage:URL?
+    @AppStorage("userImage") var userImage:String?
     @AppStorage("isLogined") var isLogined:Bool = false
     @Published var isTeacher:Bool = false
     @AppStorage("lastPointAddedDate") var lastRewardGotDate: String = ""

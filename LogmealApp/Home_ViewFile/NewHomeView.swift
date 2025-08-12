@@ -89,6 +89,38 @@ struct NewHomeView: View {
             return nil
         }
     }
+    private func loadUserImage(from fileName: String?) -> UIImage? {
+        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        var fileName: String? = nil
+
+        // 新しいimageFileNameプロパティを優先して使用
+        if let newFileName = fileName {
+            fileName = newFileName
+        }
+
+        // ファイル名が取得できなければ、nilを返す
+        guard let finalFileName = fileName else {
+            print("ファイル名が取得できませんでした。")
+            return nil
+        }
+
+        // ドキュメントディレクトリとファイル名を組み合わせて画像のURLを生成
+        let fileURL: URL
+        // ここで拡張子を付与する
+        if finalFileName.hasSuffix(".jpeg") {
+            fileURL = documentURL.appendingPathComponent(finalFileName)
+        } else {
+            fileURL = documentURL.appendingPathComponent(finalFileName + ".jpeg")
+        }
+
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return UIImage(data: data)
+        } catch {
+            print("画像の読み込みに失敗しました: \(error)")
+            return nil
+        }
+    }
     private func debugPanel() -> some View {
         // デバッグ用オーバーレイパネル
         ZStack{
@@ -163,43 +195,23 @@ struct NewHomeView: View {
         HStack{
             Spacer()
             VStack(spacing: 0){
-                AsyncImage(url: user.userImage) { phase in
-                    switch phase {
-                    case .empty:
-                        Image("no_user_image")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geometry.size.width * 0.2)
-                            .overlay {
-                                Circle()
-                                    .stroke(displayContentColor, lineWidth: 5)
-                            }
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geometry.size.width * 0.2)
-                            .clipShape(Circle())
-                    case .failure(_):
-                        Image("no_user_image")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geometry.size.width * 0.2)
-                            .overlay {
-                                Circle()
-                                    .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
-                            }
-                    @unknown default:
-                        Image("no_user_image")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geometry.size.width * 0.2)
-                            .overlay {
-                                Circle()
-                                    .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
-                            }
-                    }
+                if let image = loadUserImage(from: user.userImage) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geometry.size.width * 0.2)
+                        .clipShape(Circle())
+                }else{
+                    Image("no_user_image")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: geometry.size.width * 0.2)
+                        .overlay {
+                            Circle()
+                                .stroke(displayContentColor, lineWidth: 5)
+                        }
                 }
+            
                 Text("\(user.name)")
                     .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.03))
                     

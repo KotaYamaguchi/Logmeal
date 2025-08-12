@@ -301,19 +301,36 @@ struct ForstProfileSetView:View {
             userData.yourClass = self.userClass
             let intGrade = self.userGrade ?? 1
             userData.grade = String(intGrade)
-            userData.userImage = getDocumentPath(saveData: userImage, fileName: "userImage")
+            userData.userImage =  saveImageToDocumentDirectory(image: userImage, fileName: generateUniqueImageFileName())
         }
     }
-    private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
-        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
+    private func generateUniqueImageFileName() -> String {
+        let uuidString = UUID().uuidString
+        let fileName = "UserImage" + uuidString
+        // .jpeg拡張子をつけない
+        return fileName
+    }
+    
+    //動的ドキュメントパスで画像をsave laodする
+    // 画像を保存し、そのファイル名を返す関数
+    private func saveImageToDocumentDirectory(image: UIImage, fileName: String) -> String? {
+        guard let data = image.jpegData(compressionQuality: 1.0) else {
+            print("画像のデータ変換に失敗しました")
+            return nil
+        }
+        
         do {
-            try saveData.jpegData(compressionQuality: 1.0)?.write(to: fileURL)
+            let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
+            try data.write(to: fileURL)
+            print("画像の保存に成功しました: \(fileURL)")
+            return fileName
         } catch {
             print("画像の保存に失敗しました: \(error)")
+            return nil
         }
-        return fileURL
     }
+
     private func startWobbleAnimation() {
         Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { _ in
             withAnimation(.easeInOut(duration: 1.0)) {

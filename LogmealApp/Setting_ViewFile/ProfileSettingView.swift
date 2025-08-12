@@ -285,23 +285,67 @@ struct ProfileSettingView: View {
         "ヘロイン"
     ]
     private func saveNewProfile(){
-        if let userImage = self.userImage{
             userData.name = self.userName
             userData.age = self.userAge
             userData.yourClass = self.userClass
             userData.grade = self.userGrade
-            userData.userImage = getDocumentPath(saveData: userImage, fileName: "userImage")
-        }
+            if let userImage = self.userImage{
+                userData.userImage =  saveImageToDocumentDirectory(image: userImage, inputFileName: generateUniqueImageFileName())
+            }
+            
     }
-    private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
-        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
+    private func generateUniqueImageFileName() -> String {
+        let uuidString = UUID().uuidString
+        let fileName = "UserImage" + uuidString
+        // .jpeg拡張子をつけない
+        return fileName
+    }
+    
+    //動的ドキュメントパスで画像をsave laodする
+    // 画像を保存し、そのファイル名を返す関数
+    private func saveImageToDocumentDirectory(image: UIImage, inputFileName: String) -> String? {
+        guard let data = image.jpegData(compressionQuality: 1.0) else {
+            print("画像のデータ変換に失敗しました")
+            return nil
+        }
+        
         do {
-            try saveData.jpegData(compressionQuality: 1.0)?.write(to: fileURL)
+            let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let fileURL = documentURL.appendingPathComponent(inputFileName + ".jpeg")
+            try data.write(to: fileURL)
+            print("画像の保存に成功しました: \(fileURL)")
+            return inputFileName
         } catch {
             print("画像の保存に失敗しました: \(error)")
+            return nil
         }
-        return fileURL
+    }
+    private func loadUserImage(from inputFileName: String?) -> UIImage? { // パラメータ名を変更
+        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        
+        // 引数の inputFileName を直接使う
+        guard let finalFileName = inputFileName else {
+            print("ファイル名が取得できませんでした。")
+            return nil
+        }
+
+        // ファイル名に.jpeg拡張子が含まれていない場合、追加する
+        let fileNameWithExtension: String
+        if !finalFileName.hasSuffix(".jpeg") {
+            fileNameWithExtension = finalFileName + ".jpeg"
+        } else {
+            fileNameWithExtension = finalFileName
+        }
+        
+        let fileURL = documentURL.appendingPathComponent(fileNameWithExtension)
+        
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return UIImage(data: data)
+        } catch {
+            print("画像の読み込みに失敗しました: \(error)")
+            return nil
+        }
     }
     var body: some View {
         GeometryReader{ geometry in
@@ -334,59 +378,28 @@ struct ProfileSettingView: View {
                                 .padding(.vertical,35)
                         }
                     }else{
-                        AsyncImage(url: userData.userImage) { phase in
-                            switch phase {
-                            case .empty:
-                                Image("no_user_image")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: geometry.size.width * 0.2)
-                                    .overlay {
-                                        Circle()
-                                            .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
-                                    }
-                            case .success(let image):
-                                // 画像サイズ取得用
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width:asyncImageSize?.width ?? 1 < asyncImageSize?.height ?? 0 ? geometry.size.width * 0.2 : geometry.size.width * 0.28)
-                                    .clipShape(Circle())
-                                    .padding(.vertical, asyncImageSize?.width ?? 1 < asyncImageSize?.height ?? 0 ? 0 :35)
-                                    .background(
-                                        GeometryReader { geo in
-                                            Color.clear
-                                                .onAppear {
-                                                    if asyncImageSize == nil {
-                                                        // UIImageを取得してサイズ判定
-                                                        if let url = userData.userImage,
-                                                            let data = try? Data(contentsOf: url),
-                                                            let uiImage = UIImage(data: data) {
-                                                            asyncImageSize = uiImage.size
-                                                        }
+                        if let currentUserImage = loadUserImage(from: userData.userImage) {
+                            Image(uiImage: currentUserImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width:asyncImageSize?.width ?? 1 < asyncImageSize?.height ?? 0 ? geometry.size.width * 0.2 : geometry.size.width * 0.28)
+                                .clipShape(Circle())
+                                .padding(.vertical, asyncImageSize?.width ?? 1 < asyncImageSize?.height ?? 0 ? 0 :35)
+                                .background(
+                                    GeometryReader { geo in
+                                        Color.clear
+                                            .onAppear {
+                                                if asyncImageSize == nil {
+                                                    // UIImageを取得してサイズ判定
+                                                    if let currentUserImage = loadUserImage(from: userData.userImage){
+                                                  
+                                                            asyncImageSize = currentUserImage.size
+                                                        
                                                     }
                                                 }
-                                        }
-                                    )
-                            case .failure(_):
-                                Image("no_user_image")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: geometry.size.width * 0.2)
-                                    .overlay {
-                                        Circle()
-                                            .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
+                                            }
                                     }
-                            @unknown default:
-                                Image("no_user_image")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: geometry.size.width * 0.2)
-                                    .overlay {
-                                        Circle()
-                                            .stroke(Color(red: 236/255, green: 178/255, blue: 183/255), lineWidth: 5)
-                                    }
-                            }
+                                )
                         }
                     }
                     
