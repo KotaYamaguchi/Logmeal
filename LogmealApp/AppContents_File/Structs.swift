@@ -53,11 +53,12 @@ enum TimeStamp:String, Codable{
     var hearing:String
     var imagePath:URL
     var menu:[String]
+    var imageFileName:String?
     
     @Transient
     var lunchComments:String = ""
     
-    init(uuid: UUID? = nil,saveDay: Date, times: TimeStamp? = .lunch, sight: String, taste: String, smell: String, tactile: String, hearing: String, imagePath: URL, menu: [String]) {
+    init(uuid: UUID? = nil,saveDay: Date, times: TimeStamp? = .lunch, sight: String, taste: String, smell: String, tactile: String, hearing: String, imagePath: URL, menu: [String],imageFileName: String? = nil) {
         self.uuid = uuid
         self.saveDay = saveDay
         self.time = times
@@ -68,6 +69,7 @@ enum TimeStamp:String, Codable{
         self.hearing = hearing
         self.imagePath = imagePath
         self.menu = menu
+        self.imageFileName = imageFileName
     }
 }
 

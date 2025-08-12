@@ -53,6 +53,42 @@ struct NewHomeView: View {
             }
         }
     }
+    private func loadImageSafely(from ajiwaiCardData: AjiwaiCardData) -> UIImage? {
+        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        var fileName: String? = nil
+
+        // 新しいimageFileNameプロパティを優先して使用
+        if let newFileName = ajiwaiCardData.imageFileName {
+            fileName = newFileName
+        }
+        // imageFileNameがnilの場合、旧imagePathからファイル名を抽出
+        else if let oldImagePathURL = URL(string: ajiwaiCardData.imagePath.absoluteString) {
+            fileName = oldImagePathURL.lastPathComponent
+        }
+
+        // ファイル名が取得できなければ、nilを返す
+        guard let finalFileName = fileName else {
+            print("ファイル名が取得できませんでした。")
+            return nil
+        }
+
+        // ドキュメントディレクトリとファイル名を組み合わせて画像のURLを生成
+        let fileURL: URL
+        // ここで拡張子を付与する
+        if finalFileName.hasSuffix(".jpeg") {
+            fileURL = documentURL.appendingPathComponent(finalFileName)
+        } else {
+            fileURL = documentURL.appendingPathComponent(finalFileName + ".jpeg")
+        }
+
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return UIImage(data: data)
+        } catch {
+            print("画像の読み込みに失敗しました: \(error)")
+            return nil
+        }
+    }
     private func debugPanel() -> some View {
         // デバッグ用オーバーレイパネル
         ZStack{
@@ -166,7 +202,7 @@ struct NewHomeView: View {
                 }
                 Text("\(user.name)")
                     .font(.custom("GenJyuuGothicX-Bold", size: geometry.size.width * 0.03))
-                    .offset(y:-geometry.size.height*0.07)
+                    
             }
             VStack {
                 HStack {
@@ -203,25 +239,36 @@ struct NewHomeView: View {
                             selectedIndex = index
                         }
                     } label: {
-                        AsyncImage(url: allData[index].imagePath) { phase in
-                            switch phase {
-                            case .empty:
-                                ProgressView()
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: (geometry.size.width * 0.8) / 3,height:(geometry.size.width * 0.8) / 3)
-                                    .clipped()
-                            case .failure(_):
-                                Rectangle()
-                                    .frame(width: (geometry.size.width * 0.8) / 3, height: (geometry.size.width * 0.8) / 3)
-                                    .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
-                            @unknown default:
-                                Rectangle()
-                                    .frame(width: (geometry.size.width * 0.8) / 3, height:(geometry.size.width * 0.8) / 3)
-                                    .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
-                            }
+//                        AsyncImage(url: allData[index].imagePath) { phase in
+//                            switch phase {
+//                            case .empty:
+//                                ProgressView()
+//                            case .success(let image):
+//                                image
+//                                    .resizable()
+//                                    .scaledToFill()
+//                                    .frame(width: (geometry.size.width * 0.8) / 3,height:(geometry.size.width * 0.8) / 3)
+//                                    .clipped()
+//                            case .failure(_):
+//                                Rectangle()
+//                                    .frame(width: (geometry.size.width * 0.8) / 3, height: (geometry.size.width * 0.8) / 3)
+//                                    .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
+//                            @unknown default:
+//                                Rectangle()
+//                                    .frame(width: (geometry.size.width * 0.8) / 3, height:(geometry.size.width * 0.8) / 3)
+//                                    .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
+//                            }
+//                        }
+                        if let image = loadImageSafely(from: allData[index]) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: (geometry.size.width * 0.8) / 3, height: (geometry.size.width * 0.8) / 3)
+                                .clipped()
+                        } else {
+                            Rectangle()
+                                .frame(width: (geometry.size.width * 0.8) / 3, height: (geometry.size.width * 0.8) / 3)
+                                .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
                         }
                     }
                     .onAppear(){

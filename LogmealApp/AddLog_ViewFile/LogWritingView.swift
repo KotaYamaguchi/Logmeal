@@ -55,11 +55,16 @@ struct NewWritingView: View {
         uiImage: UIImage,
         menu: [String]
     ) {
-        // 新規作成時のみ一意のファイル名を生成
-        let fileName: String
-        fileName = generateUniqueImageFileName(saveDay: saveDay, timeStamp: times)
-        let imagePath = getDocumentPath(saveData: uiImage, fileName: fileName)
-        print("imagePath:\(imagePath)")
+        // 最初にユニークなファイル名を生成
+        let fileName = generateUniqueImageFileName(saveDay: saveDay, timeStamp: times)
+
+        // 新しい関数を使って画像を保存し、ファイル名を取得
+        guard let savedFileName = saveImageToDocumentDirectory(image: uiImage, fileName: fileName) else {
+            saveResultMessage = "画像の保存に失敗しました"
+            showSaveResultAlert = true
+            return
+        }
+
         let newData = AjiwaiCardData(
             saveDay: saveDay,
             times: times,
@@ -68,8 +73,9 @@ struct NewWritingView: View {
             smell: smell,
             tactile: tactile,
             hearing: hearing,
-            imagePath: imagePath,
-            menu: menu
+            imagePath: URL(string: "file://dummy")!, // 仮のURLを保存
+            menu: menu,
+            imageFileName: savedFileName // ファイル名を保存
         )
         context.insert(newData)
         do {
@@ -143,9 +149,10 @@ struct NewWritingView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         let dateString = dateFormatter.string(from: saveDay)
-        let timeString = timeStamp.rawValue // "morning" "lunch" "dinner" など
+        let timeString = timeStamp.rawValue
         let uuidString = UUID().uuidString
         print("generateUniqueImageFileName:\(dateString)_\(timeString)_\(uuidString)")
+        // .jpeg拡張子をつけない
         return "\(dateString)_\(timeString)_\(uuidString)"
     }
     private func getDocumentPath(saveData: UIImage, fileName: String) -> URL {
@@ -167,6 +174,58 @@ struct NewWritingView: View {
             print("Error : \(err.localizedDescription)")
         }
         return UIImage()
+    }
+    
+    //動的ドキュメントパスで画像をsave laodする
+    // 画像を保存し、そのファイル名を返す関数
+    private func saveImageToDocumentDirectory(image: UIImage, fileName: String) -> String? {
+        guard let data = image.jpegData(compressionQuality: 1.0) else {
+            print("画像のデータ変換に失敗しました")
+            return nil
+        }
+        
+        do {
+            let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let fileURL = documentURL.appendingPathComponent(fileName + ".jpeg")
+            try data.write(to: fileURL)
+            print("画像の保存に成功しました: \(fileURL)")
+            return fileName
+        } catch {
+            print("画像の保存に失敗しました: \(error)")
+            return nil
+        }
+    }
+
+    // ドキュメントディレクトリから画像ファイルを読み込む関数
+    private func loadImageSafely(from ajiwaiCardData: AjiwaiCardData) -> UIImage? {
+        let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        var fileName: String? = nil
+
+        // 新しいimageFileNameプロパティを優先して使用
+        if let newFileName = ajiwaiCardData.imageFileName {
+            fileName = newFileName
+        }
+        // imageFileNameがnilの場合、旧imagePathからファイル名を抽出
+        else if let oldImagePathURL = URL(string: ajiwaiCardData.imagePath.absoluteString) {
+            fileName = oldImagePathURL.lastPathComponent
+        }
+
+        // ファイル名が取得できなければ、nilを返す
+        guard let finalFileName = fileName else {
+            print("ファイル名が取得できませんでした。")
+            return nil
+        }
+
+        // ドキュメントディレクトリとファイル名を組み合わせて画像のURLを生成
+        let fileURL = documentURL.appendingPathComponent(finalFileName)
+
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return UIImage(data: data)
+        } catch {
+            print("画像の読み込みに失敗しました: \(error)")
+            return nil
+        }
     }
     /// 画像の比率から表示すべきフレームサイズを返す
     private func frameSize(for image: UIImage) -> CGSize {
@@ -203,6 +262,34 @@ struct NewWritingView: View {
         return fields
     }
     
+    //デバッグ用サンプル記録生成
+    func createSampleData(textLength: Int) {
+        // タイムスタンプに値を設定
+        timeStanp = .lunch
+
+        // uiImageは代入しない
+
+        // 5つの五感のテキスト合計の長さを引数で指定
+        let totalLength = textLength
+        let individualLength = totalLength / 5
+
+        // 各要素の文字数を均等に割り振ってテキストを生成
+        let sampleText = "サンプルテキスト"
+        editedSenseText = (0..<5).map { _ in
+            String(repeating: sampleText, count: individualLength / sampleText.count)
+        }
+
+        // メニューのテキストに値を設定
+        editedMenu = [
+            "チーズハンバーグ",
+            "フライドポテト",
+            "ミニトマトとレタスのサラダ",
+            "コーンスープ"
+        ]
+
+        // その他、必要に応じて変数を設定
+        currentDate = Date()
+    }
     var body: some View {
         GeometryReader{ geometry in
             ZStack{
@@ -222,6 +309,13 @@ struct NewWritingView: View {
                                 .frame(width:geometry.size.width*0.05)
                         }
                         .padding(.horizontal)
+                        Button{
+                            createSampleData(textLength: 100) // 例として100文字のサンプルを生成
+                        }label: {
+                            Text("サンプル記録を生成")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .padding()
                         Spacer()
                         dateBar(geometry: geometry)
                     }

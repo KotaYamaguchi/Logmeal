@@ -111,9 +111,9 @@ struct NewContentView: View {
                                             .offset(y: geometry.size.width < 500 ? -geometry.size.height * 0.09 : -65)
                                     }
                                 }
-                                .onTapGesture {
-                                    startBubbleCycle()
-                                }
+//                                .onTapGesture {
+//                                    startBubbleCycle()
+//                                }
                         }
                         .offset(x: geometry.size.width < 700 ? -geometry.size.width * 0.23 : -150,
                                 y: geometry.size.height < 700 ? geometry.size.height * 0.085 : 60)
@@ -167,10 +167,10 @@ struct NewContentView: View {
         }
     }
     
-    // 5分ごとに30秒間だけ吹き出し表示
+    // 30秒ごとに5秒間だけ吹き出し表示
         private func startBubbleCycle() {
             showRandomBubble()
-            bubbleTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+            bubbleTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { _ in
                 showRandomBubble()
             }
         }
@@ -186,7 +186,7 @@ struct NewContentView: View {
                 showBubble = true
             }
             hideTimer?.invalidate()
-            hideTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { _ in
+            hideTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { _ in
                 withAnimation {
                     showBubble = false
                 }
@@ -295,6 +295,9 @@ struct NewContentView: View {
                             .foregroundColor(Color(red: 149/255, green: 97/255, blue: 52/255))
                     }
             }
+        }
+        .onTapGesture {
+            showBubble = false
         }
         .padding()
         .background(Color(red: 255/255, green: 254/255, blue: 245/255))
