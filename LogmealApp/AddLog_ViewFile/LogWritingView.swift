@@ -84,15 +84,26 @@ struct NewWritingView: View {
             print("メニュー = \(newData.menu)")
             print("五感(聴覚) = \(newData.hearing)")
             
-            // ① 各文字列の文字数を計算して配列に変換
-            let characterCounts = editedSenseText.map { $0.count }
-            // ② その総和を求める
-            let totalCharacterCount = characterCounts.reduce(0, +)
-            print("合計文字数\(totalCharacterCount)")
-            // 経験値更新：10文字につき1exp（バランス調整可能）
-            updateUserExperience(by: totalCharacterCount)
-            // ポイント更新：1文字につき1ポイント（バランス調整可能）
-            updateUserPoints(by: totalCharacterCount)
+            var totalCharacterCount = 0
+            // 一言コメントの文字数を加算
+            totalCharacterCount += editedText.count
+            // 五感コメントの文字数を加算
+            for text in editedSenseText {
+                totalCharacterCount += text.count
+            }
+            
+            // 合計文字数に基づいて基本経験値を計算 (例: 3文字で1EXP)
+            let baseExp = totalCharacterCount / 3 // 調整可能
+            
+            // 最も近い5の倍数に丸める
+            // (baseExp + 2) / 5 * 5 は、整数演算で最も近い5の倍数に丸める一般的な方法
+            // 例: 4 -> 5, 7 -> 5, 8 -> 10, 12 -> 10, 13 -> 15
+            let expToAward = (baseExp + 2) / 5 * 5
+            
+            // 文字数が0の場合は経験値0、それ以外は最低5経験値を保証
+            let finalExp = totalCharacterCount > 0 ? max(5, expToAward) : 0
+            
+            user.gainExp(finalExp) // 計算された経験値を付与
             if user.currentCharacter.level >= 12{
                 user.currentCharacter.growthStage = 3
                 user.isGrowthed = true

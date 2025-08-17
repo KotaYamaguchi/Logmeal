@@ -40,8 +40,7 @@ struct NewCharacterView: View {
                     .id(refreshID)
 
                     CharacterInfoView(
-                        size: geo.size,
-                        characterData: userData.currentCharacter
+                        size: geo.size
                     )
                     .onAppear(){
                         userData.setCurrentCharacter()
@@ -327,13 +326,12 @@ private struct TopActionButtons: View {
 // MARK: - Info View
 private struct CharacterInfoView: View {
     let size: CGSize
-    let characterData: Character
     @EnvironmentObject var userData: UserData
     private let baseSize = CGSize(width: 1210, height: 785)
 
     var body: some View {
-        ZStack {
-            Image("House_\(characterData.name)")
+        ZStack { 
+            Image("House_\(userData.currentCharacter.name)")
                 .resizable()
                 .scaledToFit()
                 .frame(height: 590 * (size.width / baseSize.width))
@@ -346,10 +344,10 @@ private struct CharacterInfoView: View {
                         .scaledToFit()
                         .frame(width:50)
                     Text("\(userData.point)")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.white)
                         .font(.custom("GenJyuuGothicX-Bold", size: 35))
                     Text("pt")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.white)
                         .font(.custom("GenJyuuGothicX-Bold", size: 30))
                 }
                 .offset(x: -95 * (size.width / baseSize.width),
@@ -363,16 +361,18 @@ private struct CharacterInfoView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width:50)
+                        //経験値のプログレスバーの表示
                         ZStack(alignment:.leading){
                             RoundedRectangle(cornerRadius: 20)
                                 .frame(width:260,height: 15)
                                 .foregroundStyle(.white)
                             
+                            // プログレスバー（赤色）
                             RoundedRectangle(cornerRadius: 20)
-                                .frame(width:CGFloat(userData.exp)/260,height: 15)
+                                .frame(width:260 * (userData.expProgressPercentage() / 100.0), height: 15) // パーセンテージを使用
                                 .foregroundStyle(.red)
                         }
-                        Text("LV.\(userData.level)")
+                        Text("LV.\(userData.currentCharacter.level)") // currentCharacterのレベルを表示
                             .foregroundStyle(.white)
                             .font(.custom("GenJyuuGothicX-Bold", size: 30))
                             .padding(.horizontal)

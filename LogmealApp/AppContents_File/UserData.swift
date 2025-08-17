@@ -310,6 +310,111 @@ class UserData:ObservableObject{
         }
         saveAllCharacter()
     }
+    // 新しい経験値を追加し、レベルアップ判定も行う関数
+        func gainExp(_ amount: Int) {
+            print("--- 経験値追加処理を開始 ---")
+            print("追加される経験値: \(amount)")
+
+            // 経験値を追加
+            currentCharacter.exp += amount
+
+            // デバッグログ
+            print("経験値が追加されました。現在の経験値: \(currentCharacter.exp)")
+
+            // レベルアップ判定
+            levelUpCheck()
+            
+            // データの保存
+            saveAllCharacter()
+            print("--- 経験値追加処理を終了 ---")
+        }
+
+        // レベルアップ判定と更新を行う関数
+        private func levelUpCheck() {
+            // 最大レベルに達している場合は何もしない
+            guard currentCharacter.level < levelThresholds.count - 1 else {
+                print("最大レベルのため、レベルアップ判定は行いません。")
+                return
+            }
+            
+            // whileループを使用して、複数のレベルアップを一気に処理する
+            while currentCharacter.exp >= levelThresholds[currentCharacter.level + 1] {
+                currentCharacter.level += 1
+                print("レベルアップしました！現在のレベル: \(currentCharacter.level)")
+                
+                // 最大レベルに達した場合はループを終了
+                if currentCharacter.level >= levelThresholds.count - 1 {
+                    print("最大レベルに到達しました。")
+                    break
+                }
+            }
+        }
+    // 現在のexpと次のレベルまでのexpの割合を表示
+       func expProgressPercentage() -> Double {
+           print("--- expProgressPercentage() 開始 ---")
+           print("現在のキャラクター: \(currentCharacter.name), レベル: \(currentCharacter.level), 経験値: \(currentCharacter.exp)")
+
+           // レベルが最大値に達している場合は100%を返す
+           guard currentCharacter.level < levelThresholds.count - 1 else {
+               print("最大レベルに到達しています。割合: 100.0%")
+               print("--- expProgressPercentage() 終了 ---")
+               return 100.0
+           }
+
+           // 現在のレベルの開始経験値閾値を取得
+           let currentLevelThreshold = levelThresholds[currentCharacter.level]
+           print("現在のレベルの開始閾値 (\(currentCharacter.level)レベル): \(currentLevelThreshold) EXP")
+
+           // 次のレベルの開始経験値閾値を取得
+           let nextLevelThreshold = levelThresholds[currentCharacter.level + 1]
+           print("次のレベルの開始閾値 (\(currentCharacter.level + 1)レベル): \(nextLevelThreshold) EXP")
+
+           // 現在のレベルで必要となる総経験値の範囲
+           let totalExpForCurrentLevel = nextLevelThreshold - currentLevelThreshold
+           print("現在のレベルで必要となる総経験値の範囲: \(totalExpForCurrentLevel) EXP")
+           
+           // 現在のレベルでキャラクターが獲得した経験値
+           // 負の値にならないように0にクランプする（万が一、経験値が閾値を下回る場合を考慮）
+           var expGainedInCurrentLevel = currentCharacter.exp - currentLevelThreshold
+           print("クランプ前、現在のレベルで獲得した経験値: \(expGainedInCurrentLevel) EXP")
+           expGainedInCurrentLevel = max(0, expGainedInCurrentLevel)
+           print("クランプ後、現在のレベルで獲得した経験値: \(expGainedInCurrentLevel) EXP")
+
+           // 分母が0になることを避ける（理論上は起こらないはずだが、安全のため）
+           if totalExpForCurrentLevel == 0 {
+               print("エラー: totalExpForCurrentLevel が0です。割合: 0.0%")
+               print("--- expProgressPercentage() 終了 ---")
+               return 0.0 // または特定のレベルで進捗バーを表示しないなどのロジック
+           }
+           
+           // 進捗割合を計算して返す
+           let progress = Double(expGainedInCurrentLevel) / Double(totalExpForCurrentLevel) * 100.0
+           print("計算された進捗割合: \(progress)%")
+           print("--- expProgressPercentage() 終了 ---")
+           return progress
+       }
+
+       // 次のレベルアップまでに必要なexp
+       func expToNextLevel() -> Int {
+           print("--- expToNextLevel() 開始 ---")
+           print("現在のキャラクター: \(currentCharacter.name), レベル: \(currentCharacter.level), 経験値: \(currentCharacter.exp)")
+
+           // レベルが最大値に達している場合は0を返す
+           guard currentCharacter.level < levelThresholds.count - 1 else {
+               print("最大レベルに到達しています。残り経験値: 0 EXP")
+               print("--- expToNextLevel() 終了 ---")
+               return 0
+           }
+
+           let nextLevelThreshold = levelThresholds[currentCharacter.level + 1]
+           print("次のレベルの開始閾値 (\(currentCharacter.level + 1)レベル): \(nextLevelThreshold) EXP")
+           
+           // 残り経験値が負にならないように0にクランプ
+           let remainingExp = max(0, nextLevelThreshold - currentCharacter.exp)
+           print("計算された残り経験値: \(remainingExp) EXP")
+           print("--- expToNextLevel() 終了 ---")
+           return remainingExp
+       }
 }
 
 
