@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 /// MVVM対応のHomeView実装
-struct MVVMHomeViewImpl: View {
+struct MVVMHomeViewImplementation: View {
     @StateObject private var characterViewModel = CharacterViewModel()
     @StateObject private var ajiwaiCardViewModel = AjiwaiCardViewModel()
     @StateObject private var userProfileViewModel = UserProfileViewModel()
@@ -186,6 +186,6 @@ struct MVVMLogDetailView: View {
 }
 
 #Preview {
-    MVVMHomeViewImpl()
+    MVVMHomeViewImplementation()
         .modelContainer(for: AjiwaiCardData.self)
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// MVVM対応のキャラクター選択ビュー
-struct MVVMCharacterSelectView: View {
+struct MVVMCharacterSelectViewImplementation: View {
     @StateObject private var characterViewModel = CharacterViewModel()
     @StateObject private var shopViewModel = ShopViewModel()
     @Environment(\.dismiss) private var dismiss
@@ -33,7 +33,7 @@ struct MVVMCharacterSelectView: View {
                     // ショップボタン（レベル3以上で表示）
                     if characterViewModel.currentCharacter.growthStage >= 3 {
                         NavigationLink {
-                            MVVMShopViewImpl()
+                            MVVMShopViewImplementation()
                         } label: {
                             HStack {
                                 Image(systemName: "bag.fill")
@@ -199,7 +199,7 @@ struct MVVMCharacterSelectView: View {
 }
 
 /// プレースホルダー: MVVM対応のShopView実装
-struct MVVMShopViewImpl: View {
+struct MVVMShopViewImplementation: View {
     @StateObject private var shopViewModel = ShopViewModel()
     @StateObject private var userProfileViewModel = UserProfileViewModel()
     
@@ -275,6 +275,6 @@ struct MVVMShopViewImpl: View {
 
 #Preview {
     NavigationView {
-        MVVMCharacterSelectView()
+        MVVMCharacterSelectViewImplementation()
     }
 }

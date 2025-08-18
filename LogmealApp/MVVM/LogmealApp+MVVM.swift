@@ -173,14 +173,14 @@ struct TabBasedContentView: View {
 
 struct MVVMHomeView: View {
     var body: some View {
-        MVVMHomeViewImpl()
+        MVVMHomeViewImplementation()
             .navigationTitle("ホーム")
     }
 }
 
 struct MVVMAjiwaiCardCreateView: View {
     var body: some View {
-        Text("MVVM Ajiwai Card Create View")
+        MVVMAjiwaiCardCreateViewImplementation(showWritingView: .constant(false))
             .navigationTitle("カード作成")
     }
 }
@@ -205,7 +205,7 @@ struct MVVMAjiwaiCardEditView: View {
 
 struct MVVMCharacterSelectView: View {
     var body: some View {
-        Text("MVVM Character Select View")
+        MVVMCharacterSelectViewImplementation()
             .navigationTitle("キャラクター選択")
     }
 }
@@ -221,7 +221,7 @@ struct MVVMCharacterDetailView: View {
 
 struct MVVMShopView: View {
     var body: some View {
-        Text("MVVM Shop View")
+        MVVMShopViewImplementation()
             .navigationTitle("ショップ")
     }
 }
@@ -237,7 +237,7 @@ struct MVVMShopCategoryView: View {
 
 struct MVVMColumnListView: View {
     var body: some View {
-        Text("MVVM Column List View")
+        MVVMColumnListViewImplementation()
             .navigationTitle("コラム一覧")
     }
 }
@@ -253,28 +253,28 @@ struct MVVMColumnDetailView: View {
 
 struct MVVMSettingsView: View {
     var body: some View {
-        Text("MVVM Settings View")
+        MVVMSettingsViewImplementation()
             .navigationTitle("設定")
     }
 }
 
 struct MVVMProfileEditView: View {
     var body: some View {
-        Text("MVVM Profile Edit View")
+        MVVMProfileEditViewImplementation()
             .navigationTitle("プロフィール編集")
     }
 }
 
 struct MVVMDataExportView: View {
     var body: some View {
-        Text("MVVM Data Export View")
+        MVVMDataExportViewImplementation()
             .navigationTitle("データエクスポート")
     }
 }
 
 struct MVVMQRScannerView: View {
     var body: some View {
-        Text("MVVM QR Scanner View")
+        MVVMQRScannerViewImplementation()
             .navigationTitle("QRスキャナー")
     }
 }
