@@ -6,6 +6,89 @@ enum NavigationDestinations {
     case column
     case setting
 }
+
+// MARK: - MVVM Enhanced ContentView
+
+struct MVVMContentView: View {
+    @EnvironmentObject var coordinator: AppCoordinator
+    @EnvironmentObject var userData: UserData
+    @StateObject private var bridge: UserDataBridge
+    
+    // Current view states (keeping compatibility with existing UI)
+    let headLineTitles: [String] = ["ホーム", "コラム", "せってい"]
+    @State private var isShowSelectedView: [Bool] = [true, false, false]
+    @State private var showCharactarView: Bool = false
+    @State private var navigationFlag: Bool = false
+    @State private var navigationDestination: NavigationDestinations = .home
+    @State private var navigationDestinations: [NavigationDestinations] = [.home, .column, .setting]
+    
+    // Character speech and bubble state
+    @State private var showBubble: Bool = false
+    let bubbleSpeeches = [
+        "好きなメニューが出たらテンション上がるばい、書いてみよう",
+        "今日もお疲れさま！",
+        "何か新しいことにチャレンジしよう！",
+        "水分補給も忘れずにね！",
+        "応援してるよ！"
+    ]
+    @State private var currentBubbleSpeech: String = "好きなメニューが出たらテンション上がるばい、書いてみよう"
+    @State private var bubbleTimer: Timer?
+    @State private var hideTimer: Timer?
+    
+    init(userData: UserData) {
+        let bridge = UserDataBridgeFactory.createBridge(for: userData)
+        self._bridge = StateObject(wrappedValue: bridge)
+    }
+    
+    var body: some View {
+        contentView
+            .onAppear {
+                // Initialize bridge and sync data
+                bridge.syncUserDataToServices()
+                startBubbleTimer()
+            }
+            .onDisappear {
+                stopBubbleTimer()
+            }
+    }
+    
+    @ViewBuilder
+    private var contentView: some View {
+        // Use the existing NewContentView but with MVVM integration
+        NewContentView()
+            .environmentObject(userData)
+    }
+    
+    // MARK: - Bubble Management
+    private func startBubbleTimer() {
+        bubbleTimer = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: true) { _ in
+            showRandomBubble()
+        }
+    }
+    
+    private func stopBubbleTimer() {
+        bubbleTimer?.invalidate()
+        bubbleTimer = nil
+        hideTimer?.invalidate()
+        hideTimer = nil
+    }
+    
+    private func showRandomBubble() {
+        guard !showBubble else { return }
+        
+        currentBubbleSpeech = bubbleSpeeches.randomElement() ?? bubbleSpeeches[0]
+        withAnimation(.easeIn(duration: 0.3)) {
+            showBubble = true
+        }
+        
+        // Auto-hide after 5 seconds
+        hideTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { _ in
+            withAnimation(.easeOut(duration: 0.3)) {
+                showBubble = false
+            }
+        }
+    }
+}
 struct CharacterSpeech: Identifiable {
     let id: Int
     let character: String
