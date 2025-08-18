@@ -165,21 +165,21 @@ class CharacterServiceImpl: ObservableObject, CharacterServiceProtocol {
         let cat = _characterCollection.characters["Cat"] ?? Character(name: "Cat")
         let rabbit = _characterCollection.characters["Rabbit"] ?? Character(name: "Rabbit")
         
-        userData.DogData = userData.Character(
+        userData.DogData = UserData.Character(
             name: dog.name,
             level: dog.level,
             exp: dog.exp,
             growthStage: dog.growthStage
         )
         
-        userData.CatData = userData.Character(
+        userData.CatData = UserData.Character(
             name: cat.name,
             level: cat.level,
             exp: cat.exp,
             growthStage: cat.growthStage
         )
         
-        userData.RabbitData = userData.Character(
+        userData.RabbitData = UserData.Character(
             name: rabbit.name,
             level: rabbit.level,
             exp: rabbit.exp,

@@ -178,7 +178,7 @@ class ShopServiceImpl: ObservableObject, ShopServiceProtocol {
         
         // Convert ShopProduct back to UserData Product
         let userDataProducts = products.map { shopProduct in
-            userData.Product(
+            Product(
                 name: shopProduct.name,
                 displayName: shopProduct.displayName,
                 description: shopProduct.description,

@@ -194,12 +194,13 @@ struct MVVMLogmealApp: View {
 
 struct MVVMHomeView: View {
     @EnvironmentObject var coordinator: AppCoordinator
-    @ObservedObject var viewModel: AjiwaiCardViewModel
-    @ObservedObject var characterViewModel: CharacterViewModel
+    @StateObject private var viewModel: AjiwaiCardViewModel
+    @StateObject private var characterViewModel: CharacterViewModel
     
     init() {
-        self.viewModel = DIContainer.shared.resolve()
-        self.characterViewModel = DIContainer.shared.resolve()
+        let container = DIContainer.shared
+        self._viewModel = StateObject(wrappedValue: AjiwaiCardViewModel())
+        self._characterViewModel = StateObject(wrappedValue: CharacterViewModel())
     }
     
     var body: some View {
@@ -210,10 +211,10 @@ struct MVVMHomeView: View {
 
 struct MVVMProfileView: View {
     @EnvironmentObject var coordinator: AppCoordinator
-    @ObservedObject var viewModel: UserProfileViewModel
+    @StateObject private var viewModel: UserProfileViewModel
     
     init() {
-        self.viewModel = DIContainer.shared.resolve()
+        self._viewModel = StateObject(wrappedValue: UserProfileViewModel())
     }
     
     var body: some View {
@@ -223,10 +224,10 @@ struct MVVMProfileView: View {
 
 struct MVVMCharacterView: View {
     @EnvironmentObject var coordinator: AppCoordinator
-    @ObservedObject var viewModel: CharacterViewModel
+    @StateObject private var viewModel: CharacterViewModel
     
     init() {
-        self.viewModel = DIContainer.shared.resolve()
+        self._viewModel = StateObject(wrappedValue: CharacterViewModel())
     }
     
     var body: some View {
@@ -236,10 +237,10 @@ struct MVVMCharacterView: View {
 
 struct MVVMShopView: View {
     @EnvironmentObject var coordinator: AppCoordinator
-    @ObservedObject var viewModel: ShopViewModel
+    @StateObject private var viewModel: ShopViewModel
     
     init() {
-        self.viewModel = DIContainer.shared.resolve()
+        self._viewModel = StateObject(wrappedValue: ShopViewModel())
     }
     
     var body: some View {
@@ -249,10 +250,10 @@ struct MVVMShopView: View {
 
 struct MVVMColumnView: View {
     @EnvironmentObject var coordinator: AppCoordinator
-    @ObservedObject var viewModel: ColumnViewModel
+    @StateObject private var viewModel: ColumnViewModel
     
     init() {
-        self.viewModel = DIContainer.shared.resolve()
+        self._viewModel = StateObject(wrappedValue: ColumnViewModel())
     }
     
     var body: some View {
@@ -263,10 +264,10 @@ struct MVVMColumnView: View {
 
 struct MVVMSettingsView: View {
     @EnvironmentObject var coordinator: AppCoordinator
-    @ObservedObject var viewModel: SettingsViewModel
+    @StateObject private var viewModel: SettingsViewModel
     
     init() {
-        self.viewModel = DIContainer.shared.resolve()
+        self._viewModel = StateObject(wrappedValue: SettingsViewModel())
     }
     
     var body: some View {

@@ -102,11 +102,25 @@ class ExportViewModel: ObservableObject {
         // Export AjiwaiCards
         if includeAjiwaiCards {
             let allCards = ajiwaiCardService.fetchAjiwaiCards()
-            exportData.ajiwaiCards = filterCardsByDateRange(allCards)
+            let filteredCards = filterCardsByDateRange(allCards)
+            exportData.ajiwaiCardsData = filteredCards.map { card in
+                ExportableAjiwaiCard(
+                    uuid: card.uuid?.uuidString,
+                    saveDay: card.saveDay,
+                    time: card.time?.rawValue,
+                    sight: card.sight,
+                    taste: card.taste,
+                    smell: card.smell,
+                    tactile: card.tactile,
+                    hearing: card.hearing,
+                    imagePath: card.imagePath.path,
+                    menu: card.menu
+                )
+            }
             
             // Export images if requested
             if includeImages {
-                exportData.cardImages = try await exportCardImages(exportData.ajiwaiCards)
+                exportData.cardImages = try await exportCardImages(filteredCards)
             }
             await updateProgress(0.6)
         }
@@ -114,13 +128,28 @@ class ExportViewModel: ObservableObject {
         // Export columns
         if includeColumns {
             let allColumns = columnService.fetchColumns()
-            exportData.columns = filterColumnsByDateRange(allColumns)
+            let filteredColumns = filterColumnsByDateRange(allColumns)
+            exportData.columnsData = filteredColumns.map { column in
+                ExportableColumn(
+                    columnDay: column.columnDay,
+                    title: column.title,
+                    caption: column.caption,
+                    isRead: column.isRead,
+                    isExpanded: column.isExpanded
+                )
+            }
             await updateProgress(0.8)
         }
         
         // Export menus
         let allMenus = menuService.fetchMenus()
-        exportData.menus = filterMenusByDateRange(allMenus)
+        let filteredMenus = filterMenusByDateRange(allMenus)
+        exportData.menusData = filteredMenus.map { menu in
+            ExportableMenu(
+                day: menu.day,
+                menu: menu.menu
+            )
+        }
         
         await updateProgress(1.0)
         
@@ -162,13 +191,53 @@ class ExportViewModel: ObservableObject {
     }
     
     private func filterColumnsByDateRange(_ columns: [ColumnData]) -> [ColumnData] {
-        // Similar filtering logic for columns based on dateRange
-        return columns // Simplified for now
+        switch dateRange {
+        case .all:
+            return columns
+        case .lastMonth:
+            let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let oneMonthAgoString = formatter.string(from: oneMonthAgo)
+            return columns.filter { $0.columnDay >= oneMonthAgoString }
+        case .lastThreeMonths:
+            let threeMonthsAgo = Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date()
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let threeMonthsAgoString = formatter.string(from: threeMonthsAgo)
+            return columns.filter { $0.columnDay >= threeMonthsAgoString }
+        case .custom:
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let startString = formatter.string(from: customStartDate)
+            let endString = formatter.string(from: customEndDate)
+            return columns.filter { $0.columnDay >= startString && $0.columnDay <= endString }
+        }
     }
     
     private func filterMenusByDateRange(_ menus: [MenuData]) -> [MenuData] {
-        // Similar filtering logic for menus based on dateRange
-        return menus // Simplified for now
+        switch dateRange {
+        case .all:
+            return menus
+        case .lastMonth:
+            let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let oneMonthAgoString = formatter.string(from: oneMonthAgo)
+            return menus.filter { $0.day >= oneMonthAgoString }
+        case .lastThreeMonths:
+            let threeMonthsAgo = Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? Date()
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let threeMonthsAgoString = formatter.string(from: threeMonthsAgo)
+            return menus.filter { $0.day >= threeMonthsAgoString }
+        case .custom:
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let startString = formatter.string(from: customStartDate)
+            let endString = formatter.string(from: customEndDate)
+            return menus.filter { $0.day >= startString && $0.day <= endString }
+        }
     }
     
     // MARK: - Image Export
@@ -196,9 +265,9 @@ class ExportViewModel: ObservableObject {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         
-        for card in data.ajiwaiCards {
+        for card in data.ajiwaiCardsData {
             let dateString = dateFormatter.string(from: card.saveDay)
-            let timeString = card.time?.rawValue ?? ""
+            let timeString = card.time ?? ""
             let menuString = card.menu.joined(separator: "; ")
             
             csvContent += "\(dateString),\(timeString),\(card.sight),\(card.taste),\(card.smell),\(card.tactile),\(card.hearing),\(menuString)\n"
@@ -289,10 +358,37 @@ struct ExportData: Codable {
     var userProfile: UserProfile?
     var userPreferences: UserPreferences?
     var characterCollection: CharacterCollection?
-    var ajiwaiCards: [AjiwaiCardData] = []
-    var columns: [ColumnData] = []
-    var menus: [MenuData] = []
+    var ajiwaiCardsData: [ExportableAjiwaiCard] = []
+    var columnsData: [ExportableColumn] = []
+    var menusData: [ExportableMenu] = []
     var cardImages: [String: Data] = [:]
+}
+
+// Simplified exportable versions that don't rely on SwiftData
+struct ExportableAjiwaiCard: Codable {
+    var uuid: String?
+    var saveDay: Date
+    var time: String?
+    var sight: String
+    var taste: String
+    var smell: String
+    var tactile: String
+    var hearing: String
+    var imagePath: String
+    var menu: [String]
+}
+
+struct ExportableColumn: Codable {
+    var columnDay: String
+    var title: String
+    var caption: String
+    var isRead: Bool
+    var isExpanded: Bool
+}
+
+struct ExportableMenu: Codable {
+    var day: String
+    var menu: [String]
 }
 
 struct ExportResult {

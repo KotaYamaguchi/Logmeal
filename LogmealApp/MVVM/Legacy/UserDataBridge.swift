@@ -100,7 +100,7 @@ class UserDataBridge: ObservableObject {
         
         // Update character data
         if let dog = collection.characters["Dog"] {
-            originalUserData.DogData = originalUserData.Character(
+            originalUserData.DogData = UserData.Character(
                 name: dog.name,
                 level: dog.level,
                 exp: dog.exp,
@@ -109,7 +109,7 @@ class UserDataBridge: ObservableObject {
         }
         
         if let cat = collection.characters["Cat"] {
-            originalUserData.CatData = originalUserData.Character(
+            originalUserData.CatData = UserData.Character(
                 name: cat.name,
                 level: cat.level,
                 exp: cat.exp,
@@ -118,7 +118,7 @@ class UserDataBridge: ObservableObject {
         }
         
         if let rabbit = collection.characters["Rabbit"] {
-            originalUserData.RabbitData = originalUserData.Character(
+            originalUserData.RabbitData = UserData.Character(
                 name: rabbit.name,
                 level: rabbit.level,
                 exp: rabbit.exp,

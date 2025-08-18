@@ -1,7 +1,15 @@
 import SwiftUI
+import SwiftData
 
 struct LaunchScreen: View {
+    @EnvironmentObject var userData: UserData
+    @EnvironmentObject var coordinator: AppCoordinator
+    @Environment(\.modelContext) private var modelContext
+    @Query private var allData: [AjiwaiCardData]
+    
     @State private var isLoading = true
+    @State private var isInitialized = false
+    
     var body: some View {
         GeometryReader{ geometry in
             if isLoading{
@@ -18,6 +26,12 @@ struct LaunchScreen: View {
                         )
                 }
                 .onAppear {
+                    if !isInitialized {
+                        setupMVVMArchitecture()
+                        performDataMigration()
+                        isInitialized = true
+                    }
+                    
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         withAnimation {
                             isLoading = false
@@ -29,9 +43,42 @@ struct LaunchScreen: View {
             }
         }
     }
+    
+    // MARK: - MVVM Setup
+    private func setupMVVMArchitecture() {
+        // Setup DI container with dependencies
+        DIContainer.shared.setup(modelContext: modelContext, userData: userData)
+        
+        // Initialize coordinator
+        coordinator.initializeApp()
+        
+        print("✅ MVVM architecture initialized in LaunchScreen")
+    }
+    
+    // MARK: - Data Migration
+    private func performDataMigration() {
+        for card in allData {
+            if card.uuid == nil {
+                card.uuid = UUID()
+                print("Migration: Added UUID to card")
+            }
+            if card.time == nil {
+                card.time = .lunch
+                print("Migration: Added default time to card")
+            }
+        }
+        
+        do {
+            try modelContext.save()
+            print("✅ Data migration completed successfully")
+        } catch {
+            print("❌ Data migration failed: \(error)")
+        }
+    }
 }
 
 #Preview {
     LaunchScreen()
         .environmentObject(UserData())
+        .environmentObject(AppCoordinator())
 }
