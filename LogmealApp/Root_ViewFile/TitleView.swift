@@ -9,63 +9,83 @@ import SwiftUI
 import SwiftData
 
 struct TitleView: View {
-    @State private var textScaleEffectValue:Double = 1.0
-    @State private var showMenu:Bool = false
+    @State private var textScaleEffectValue: Double = 1.0
+    @State private var showMenu: Bool = false
     @EnvironmentObject var user: UserData
+    @EnvironmentObject var coordinator: AppCoordinator
     @Query private var allData: [AjiwaiCardData]
     @Environment(\.modelContext) private var context
+    
     var body: some View {
-        
-            if user.isTitle{
-                GeometryReader{ geometry in
-                    ZStack(alignment: .topTrailing) {
-                        ZStack{
-                            Image("bg_AjiwaiCardView")
-                                .resizable()
-                                .ignoresSafeArea()
-                                .scaledToFill()
-                                .frame(width: geometry.size.width * 1.05, height: geometry.size.height)
-                                .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                            Image("bg_TitleView")
-                                .resizable()
-                                .ignoresSafeArea()
-                                .scaledToFill()
-                                .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                        }
-                        
-                        
-                        Button {
-                            showMenu = true
-                        } label: {
-                            Image(systemName: "info.circle.fill")
-                                .font(.system(size: 40))
-                                .foregroundStyle(Color.pink)
-                        }
-                        .padding(.all)
-                        .buttonStyle(PlainButtonStyle())
-                        
-                        Text("画面をタップしてゲームを始めよう")
-                            .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                            .foregroundStyle(.gray)
-                            .padding(.top, 30)
-                            .scaleEffect(textScaleEffectValue)
-                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.8)
+        if user.isTitle {
+            GeometryReader { geometry in
+                ZStack(alignment: .topTrailing) {
+                    ZStack {
+                        Image("bg_AjiwaiCardView")
+                            .resizable()
+                            .ignoresSafeArea()
+                            .scaledToFill()
+                            .frame(width: geometry.size.width * 1.05, height: geometry.size.height)
+                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
+                        Image("bg_TitleView")
+                            .resizable()
+                            .ignoresSafeArea()
+                            .scaledToFill()
+                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
                     }
-                    .onAppear(){
-                        user.migrateLegacyData()
+                    
+                    Button {
+                        showMenu = true
+                    } label: {
+                        Image(systemName: "info.circle.fill")
+                            .font(.system(size: 40))
+                            .foregroundStyle(Color.pink)
                     }
-                    .onTapGesture {
-                        withAnimation {
-                            user.isTitle = false
+                    .padding(.all)
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    Text("画面をタップしてゲームを始めよう")
+                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                        .foregroundStyle(.gray)
+                        .padding(.top, 30)
+                        .scaleEffect(textScaleEffectValue)
+                        .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.8)
+                }
+                .onAppear {
+                    user.migrateLegacyData()
+                    startTextAnimation()
+                }
+                .onTapGesture {
+                    withAnimation {
+                        if user.isLogined {
+                            // User is already logged in, go to main content
+                            coordinator.navigateToHome()
+                        } else {
+                            // User needs to login/setup profile
+                            coordinator.navigateToFirstLogin()
                         }
-                    }
-                    .sheet(isPresented:$showMenu){
-                        appSettingView(geometry: geometry)
+                        user.isTitle = false
                     }
                 }
-            }else{
+                .sheet(isPresented: $showMenu) {
+                    appSettingView(geometry: geometry)
+                }
+            }
+        } else {
+            // Show appropriate view based on login status
+            if user.isLogined {
+                CompleteContentView(userData: user)
+            } else {
                 InitialScreenSelectorView()
             }
+        }
+    }
+    
+    private func startTextAnimation() {
+        withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+            textScaleEffectValue = 1.1
+        }
+    }
             
     }
     @ViewBuilder private func appSettingView(geometry:GeometryProxy) -> some View {
@@ -263,5 +283,6 @@ struct TitleView: View {
 #Preview {
     TitleView()
         .environmentObject(UserData())
-        .modelContainer(for:AjiwaiCardData.self)
+        .environmentObject(AppCoordinator())
+        .modelContainer(for: AjiwaiCardData.self)
 }
