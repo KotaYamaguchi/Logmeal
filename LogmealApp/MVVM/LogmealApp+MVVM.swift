@@ -173,7 +173,7 @@ struct TabBasedContentView: View {
 
 struct MVVMHomeView: View {
     var body: some View {
-        Text("MVVM Home View")
+        MVVMHomeViewImpl()
             .navigationTitle("ホーム")
     }
 }

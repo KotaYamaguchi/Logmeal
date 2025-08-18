@@ -1,12 +1,28 @@
 import SwiftUI
 import SwiftData
+
 @main
 struct LogmealApp: App {
+    // MVVM移行のためのフィーチャーフラグ（段階的移行用）
+    private let useMVVMArchitecture = true
+    
+    var body: some Scene {
+        if useMVVMArchitecture {
+            // 新しいMVVMアーキテクチャを使用
+            mvvmBody
+        } else {
+            // 既存のアーキテクチャを維持（後方互換性）
+            legacyBody
+        }
+    }
+    
+    // MARK: - Legacy Architecture (Backward Compatibility)
     @StateObject var user = UserData()
     @StateObject private var bgmManager = BGMManager.shared
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
-    var body: some Scene {
+    
+    private var legacyBody: some Scene {
         WindowGroup {
             LaunchScreen()
                 .environmentObject(user)

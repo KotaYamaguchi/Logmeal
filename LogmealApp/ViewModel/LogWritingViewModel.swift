@@ -21,9 +21,14 @@ class LogWritingViewModel: ObservableObject {
     @Published var showValidationOverlay = false
     @Published var validationMessage: String = ""
 
-    // MARK: - Dependencies
-    private var modelContext: ModelContext
-    private var userData: UserData
+    // MARK: - Dependencies (Legacy & MVVM Compatible)
+    private var modelContext: ModelContext?
+    private var userData: UserData?
+    
+    // MVVM Dependencies (optional for backward compatibility)
+    private let ajiwaiCardService: AjiwaiCardServiceProtocol?
+    private let characterService: CharacterServiceProtocol?
+    private let menuService: MenuServiceProtocol?
 
     // MARK: - Constants
     let senseIcons = ["mt_Eye_icon", "mt_Ear_icon", "mt_Nose_icon", "mt_Tongue_icon", "mt_Hand_Icon"]
@@ -43,9 +48,28 @@ class LogWritingViewModel: ObservableObject {
         Color(red: 196 / 255, green: 160 / 255, blue: 193 / 255)
     ]
 
+    // MARK: - Initializers
+    
+    // Legacy initializer (backward compatibility)
     init(modelContext: ModelContext, userData: UserData) {
         self.modelContext = modelContext
         self.userData = userData
+        self.ajiwaiCardService = nil
+        self.characterService = nil
+        self.menuService = nil
+    }
+    
+    // MVVM initializer
+    init(
+        ajiwaiCardService: AjiwaiCardServiceProtocol = DIContainer.shared.resolve(AjiwaiCardServiceProtocol.self),
+        characterService: CharacterServiceProtocol = DIContainer.shared.resolve(CharacterServiceProtocol.self),
+        menuService: MenuServiceProtocol = DIContainer.shared.resolve(MenuServiceProtocol.self)
+    ) {
+        self.modelContext = nil
+        self.userData = nil
+        self.ajiwaiCardService = ajiwaiCardService
+        self.characterService = characterService
+        self.menuService = menuService
     }
     
     // MARK: - Public Methods
