@@ -1,7 +1,8 @@
 import SwiftUI
-
+import SwiftData
 
 struct GrowthAnimationView: View {
+    @Query private var characters: [Character]
     let text1: String
     let text2: String
     let useBackGroundColor:Bool
@@ -16,22 +17,22 @@ struct GrowthAnimationView: View {
     private func getFirstGifName() -> String {
            switch user.growthStage {
            case 2:
-               return "\(user.currentCharacter.name)1_animation_breath"
+               return "\(characters.first(where: {$0.isSelected})!.name)1_animation_breath"
            case 3:
-               return "\(user.currentCharacter.name)2_animation_breath"
+               return "\(characters.first(where: {$0.isSelected})!.name)2_animation_breath"
            default:
-               return "\(user.currentCharacter.name)\(user.currentCharacter.growthStage)_animation_breath"
+               return "\(characters.first(where: {$0.isSelected})!.name)\(characters.first(where: {$0.isSelected})!.growthStage)_animation_breath"
            }
        }
        
        private func getSecondGifName() -> String {
-           switch user.currentCharacter.growthStage {
+           switch characters.first(where: {$0.isSelected})!.growthStage {
            case 2:
-               return "\(user.currentCharacter.name)2_animation_breath"
+               return "\(characters.first(where: {$0.isSelected})!.name)2_animation_breath"
            case 3:
-               return "\(user.currentCharacter.name)3_animation_breath"
+               return "\(characters.first(where: {$0.isSelected})!.name)3_animation_breath"
            default:
-               return "\(user.currentCharacter.name)\(user.currentCharacter.growthStage)_animation_breath"
+               return "\(characters.first(where: {$0.isSelected})!.name)\(characters.first(where: {$0.isSelected})!.growthStage)_animation_breath"
            }
        }
     
@@ -162,7 +163,7 @@ struct NormalAnimetionView: View {
     var characterGifName: String
     var text: String
     var backgroundImage: String = ""
-    let useBackGroundColor:Bool 
+    let useBackGroundColor:Bool
     @State private var playGif: Bool = true
     
     var body: some View {

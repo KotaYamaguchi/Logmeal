@@ -52,7 +52,7 @@ struct TitleView: View {
                             .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.8)
                     }
                     .onAppear(){
-                        user.migrateLegacyData()
+//                        user.migrateLegacyData()
                     }
                     .onTapGesture {
                         withAnimation {
@@ -90,6 +90,10 @@ struct TitleView: View {
                          UserDefaults.standard.removePersistentDomain(forName: appDomain!)
                         do{
                             try context.delete(model:AjiwaiCardData.self,includeSubclasses: true)
+                            try context.delete(model:MenuData.self,includeSubclasses: true)
+                            try context.delete(model:ColumnData.self,includeSubclasses: true)
+                            try context.delete(model:Character.self,includeSubclasses: true)
+                            print("データを全て削除しました")
                         }catch{
                             print("error:\(error.localizedDescription)")
                         }

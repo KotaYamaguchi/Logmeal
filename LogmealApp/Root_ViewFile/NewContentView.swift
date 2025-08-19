@@ -14,6 +14,7 @@ struct CharacterSpeech: Identifiable {
 }
 struct NewContentView: View {
     @EnvironmentObject var user: UserData
+    @Query private var characters: [Character]
     let headLineTitles: [String] = ["ホーム", "コラム", "せってい"]
     @State private var isShowSelectedView: [Bool] = [true, false, false]
     @State private var showCharactarView: Bool = false
@@ -122,8 +123,8 @@ struct NewContentView: View {
                     if user.showAnimation {
                         if user.showGrowthAnimation {
                             GrowthAnimationView(
-                                text1: "おや、\(characterName(current: user.currentCharacter))のようすが…",
-                                text2: "おめでとう！\(characterName(current: user.currentCharacter))が進化したよ！",
+                                text1: "おや、\(characterName(current: characters.first(where: {$0.isSelected})!))のようすが…",
+                                text2: "おめでとう！\(characterName(current: characters.first(where: {$0.isSelected})!))が進化したよ！",
                                 useBackGroundColor: true
                             )
                             .onTapGesture {
@@ -133,9 +134,9 @@ struct NewContentView: View {
                             }
                         } else if user.showLevelUPAnimation {
                             LevelUpAnimationView(
-                                characterGifName: "\(user.currentCharacter.name)\(user.growthStage)_animation_breath",
-                                text: "\(characterName(current: user.currentCharacter))がレベルアップしたよ！",
-                                backgroundImage: "mt_RewardView_callout_\(user.currentCharacter.name)",
+                                characterGifName: "\(characters.first(where: {$0.isSelected})!.name)\(user.growthStage)_animation_breath",
+                                text: "\(characterName(current: characters.first(where: {$0.isSelected})!))がレベルアップしたよ！",
+                                backgroundImage: "mt_RewardView_callout_\(characters.first(where: {$0.isSelected})!.name)",
                                 useBackGroundColor: true
                             )
                             .onTapGesture {
@@ -145,9 +146,9 @@ struct NewContentView: View {
                             }
                         } else {
                             NormalAnimetionView(
-                                characterGifName: "\(user.currentCharacter.name)\(user.currentCharacter.growthStage)_animation_breath",
+                                characterGifName: "\(characters.first(where: {$0.isSelected})!.name)\(characters.first(where: {$0.isSelected})!.growthStage)_animation_breath",
                                 text: "今日も記録してくれてありがとう！",
-                                backgroundImage: "mt_RewardView_callout_\(user.currentCharacter.name)",
+                                backgroundImage: "mt_RewardView_callout_\(characters.first(where: {$0.isSelected})!.name)",
                                 useBackGroundColor: true
                             )
                             .onTapGesture {
@@ -157,7 +158,6 @@ struct NewContentView: View {
                     }
                 }
                 .onAppear {
-                    user.initCharacterData()
                     startBubbleCycle()
                 }
                 .onDisappear {
@@ -194,10 +194,10 @@ struct NewContentView: View {
         }
 
     private func pickRandomCharacterSpeech() -> String {
-        let characterName = user.currentCharacter.name
-        let growthStage = user.currentCharacter.growthStage
-        let exp = user.currentCharacter.exp
-        let level = user.currentCharacter.level
+        let characterName = characters.first(where: {$0.isSelected})!.name
+        let growthStage = characters.first(where: {$0.isSelected})!.growthStage
+        let exp = characters.first(where: {$0.isSelected})!.exp
+        let level = characters.first(where: {$0.isSelected})!.level
         let levelThresholds = user.levelThresholds
 
         // SwiftDataのAjiwaiCardDataの件数取得
@@ -284,7 +284,7 @@ struct NewContentView: View {
                     showCharactarView = true
                 }
             } label: {
-                Image("\(user.currentCharacter.name)_window_\(user.currentCharacter.growthStage)")
+                Image("\(characters.first(where: {$0.isSelected})!.name)_window_\(characters.first(where: {$0.isSelected})!.growthStage)")
                     .resizable()
                     .scaledToFit()
                     .frame(width: geometry.size.width < 500 ? geometry.size.width * 0.56 : 280)
@@ -361,9 +361,9 @@ struct NewContentView: View {
     }
 
     private func changeGifData() {
-        switch user.currentCharacter.growthStage {
+        switch characters.first(where: {$0.isSelected})!.growthStage {
         case 1:
-            switch user.currentCharacter.name {
+            switch characters.first(where: {$0.isSelected})!.name {
             case "Dog":
                 gifData = NSDataAsset(name: "Dog1_animation_breath")?.data
                 gifArray = ["Dog1_animation_breath", "Dog1_animation_sleep"]
@@ -378,7 +378,7 @@ struct NewContentView: View {
                 gifArray = []
             }
         case 2:
-            switch user.currentCharacter.name {
+            switch characters.first(where: {$0.isSelected})!.name {
             case "Dog":
                 gifData = NSDataAsset(name: "Dog2_animation_breath")?.data
                 gifArray = ["Dog2_animation_breath", "Dog2_animation_sleep"]
@@ -393,7 +393,7 @@ struct NewContentView: View {
                 gifArray = []
             }
         case 3:
-            switch user.currentCharacter.name {
+            switch characters.first(where: {$0.isSelected})!.name {
             case "Dog":
                 gifData = NSDataAsset(name: "Dog3_animation_breath")?.data
                 gifArray = [

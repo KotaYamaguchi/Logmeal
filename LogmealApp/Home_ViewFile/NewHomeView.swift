@@ -7,10 +7,11 @@ struct NewHomeView: View {
     @EnvironmentObject var user: UserData
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
+    @Query private var characters: [Character]
     @State var selectedIndex: Int? = nil
     @State var showDetailView:Bool = false
     private var displayContentColor:Color{
-        switch user.currentCharacter.name {
+        switch characters.first(where: {$0.isSelected})!.name {
         case "Dog": Color(red: 248/255, green: 201/255, blue: 201/255)
         case "Cat": Color(red: 198/255, green: 166/255, blue: 208/255)
         case "Rabbit": Color(red: 251/255, green: 233/255, blue: 184/255)
@@ -19,7 +20,7 @@ struct NewHomeView: View {
         }
     }
     private var backgoundImage:String{
-        switch user.currentCharacter.name{
+        switch characters.first(where: {$0.isSelected})!.name{
         case "Dog":"bg_home_Dog"
         case "Cat":"bg_home_Cat"
         case "Rabbit":"bg_home_Rabbit"
@@ -28,7 +29,7 @@ struct NewHomeView: View {
         }
     }
     private var addButtonImage:String{
-        switch user.currentCharacter.name{
+        switch characters.first(where: {$0.isSelected})!.name{
         case "Dog":"bt_add_Dog"
         case "Cat":"bt_add_Cat"
         case "Rabbit":"bt_add_Rabbit"
@@ -89,30 +90,25 @@ struct NewHomeView: View {
             return nil
         }
     }
-    private func loadUserImage(from fileName: String?) -> UIImage? {
+    private func loadUserImage(from inputFileName: String?) -> UIImage? { // パラメータ名を変更
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        var fileName: String? = nil
-
-        // 新しいimageFileNameプロパティを優先して使用
-        if let newFileName = fileName {
-            fileName = newFileName
-        }
-
-        // ファイル名が取得できなければ、nilを返す
-        guard let finalFileName = fileName else {
+        
+        // 引数の inputFileName を直接使う
+        guard let finalFileName = inputFileName else {
             print("ファイル名が取得できませんでした。")
             return nil
         }
 
-        // ドキュメントディレクトリとファイル名を組み合わせて画像のURLを生成
-        let fileURL: URL
-        // ここで拡張子を付与する
-        if finalFileName.hasSuffix(".jpeg") {
-            fileURL = documentURL.appendingPathComponent(finalFileName)
+        // ファイル名に.jpeg拡張子が含まれていない場合、追加する
+        let fileNameWithExtension: String
+        if !finalFileName.hasSuffix(".jpeg") {
+            fileNameWithExtension = finalFileName + ".jpeg"
         } else {
-            fileURL = documentURL.appendingPathComponent(finalFileName + ".jpeg")
+            fileNameWithExtension = finalFileName
         }
-
+        
+        let fileURL = documentURL.appendingPathComponent(fileNameWithExtension)
+        
         do {
             let data = try Data(contentsOf: fileURL)
             return UIImage(data: data)
@@ -163,7 +159,6 @@ struct NewHomeView: View {
             }
             .onAppear(){
                 print("ーーーーーーーーーーーーアプリを起動しました！ーーーーーーーーーーーー")
-                user.initCharacterData()
             }
             .onChange(of: selectedIndex) { _, newValue in
                 showDetailView = (newValue != nil)
@@ -183,7 +178,7 @@ struct NewHomeView: View {
     }
     
     private func backgroundImage(geometry: GeometryProxy) -> some View {
-        Image("bg_home_\(user.currentCharacter.name)")
+        Image("bg_home_\(characters.first(where: {$0.isSelected})!.name)")
             .resizable()
             .scaledToFill()
             .ignoresSafeArea()
@@ -221,7 +216,7 @@ struct NewHomeView: View {
                     ForEach([
                         ("\(allData.count)", "ろぐ"),
                         ("\(user.point)", "ポイント"),
-                        ("\(user.currentCharacter.level)", "レベル")
+                        ("\(characters.first(where: {$0.isSelected})!.level)", "レベル")
                     ], id: \.1) { value, label in
                         VStack {
                             Text(value)

@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct NewColumnView: View {
+    @Query private var characters: [Character]
     @State private var searchText: String = ""
     @State private var isOpenSortMenu: Bool = false
     @State private var sortTitle: String = "新しい順"
@@ -11,7 +12,7 @@ struct NewColumnView: View {
     @Environment(\.modelContext) private var context
     //キャラごとのコラム追加ボタン
     private var addButtonImage:String{
-        switch user.currentCharacter.name{
+        switch characters.first(where: {$0.isSelected})!.name{
         case "Dog":"bt_add_Dog"
         case "Cat":"bt_add_Cat"
         case "Rabbit":"bt_add_Rabbit"
@@ -20,7 +21,7 @@ struct NewColumnView: View {
         }
     }
     private var displayContentColor:Color{
-        switch user.currentCharacter.name {
+        switch characters.first(where: {$0.isSelected})!.name {
         case "Dog": Color(red: 248/255, green: 201/255, blue: 201/255)
         case "Cat": Color(red: 198/255, green: 166/255, blue: 208/255)
         case "Rabbit": Color(red: 251/255, green: 233/255, blue: 184/255)
@@ -67,7 +68,7 @@ struct NewColumnView: View {
         }
     }
     private var backgoundImage:String{
-        switch user.currentCharacter.name{
+        switch characters.first(where: {$0.isSelected})!.name{
         case "Dog":"bg_column_Dog"
         case "Cat":"bg_column_Cat"
         case "Rabbit":"bg_column_Rabbit"
@@ -279,9 +280,6 @@ struct NewColumnView: View {
             }
             }
             .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
-            .onAppear(){
-                user.initCharacterData()
-            }
             .sheet(isPresented:$showQRscanner){
                 ScannerView(isPresentingScanner: $showQRscanner)
             }

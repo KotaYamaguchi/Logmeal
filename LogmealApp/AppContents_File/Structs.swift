@@ -97,3 +97,19 @@ enum TimeStamp:String, Codable{
     }
 }
 
+
+@Model final class Character {
+    @Attribute(.unique) var name: String
+    var level: Int
+    var exp: Int
+    var growthStage: Int
+    var isSelected: Bool
+
+    init(name: String, level: Int, exp: Int, growthStage: Int, isSelected: Bool = false) {
+        self.name = name
+        self.level = level
+        self.exp = exp
+        self.growthStage = growthStage
+        self.isSelected = isSelected
+    }
+}

@@ -1,7 +1,10 @@
 import SwiftUI
+import SwiftData
 
 // MARK: - Main Detail View
 struct NewCharacterDetailView: View {
+    @Query private var characters: [Character]
+    @Environment(\.modelContext) private var context
     @State private var selectedTab: CharacterType = .dog
     @EnvironmentObject var userData: UserData
 
@@ -31,14 +34,18 @@ struct NewCharacterDetailView: View {
                 .padding(.bottom, 20)
             }
 
-            if showConfirm, let target = confirmTarget, let type = confirmType {
+            if showConfirm, let target = confirmTarget, let _ = confirmType {
                 CharacterSwitchConfirmView(
-                    current: userData.currentCharacter,
+                    current: characters.first(where: {$0.isSelected})!,
                     target: target,
                     onConfirm: {
-                        let status = userData.canSwitchCharacter(currentharacter: userData.currentCharacter)
-                        userData.switchCharacter(switchStatus: status, targetCharacter: target)
-                        showConfirm = false
+                        let status = userData.canSwitchCharacter(currentharacter: characters.first(where: {$0.isSelected})!)
+                        if status == .success{
+                            userData.switchCharacter(current: characters.first(where: {$0.isSelected})!, to: target.name, array: characters, context: context)
+                            showConfirm = false
+                        }else{
+                            print("キャラクターの切り替えに失敗しました。成長段階が3ではありません。")
+                        }
                     },
                     onCancel: {
                         showConfirm = false
@@ -80,6 +87,7 @@ enum CharacterType: Int, CaseIterable, Identifiable {
 
 // MARK: - Dynamic Background
 private struct CharacterDetailBackground: View {
+    @Query private var characters: [Character]
     @EnvironmentObject var userData: UserData
     let selected: CharacterType
 
@@ -91,11 +99,11 @@ private struct CharacterDetailBackground: View {
     private var backgroundImageName: String {
         switch selected {
         case .dog:
-            return "characterDetail_Dog\(userData.DogData.growthStage)"
+            return "characterDetail_Dog\(characters.first(where: {$0.name == "Dog"})!.growthStage)"
         case .rabbit:
-            return "characterDetail_Rabbit\(userData.RabbitData.growthStage)"
+            return "characterDetail_Rabbit\(characters.first(where: {$0.name == "Rabbit"})!.growthStage)"
         case .cat:
-            return "characterDetail_Cat\(userData.CatData.growthStage)"
+            return "characterDetail_Cat\(characters.first(where: {$0.name == "Cat"})!.growthStage)"
         }
     }
 }
@@ -154,18 +162,19 @@ private struct CharacterDetailContent: View {
 
 /// DogDetailView: currentCharacter.growthStage == 3 のときのみ切り替え可能
 private struct DogDetailView: View {
+    @Query private var characters: [Character]
     @EnvironmentObject var userData: UserData
     let onRequestSwitch: (CharacterType, Character) -> Void
 
     var body: some View {
-        if userData.selectedCharacter == "Dog" {
+        if characters.first(where: {$0.isSelected})!.name == "Dog" {
             // すでにDogが選択中
             DisabledButton(title: "選択中")
         } else {
             // 現在のキャラが成長段階3なら切り替え可能
-            if userData.currentCharacter.growthStage == 3 {
+            if characters.first(where: {$0.isSelected})!.growthStage == 3 {
                 SelectButton(title: "このキャラにする！") {
-                    onRequestSwitch(.dog, userData.DogData)
+                    onRequestSwitch(.dog, characters.first(where: {$0.name == "Dog"})!)
                 }
             } else {
                 DisabledButton(title: "選択不可")
@@ -178,16 +187,16 @@ private struct DogDetailView: View {
 private struct RabbitDetailView: View {
     @EnvironmentObject var userData: UserData
     let onRequestSwitch: (CharacterType, Character) -> Void
-
+    @Query private var characters: [Character]
     var body: some View {
         VStack(spacing: 24) {
            
-            if userData.selectedCharacter == "Rabbit" {
+            if characters.first(where: {$0.isSelected})!.name == "Rabbit"  {
                 DisabledButton(title: "選択中")
             } else {
-                if userData.currentCharacter.growthStage == 3 {
+                if characters.first(where: {$0.isSelected})!.growthStage == 3 {
                     SelectButton(title: "このキャラにする！") {
-                        onRequestSwitch(.rabbit, userData.RabbitData)
+                        onRequestSwitch(.rabbit, characters.first(where: {$0.name == "Rabbit"})!)
                     }
                 } else {
                     DisabledButton(title: "選択不可")
@@ -201,17 +210,17 @@ private struct RabbitDetailView: View {
 private struct CatDetailView: View {
     @EnvironmentObject var userData: UserData
     let onRequestSwitch: (CharacterType, Character) -> Void
-
+    @Query private var characters: [Character]
     var body: some View {
         VStack(spacing: 24) {
     
 
-            if userData.selectedCharacter == "Cat" {
+            if characters.first(where: {$0.isSelected})!.name == "Cat"  {
                 DisabledButton(title: "選択中")
             } else {
-                if userData.currentCharacter.growthStage == 3 {
+                if characters.first(where: {$0.isSelected})!.growthStage == 3 {
                     SelectButton(title: "このキャラにする！") {
-                        onRequestSwitch(.cat, userData.CatData)
+                        onRequestSwitch(.cat, characters.first(where: {$0.name == "Cat"})!)
                     }
                 } else {
                     DisabledButton(title: "選択不可")

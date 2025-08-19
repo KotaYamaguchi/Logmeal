@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct NewShopView: View {
+    @Query private var characters: [Character]
     @EnvironmentObject var user: UserData
     @State private var isFrontItemsBoard: Bool = true
     @State private var showPurchaseAlert: Bool = false
@@ -24,7 +26,7 @@ struct NewShopView: View {
     @State private var isLoading: Bool = true   // ★追加: ローディング状態
     // 背景色
     private var displayContentColor: Color {
-        switch user.currentCharacter.name {
+        switch characters.first(where: {$0.isSelected})!.name {
         case "Dog": return Color(red: 248/255, green: 201/255, blue: 201/255)
         case "Cat": return Color(red: 198/255, green: 166/255, blue: 208/255)
         case "Rabbit": return Color(red: 251/255, green: 233/255, blue: 184/255)
@@ -34,7 +36,7 @@ struct NewShopView: View {
     
     // 背景画像
     private var backgroundImage: String {
-        switch user.currentCharacter.name {
+        switch characters.first(where: {$0.isSelected})!.name {
         case "Dog": return "bg_shop_Dog"
         case "Cat": return "bg_shop_Cat"
         case "Rabbit": return "bg_shop_Rabbit"
@@ -98,7 +100,7 @@ struct NewShopView: View {
                 print("=== onAppear Debug Log ===")
                 print("geometry.size: (width: \(geometry.size.width), height: \(geometry.size.height))")
                 print("user.initCharacterData() 実行")
-                user.initCharacterData()
+                
                 // ★ 非同期でマイグレーション・ロード
                 isLoading = true
                 Task {
@@ -107,13 +109,12 @@ struct NewShopView: View {
                     isLoading = false
                     print("updateBoughtProducts() 実行")
                     print("boughtProducts: \(boughtProducts)")
-                    print("user.currentCharacter: name=\(user.currentCharacter.name), level=\(user.currentCharacter.level), exp=\(user.currentCharacter.exp), growthStage=\(user.currentCharacter.growthStage)")
                     print("================================")
                 }
             }
             .onDisappear(){
                 // キャラごとのキーで保存
-                let charName = user.currentCharacter.name
+                let charName = characters.first(where: {$0.isSelected})!
                 user.saveProducts(products: products, key: "\(charName)_products")
                 user.saveProducts(products: boughtProducts, key: "\(charName)_boughtItem")
             }
@@ -415,7 +416,7 @@ extension NewShopView {
     
     private func loadProducts() {
         print("=== loadProducts Debug Log ===")
-        let charName = user.currentCharacter.name
+        let charName = characters.first(where: {$0.isSelected})!.name
         let productKey = "\(charName)_products"
         print("currentCharacter: \(charName), 使用キー: \(productKey)")
         let loadedProducts = user.loadProducts(key: productKey)
@@ -487,7 +488,7 @@ extension NewShopView {
             return
         }
         // キャラごとのキーで保存
-        let charName = user.currentCharacter.name
+        let charName = characters.first(where: {$0.isSelected})!
         products[index].isBought = true
         user.point -= products[index].price
         boughtProducts.append(selectedProduct)

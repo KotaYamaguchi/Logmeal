@@ -8,6 +8,7 @@ struct LogEditView: View {
     @Environment(\.modelContext) private var context
     @Query private var allData: [AjiwaiCardData]
     @Query private var allMenu:[MenuData]
+    @Query private var characters: [Character]
     @State private var timeStanp:TimeStamp? = nil
     @State private var currentDate: Date = Date()
     @Binding var isEditing: Bool
@@ -188,11 +189,11 @@ struct LogEditView: View {
             updateUserExperience(by: totalCharacterCount)
             // ポイント更新：1文字につき1ポイント（バランス調整可能）
             updateUserPoints(by: totalCharacterCount)
-            if user.currentCharacter.level >= 12{
-                user.currentCharacter.growthStage = 3
+            if characters.first(where: {$0.isSelected})!.level >= 12{
+                characters.first(where: {$0.isSelected})!.growthStage = 3
                 user.isGrowthed = true
-            }else if user.currentCharacter.level >= 5{
-                user.currentCharacter.growthStage = 2
+            }else if characters.first(where: {$0.isSelected})!.level >= 5{
+                characters.first(where: {$0.isSelected})!.growthStage = 2
                 user.isGrowthed = true
             }
         } catch {
@@ -204,33 +205,26 @@ struct LogEditView: View {
     }
     // ユーザー経験値の更新処理
     private func updateUserExperience(by gainedExp: Int) {
-        user.initCharacterData()
-        user.currentCharacter.exp += gainedExp / 10 //　10文字につき1exp
+        characters.first(where: {$0.isSelected})!.exp += gainedExp / 10 //　10文字につき1exp
         
         
         var newLevel = 0
         // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
         for threshold in user.levelThresholds {
-            if user.currentCharacter.exp >= threshold {
+            if characters.first(where: {$0.isSelected})!.exp >= threshold {
                 newLevel += 1
             } else {
                 break
             }
         }
-        user.currentCharacter.level = newLevel
-        user.isIncreasedLevel = true
-        switch user.selectedCharacter{
-        case "Dog":
-            user.DogData = user.currentCharacter
-        case "Cat":
-            user.CatData = user.currentCharacter
-        case "Rabbit":
-            user.RabbitData = user.currentCharacter
-        default:
-            break
+        characters.first(where: {$0.isSelected})!.level = newLevel
+        do{
+            try context.save()
+        }catch{
+            print("レベル更新に失敗しました: \(error)")
         }
-        user.saveAllCharacter()
-        print("獲得経験値: \(gainedExp), 総経験値: \(user.currentCharacter.exp), 新しいレベル: \(user.currentCharacter.level)")
+       
+        user.isIncreasedLevel = true
     }
     // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
     private func updateUserPoints(by gainedExp: Int) {

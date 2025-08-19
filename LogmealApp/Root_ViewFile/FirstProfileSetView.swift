@@ -8,8 +8,10 @@
 import Foundation
 import SwiftUI
 import PhotosUI
+import SwiftData
 
 struct ForstProfileSetView:View {
+    @Query private var characters: [Character]
     @EnvironmentObject var userData:UserData
     @State var showSaveSuccess:Bool = false
     @State private var isAllProfileSet:Bool = false
@@ -478,7 +480,7 @@ struct ForstProfileSetView:View {
                     .padding(.vertical)
                     
                 }
-                Image("\(userData.currentCharacter.name)_normal_1")
+                Image("\(characters.first(where: {$0.isSelected})!.name)_normal_1")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 180)
