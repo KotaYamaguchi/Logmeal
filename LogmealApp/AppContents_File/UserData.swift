@@ -133,17 +133,41 @@ class UserData:ObservableObject{
                 let RabbitData = Character(
                     name: "Rabbit", level: level, exp: exp, growthStage: growthStage, isSelected: true
                 )
+                let DogData = Character(
+                    name: "Dog", level: 0, exp: 0, growthStage: 1, isSelected: false
+                )
+                let CatData = Character(
+                    name: "Cat", level: 0, exp: 0, growthStage: 1, isSelected: false
+                )
                 context.insert(RabbitData)
+                context.insert(DogData)
+                context.insert(CatData)
                 
             case "Dog":
                 let DogData = Character(
                     name: "Dog", level: level, exp: exp, growthStage: growthStage, isSelected: true
                 )
+                let RabbitData = Character(
+                    name: "Rabbit", level: 0, exp: 0, growthStage: 1, isSelected: false
+                )
+                let CatData = Character(
+                    name: "Cat", level: 0, exp: 0, growthStage: 1, isSelected: false
+                )
+                context.insert(RabbitData)
                 context.insert(DogData)
+                context.insert(CatData)
             case "Cat":
                 let CatData = Character(
                     name: "Cat", level: level, exp: exp, growthStage: growthStage, isSelected: true
                 )
+                let DogData = Character(
+                    name: "Dog", level: 0, exp: 0, growthStage: 1, isSelected: false
+                )
+                let RabbitData = Character(
+                    name: "Rabbit", level: 0, exp: 0, growthStage: 1, isSelected: false
+                )
+                context.insert(RabbitData)
+                context.insert(DogData)
                 context.insert(CatData)
             default:
                 break

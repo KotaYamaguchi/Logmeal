@@ -38,24 +38,6 @@ struct LaunchScreen: View {
                             print("マイグレーションエラー")
                         }
                     }
-                    if characters.isEmpty {
-                        let dogData = Character(name: "Dog", level: 0, exp: 0, growthStage: 1, isSelected: false)
-                        let rabbitData = Character(name: "Rabbit", level: 0, exp: 0, growthStage: 1, isSelected: false)
-                        let catData = Character(name: "Cat", level: 0, exp: 0, growthStage: 1, isSelected: false)
-                        
-                        context.insert(dogData)
-                        context.insert(rabbitData)
-                        context.insert(catData)
-                        
-                        do{
-                            try context.save()
-                            print("初期キャラクターデータを保存しました。")
-                        }catch{
-                            print("Failed to save initial character data: \(error)")
-                        }
-                    }else{
-                        print("キャラクターデータは既に存在します。")
-                    }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         withAnimation {
                             isLoading = false
