@@ -215,7 +215,11 @@ struct CharacterSelectView: View {
                                     }catch{
                                         print("Failed to save character selection: \(error)")
                                     }
+                                }else{
+                                    print("Selected character not found in characters array.")
                                 }
+                            }else{
+                                print("No character selected.")
                             }
                         } label: {
                             Image("bt_base")
@@ -256,11 +260,4 @@ struct CharacterSelectView: View {
             }
         }
     }
-}
-
-
-
-#Preview {
-    CharacterSelectView(isSelectedCharacter: .constant(false)).detailView(size: CGSize(width: 800, height: 600))
-        .environmentObject(UserData())
 }
