@@ -243,9 +243,4 @@ class UserData:ObservableObject{
     }
 }
 
-enum SwitchStatus:String{
-    case success
-    case fails
-}
-
 

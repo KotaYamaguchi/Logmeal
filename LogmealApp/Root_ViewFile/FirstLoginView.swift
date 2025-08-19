@@ -1,7 +1,8 @@
 import SwiftUI
+import _AVKit_SwiftUI
+import AVFoundation
 import Network
-import WebKit
-import AVKit
+
 import SwiftData
 
 struct FirstLoginView: View {
@@ -216,50 +217,6 @@ struct FirstLoginView: View {
 
 
 
-struct YouTubeViewRepresentable: UIViewRepresentable {
-    let videoID: String
-    
-    func makeUIView(context: Context) -> WKWebView {
-        let webView = WKWebView()
-        webView.scrollView.isScrollEnabled = false  // Disable scrolling
-        webView.contentMode = .scaleAspectFit  // Adjust content scaling
-        
-        return webView
-    }
-    
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        let htmlString = """
-        <html>
-        <body style="margin:0;padding:0;">
-        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/\(videoID)?playsinline=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </body>
-        </html>
-        """
-        uiView.loadHTMLString(htmlString, baseURL: nil)
-    }
-}
-struct YoutubeView: View {
-    @Environment(\.dismiss) private var dismiss
-    let withBaclButton:Bool
-    var body: some View {
-        NavigationStack{
-            YouTubeViewRepresentable(videoID: "6SwhhYdYSm4")
-                .padding(.horizontal)
-                .toolbar{
-                    if withBaclButton{
-                        ToolbarItem{
-                            Button{
-                                dismiss()
-                            }label: {
-                                Image("bt_close")
-                                    .resizable()
-                                    .frame(width: 35,height: 35)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
-                    }
-                }
-        }
-    }
-}
+
+
 

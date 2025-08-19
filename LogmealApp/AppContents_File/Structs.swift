@@ -1,11 +1,8 @@
 import SwiftUI
 import SwiftData
 //画面遷移用の列挙型
-enum Homepath: Hashable {
-    case home
-    case ajiwaiCard(AjiwaiCardData?)
-    case reward
-}
+
+
 struct Product: Identifiable, Codable {
     var id = UUID()
     var name: String
@@ -111,5 +108,52 @@ enum TimeStamp:String, Codable{
         self.exp = exp
         self.growthStage = growthStage
         self.isSelected = isSelected
+    }
+}
+struct CharacterSpeech: Identifiable {
+    let id: Int
+    let character: String
+    let speech: String
+    let timing: String
+}
+
+enum NavigationDestinations {
+    case home
+    case column
+    case setting
+}
+enum Homepath: Hashable {
+    case home
+    case ajiwaiCard(AjiwaiCardData?)
+    case reward
+}
+
+enum SwitchStatus:String{
+    case success
+    case fails
+}
+enum CharacterType: Int, CaseIterable, Identifiable {
+    case dog, rabbit, cat
+    var id: Int { rawValue }
+    var rawValueString: String {
+        switch self {
+        case .dog: return "Dog"
+        case .rabbit: return "Rabbit"
+        case .cat: return "Cat"
+        }
+    }
+    var iconName: String {
+        switch self {
+        case .dog: return "Dog_normal_1"
+        case .rabbit: return "Rabbit_normal_1"
+        case .cat: return "Cat_normal_1"
+        }
+    }
+    var displayName: String {
+        switch self {
+        case .dog: return "犬"
+        case .rabbit: return "うさぎ"
+        case .cat: return "ねこ"
+        }
     }
 }

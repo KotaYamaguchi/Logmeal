@@ -1,17 +1,7 @@
 import SwiftUI
 import SwiftData
 
-enum NavigationDestinations {
-    case home
-    case column
-    case setting
-}
-struct CharacterSpeech: Identifiable {
-    let id: Int
-    let character: String
-    let speech: String
-    let timing: String
-}
+
 struct NewContentView: View {
     @EnvironmentObject var user: UserData
     @Query private var characters: [Character]

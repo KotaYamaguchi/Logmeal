@@ -286,6 +286,7 @@ struct NewColumnView: View {
         }
     }
 }
+
 #Preview{
     let previewContainer = try! ModelContainer(
         for: ColumnData.self,
