@@ -15,26 +15,26 @@ struct GrowthAnimationView: View {
     @State private var playGif: Bool = true
     
     private func getFirstGifName() -> String {
-           switch user.growthStage {
-           case 2:
-               return "\(characters.first(where: {$0.isSelected})!.name)1_animation_breath"
-           case 3:
-               return "\(characters.first(where: {$0.isSelected})!.name)2_animation_breath"
-           default:
-               return "\(characters.first(where: {$0.isSelected})!.name)\(characters.first(where: {$0.isSelected})!.growthStage)_animation_breath"
-           }
-       }
-       
-       private func getSecondGifName() -> String {
-           switch characters.first(where: {$0.isSelected})!.growthStage {
-           case 2:
-               return "\(characters.first(where: {$0.isSelected})!.name)2_animation_breath"
-           case 3:
-               return "\(characters.first(where: {$0.isSelected})!.name)3_animation_breath"
-           default:
-               return "\(characters.first(where: {$0.isSelected})!.name)\(characters.first(where: {$0.isSelected})!.growthStage)_animation_breath"
-           }
-       }
+        switch characters.first(where: {$0.isSelected})!.growthStage {
+        case 2:
+            return "\(characters.first(where: {$0.isSelected})!.name)1_animation_breath"
+        case 3:
+            return "\(characters.first(where: {$0.isSelected})!.name)2_animation_breath"
+        default:
+            return "\(characters.first(where: {$0.isSelected})!.name)\(characters.first(where: {$0.isSelected})!.growthStage)_animation_breath"
+        }
+    }
+    
+    private func getSecondGifName() -> String {
+        switch characters.first(where: {$0.isSelected})!.growthStage {
+        case 2:
+            return "\(characters.first(where: {$0.isSelected})!.name)2_animation_breath"
+        case 3:
+            return "\(characters.first(where: {$0.isSelected})!.name)3_animation_breath"
+        default:
+            return "\(characters.first(where: {$0.isSelected})!.name)\(characters.first(where: {$0.isSelected})!.growthStage)_animation_breath"
+        }
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -47,9 +47,7 @@ struct GrowthAnimationView: View {
                     GIFImage(data: NSDataAsset(name: getFirstGifName())!.data, loopCount: 1, playGif: $playGif)
                         .frame(width: geometry.size.width * 0.7, height: geometry.size.height * 0.7)
                         .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.65)
-                }
-                
-                if showSecondGif {
+                }else if showSecondGif{
                     GIFImage(data: NSDataAsset(name: getSecondGifName())!.data, loopCount: 1, playGif: $playGif)
                         .frame(width: geometry.size.width * 0.7, height: geometry.size.height * 0.7)
                         .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.65)
@@ -70,7 +68,7 @@ struct GrowthAnimationView: View {
                                        speed: 0.1,
                                        font: .custom("GenJyuuGothicX-Bold", size: 17),
                                        textColor: useBackGroundColor ? .white : .textColor) {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                             showText1 = false
                             playGrowthAnimation()
                         }

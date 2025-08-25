@@ -107,9 +107,11 @@ struct NewWritingView: View {
             user.gainExp(finalExp, current: characters.first(where: {$0.isSelected})!) // 計算された経験値を付与
             if characters.first(where: {$0.isSelected})!.level >= 12{
                 characters.first(where: {$0.isSelected})!.growthStage = 3
+                user.showGrowthAnimation = true
                 user.isGrowthed = true
             }else if characters.first(where: {$0.isSelected})!.level >= 5{
                 characters.first(where: {$0.isSelected})!.growthStage = 2
+                user.showGrowthAnimation = true
                 user.isGrowthed = true
             }
         } catch {
@@ -133,6 +135,9 @@ struct NewWritingView: View {
             } else {
                 break
             }
+        }
+        if newLevel > characters.first(where: {$0.isSelected})!.level {
+            user.showLevelUPAnimation = true
         }
         characters.first(where: {$0.isSelected})!.level = newLevel
         user.isIncreasedLevel = true
@@ -309,7 +314,7 @@ struct NewWritingView: View {
                         }
                         .padding(.horizontal)
                         Button{
-                            createSampleData(textLength: 100) // 例として100文字のサンプルを生成
+                            createSampleData(textLength: 300) // 例として100文字のサンプルを生成
                         }label: {
                             Text("サンプル記録を生成")
                         }
@@ -431,25 +436,6 @@ struct NewWritingView: View {
                                 
                             }
                             VStack{
-                                //                                VStack{
-                                //                                    Text("ごはんはどうだった？")
-                                //                                        .font(.custom("GenJyuuGothicX-Bold", size: 25))
-                                //                                    Text("食べた感想を教えてね！")
-                                //                                        .font(.custom("GenJyuuGothicX-Bold", size: 20))
-                                //                                    Image("mt_AjiwaiCard")
-                                //                                        .resizable()
-                                //                                        .scaledToFit()
-                                //                                        .frame(height: geometry.size.height*0.4)
-                                //                                        .overlay{
-                                //
-                                //                                            TextField("カレーの色が家のものと違って明るくて、甘い味でした。フルーツヨーグルトが...",text: $editedText,axis:.vertical)
-                                //                                                .frame(width: geometry.size.width*0.34,height:geometry.size.height*0.15)
-                                //                                        }
-                                //                                }
-                                //                                .padding()
-                                //                                .background{
-                                //                                    backgroundCard(geometry: geometry)
-                                //                                }
                                 VStack{
                                     VStack{
                                         Text("五感で味わってみよう！")
