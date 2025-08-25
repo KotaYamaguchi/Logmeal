@@ -18,10 +18,10 @@ struct LogEditView: View {
     @State private var editedSenseText: [String] = ["","","","",""]
     @State private var editedMenu: [String] = ["","","",""]
     @State private var showCameraPicker = false
-    @State private var showingSaveAlert = false
     @State private var showDatePicker:Bool = false
-    @State private var saveResultMessage: String? = nil
-    @State private var showSaveResultAlert: Bool = false
+    @State private var showSaveConfirmOverlay = false
+    @State private var showSaveResultOverlay = false
+    @State private var saveResultMessage: String = ""
     private let senseIcons = ["mt_Eye_icon", "mt_Ear_icon", "mt_Nose_icon", "mt_Tongue_icon", "mt_Hand_Icon"]
     private let senseTitles = ["みため", "おと", "におい", "あじ", "さわりごこち"]
     private let sensePlaceholders = [
@@ -38,14 +38,14 @@ struct LogEditView: View {
         Color(red: 139 / 255, green: 194 / 255, blue: 222 / 255),
         Color(red: 196 / 255, green: 160 / 255, blue: 193 / 255)
     ]
-
-    let dataIndex: Int // 編集対象のデータのインデックスを受け取る
     
-    // 編集対象のAjiwaiCardData
-    private var ajiawaiData: AjiwaiCardData {
-        allData[dataIndex]
-    }
-
+    var selectedData: AjiwaiCardData // 編集対象のデータのインデックスを受け取る
+    
+//    // 編集対象のAjiwaiCardData
+//    private var selectedData: AjiwaiCardData {
+//        allData[dataIndex]
+//    }
+    
     private func dateFormatter(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
@@ -53,9 +53,9 @@ struct LogEditView: View {
         formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: date)
     }
-
+    
     // MARK: - 画像保存・読み込みヘルパー関数 (LogEditView内で使用)
-
+    
     // 画像を保存し、そのファイル名を返す関数
     private func saveImageToDocumentDirectory(image: UIImage, fileName: String) -> String? {
         guard let data = image.jpegData(compressionQuality: 1.0) else {
@@ -76,7 +76,7 @@ struct LogEditView: View {
             return nil
         }
     }
-
+    
     // ドキュメントディレクトリから画像ファイルを読み込む関数
     private func loadImageFromDocumentDirectory(fileName: String) -> UIImage? {
         let documentURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -99,11 +99,11 @@ struct LogEditView: View {
             return nil
         }
     }
-
+    
     // AjiwaiCardDataから画像を安全に読み込む関数
     private func loadImageSafely(from ajiwaiCardData: AjiwaiCardData) -> UIImage? {
         var fileName: String? = nil
-
+        
         // 1. 新しい imageFileName プロパティを優先して使用
         if let newFileName = ajiwaiCardData.imageFileName {
             fileName = newFileName
@@ -112,17 +112,17 @@ struct LogEditView: View {
         else if let oldImagePathURL = URL(string: ajiwaiCardData.imagePath.absoluteString) {
             fileName = oldImagePathURL.lastPathComponent
         }
-
+        
         // ファイル名が取得できなければ、nilを返す
         guard let finalFileName = fileName else {
             print("ファイル名が取得できませんでした。")
             return nil
         }
-
+        
         // loadImageFromDocumentDirectory を使って画像を読み込む
         return loadImageFromDocumentDirectory(fileName: finalFileName)
     }
-
+    
     // 一意なファイル名を生成する関数（拡張子なし）
     private func generateUniqueImageFileName(saveDay: Date, timeStamp: TimeStamp) -> String {
         let dateFormatter = DateFormatter()
@@ -134,8 +134,8 @@ struct LogEditView: View {
         // ここでは拡張子を含めずにファイル名を返す
         return "\(dateString)_\(timeString)_\(uuidString)"
     }
-
-
+    
+    
     func saveCurrentData(
         saveDay: Date,
         times: TimeStamp,
@@ -148,91 +148,40 @@ struct LogEditView: View {
         menu: [String]
     ) {
         // 既存のデータを更新
-        ajiawaiData.saveDay = saveDay
-        ajiawaiData.time = times
-        ajiawaiData.sight = sight
-        ajiawaiData.taste = taste
-        ajiawaiData.smell = smell
-        ajiawaiData.tactile = tactile
-        ajiawaiData.hearing = hearing
-        ajiawaiData.menu = menu
-
+        selectedData.saveDay = saveDay
+        selectedData.time = times
+        selectedData.sight = sight
+        selectedData.taste = taste
+        selectedData.smell = smell
+        selectedData.tactile = tactile
+        selectedData.hearing = hearing
+        selectedData.menu = menu
+        
         // 画像が変更された場合のみ再保存
-        if let currentUIImage = self.uiImage, currentUIImage == uiImage {
-            // 画像は変更されていないので何もしない
-            print("画像は変更されていません。")
-        } else {
             // 画像が変更されたか、または新規設定された場合
             let fileName = generateUniqueImageFileName(saveDay: saveDay, timeStamp: times)
             if let savedFileNameWithExtension = saveImageToDocumentDirectory(image: uiImage, fileName: fileName) {
-                ajiawaiData.imagePath = URL(string: "file://dummy_old_path")! // 旧バージョン互換性のためダミーURLを更新
-                ajiawaiData.imageFileName = savedFileNameWithExtension // 新しいファイル名を更新
+                selectedData.imagePath = URL(string: "file://dummy_old_path")! // 旧バージョン互換性のためダミーURLを更新
+                selectedData.imageFileName = savedFileNameWithExtension // 新しいファイル名を更新
             } else {
                 saveResultMessage = "画像の保存に失敗しました"
-                showSaveResultAlert = true
+                showSaveResultOverlay = true
                 return
             }
-        }
-
+//        }
+        
         do {
             try context.save()
-            saveResultMessage = "保存に成功しました！"
-            print("メニュー = \(ajiawaiData.menu)")
-            print("五感(聴覚) = \(ajiawaiData.hearing)")
-            
-            // ① 各文字列の文字数を計算して配列に変換
-            let characterCounts = editedSenseText.map { $0.count }
-            // ② その総和を求める
-            let totalCharacterCount = characterCounts.reduce(0, +)
-            print("合計文字数\(totalCharacterCount)")
-            // 経験値更新：10文字につき1exp（バランス調整可能）
-            updateUserExperience(by: totalCharacterCount)
-            // ポイント更新：1文字につき1ポイント（バランス調整可能）
-            updateUserPoints(by: totalCharacterCount)
-            if characters.first(where: {$0.isSelected})!.level >= 12{
-                characters.first(where: {$0.isSelected})!.growthStage = 3
-                user.isGrowthed = true
-            }else if characters.first(where: {$0.isSelected})!.level >= 5{
-                characters.first(where: {$0.isSelected})!.growthStage = 2
-                user.isGrowthed = true
-            }
+            saveResultMessage = "きろくが保存できました！"
+            print("メニュー = \(selectedData.menu)")
+            print("五感(聴覚) = \(selectedData.hearing)")
         } catch {
             print("保存に失敗しました: \(error)")
             saveResultMessage = "保存に失敗しました…"
         }
-        
-        showSaveResultAlert = true
+        showSaveResultOverlay = true
     }
-    // ユーザー経験値の更新処理
-    private func updateUserExperience(by gainedExp: Int) {
-        characters.first(where: {$0.isSelected})!.exp += gainedExp / 10 //　10文字につき1exp
-        
-        
-        var newLevel = 0
-        // しきい値配列の各値と経験値を比較し、条件を満たす場合にレベルを更新
-        for threshold in user.levelThresholds {
-            if characters.first(where: {$0.isSelected})!.exp >= threshold {
-                newLevel += 1
-            } else {
-                break
-            }
-        }
-        characters.first(where: {$0.isSelected})!.level = newLevel
-        do{
-            try context.save()
-        }catch{
-            print("レベル更新に失敗しました: \(error)")
-        }
-       
-        user.isIncreasedLevel = true
-    }
-    // ポイントの更新処理（例：全体の文字数の10分の1を獲得する）
-    private func updateUserPoints(by gainedExp: Int) {
-        // 獲得ポイントは経験値の計算結果を基にスケールする
-        let gainedPoints = gainedExp  / 10 // 10文字につき1ポイント
-        user.point += gainedPoints
-        print("獲得ポイント: \(gainedPoints), 新しいポイント: \(user.point)")
-    }
+    
     func getImageByUrl(url: URL) -> UIImage{
         do {
             let data = try Data(contentsOf: url)
@@ -271,7 +220,7 @@ struct LogEditView: View {
             fields.append("「あさ」か「ひる」か「よる」を選んでね")
         }
         if uiImage == nil {
-            fields.append("写真をとるかライブラリから選んでね")
+            fields.append("しゃしんがないよ！")
         }
         // ほかに必須のテキストなどがあれば同様に append
         return fields
@@ -459,21 +408,9 @@ struct LogEditView: View {
                         Button {
                             let missing = missingFields
                             if missing.isEmpty {
-                                // 必須項目がそろっていれば、もともとの保存処理を実行
-                                saveCurrentData(
-                                    saveDay: currentDate,
-                                    times: timeStanp!,
-                                    sight: editedSenseText[0],
-                                    taste: editedSenseText[3],
-                                    smell: editedSenseText[2],
-                                    tactile: editedSenseText[4],
-                                    hearing: editedSenseText[1],
-                                    uiImage: uiImage!,
-                                    menu: editedMenu
-                                )
-                                user.showAnimation = true
+                                // 必須項目がそろっていれば、自作確認アラート表示
+                                showSaveConfirmOverlay = true
                             } else {
-                                // 足りない項目があれば、改行区切りでメッセージを作ってアラート表示
                                 validationMessage = missing.joined(separator: "\n")
                                 showValidationOverlay = true
                             }
@@ -489,33 +426,22 @@ struct LogEditView: View {
                                         .stroke(Color.buttonColor ,lineWidth: 4)
                                 }
                         }
-                        .alert(isPresented: $showSaveResultAlert) {
-                            Alert(
-                                title: Text(saveResultMessage ?? ""),
-                                dismissButton: .default(Text("OK")) {
-                                    if saveResultMessage == "保存に成功しました！"{
-                                        isEditing = false // 保存成功時に編集モードを終了
-                                    }
-                                }
-                            )
-                        }
-                        
                     }
                 }
                 .padding()
             }
             .onAppear(){
                 // 編集対象のデータから初期値をセット
-                currentDate = ajiawaiData.saveDay
-                timeStanp = ajiawaiData.time
-                editedSenseText[0] = ajiawaiData.sight
-                editedSenseText[1] = ajiawaiData.hearing
-                editedSenseText[2] = ajiawaiData.smell
-                editedSenseText[3] = ajiawaiData.taste
-                editedSenseText[4] = ajiawaiData.tactile
-                editedMenu = ajiawaiData.menu
+                currentDate = selectedData.saveDay
+                timeStanp = selectedData.time
+                editedSenseText[0] = selectedData.sight
+                editedSenseText[1] = selectedData.hearing
+                editedSenseText[2] = selectedData.smell
+                editedSenseText[3] = selectedData.taste
+                editedSenseText[4] = selectedData.tactile
+                editedMenu = selectedData.menu
                 
-                self.uiImage = loadImageSafely(from: ajiawaiData) // 初期画像を設定
+                self.uiImage = loadImageSafely(from: selectedData) // 初期画像を設定
             }
             .fullScreenCover(isPresented: $showCameraPicker) {
                 ImagePicker(image: $uiImage, sourceType: .camera)
@@ -525,11 +451,14 @@ struct LogEditView: View {
                 Task {
                     if let data = try? await newItem?.loadTransferable(type: Data.self),
                        let uiImage = UIImage(data: data) {
+                        print("新しい画像が選択されました")
                         self.uiImage = uiImage
                     }
                 }
             }
             .overlay(validationOverlay)
+            .overlay(saveConfirmOverlay)
+            .overlay(saveResultOverlay)
             .animation(.easeInOut, value: showValidationOverlay)
         }
     }
@@ -668,7 +597,7 @@ struct LogEditView: View {
             // 2) メッセージ本体
             VStack(spacing: 20) {
                 Text(validationMessage)
-                    .font(.system(size: 28, weight: .bold))  // ← 修正済み
+                    .font(.system(size: 28, weight: .bold))   // ← 修正済み
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                 
@@ -688,6 +617,116 @@ struct LogEditView: View {
             .background(Color.white.opacity(0.8))
             .cornerRadius(12)
             .padding(40)
+            .transition(.opacity)
+        }
+    }
+    /// 保存確認用の自作オーバーレイ
+    @ViewBuilder
+    private var saveConfirmOverlay: some View {
+        if showSaveConfirmOverlay {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+            VStack(spacing: 24){
+                Text("このきろくを保存しますか？")
+                    .font(.custom("GenJyuuGothicX-Bold", size: 24))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                Text("あとから書き直すこともできます")
+                    .font(.custom("GenJyuuGothicX-Regular", size: 18))
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                HStack(spacing: 32){
+                    Button {
+                        withAnimation {
+                            showSaveConfirmOverlay = false
+                        }
+                    } label: {
+                        Text("やめる")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 18))
+                            .frame(width: 120, height: 44)
+                            .background(Color.white)
+                            .foregroundStyle(Color.gray)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay{
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.gray, lineWidth: 3)
+                            }
+                    }
+                    Button {
+                        // 保存処理
+                        saveCurrentData(
+                            saveDay: currentDate,
+                            times: timeStanp!,
+                            sight: editedSenseText[0],
+                            taste: editedSenseText[3],
+                            smell: editedSenseText[2],
+                            tactile: editedSenseText[4],
+                            hearing: editedSenseText[1],
+                            uiImage: uiImage!,
+                            menu: editedMenu
+                        )
+                        user.showAnimation = true
+                        withAnimation {
+                            showSaveConfirmOverlay = false
+                        }
+                    } label: {
+                        Text("ほぞんする")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 18))
+                            .frame(width: 120, height: 44)
+                            .background(Color.buttonColor)
+                            .foregroundStyle(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay{
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.buttonColor, lineWidth: 3)
+                            }
+                    }
+                }
+            }
+            .padding(.vertical, 40)
+            .padding(.horizontal, 36)
+            .background(Color.white)
+            .cornerRadius(24)
+            .shadow(radius: 16)
+            .frame(maxWidth: 340)
+            .transition(.opacity)
+        }
+    }
+    /// 保存結果表示用の自作オーバーレイ
+    @ViewBuilder
+    private var saveResultOverlay: some View {
+        if showSaveResultOverlay {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+            VStack(spacing: 24){
+                Text(saveResultMessage)
+                    .font(.custom("GenJyuuGothicX-Bold", size: 26))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                Button("OK") {
+                    withAnimation {
+                        showSaveResultOverlay = false
+                        if saveResultMessage == "きろくが保存できました！" {
+                            isEditing = false
+                        }
+                    }
+                }
+                .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                .frame(width: 120, height: 44)
+                .background(Color.buttonColor)
+                .foregroundStyle(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay{
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.buttonColor, lineWidth: 3)
+                }
+            }
+            .padding(.vertical, 40)
+            .padding(.horizontal, 36)
+            .background(Color.white)
+            .cornerRadius(24)
+            .shadow(radius: 16)
+            .frame(minWidth: 340)
             .transition(.opacity)
         }
     }

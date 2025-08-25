@@ -242,7 +242,7 @@ struct NewContentView: View {
                 )
             }
             .buttonStyle(PlainButtonStyle())
-
+            
             NavigationLink {
                 NewColumnView()
             } label: {
@@ -254,7 +254,7 @@ struct NewContentView: View {
                 )
             }
             .buttonStyle(PlainButtonStyle())
-
+            
             NavigationLink {
                 NewSettingView()
             } label: {
@@ -266,24 +266,25 @@ struct NewContentView: View {
                 )
             }
             .buttonStyle(PlainButtonStyle())
-
+            
             Spacer()
-
-            Button {
-                withAnimation {
-                    showCharactarView = true
-                }
-            } label: {
-                Image("\(characters.first(where: {$0.isSelected})!.name)_window_\(characters.first(where: {$0.isSelected})!.growthStage)")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: geometry.size.width < 500 ? geometry.size.width * 0.56 : 280)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(lineWidth: geometry.size.width < 500 ? 6 : 10)
-                            .foregroundColor(Color(red: 149/255, green: 97/255, blue: 52/255))
+            if !user.showAnimation{
+                Button {
+                    withAnimation {
+                        showCharactarView = true
                     }
+                } label: {
+                    Image("\(characters.first(where: {$0.isSelected})!.name)_window_\(characters.first(where: {$0.isSelected})!.growthStage)")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: geometry.size.width < 500 ? geometry.size.width * 0.56 : 280)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(lineWidth: geometry.size.width < 500 ? 6 : 10)
+                                .foregroundColor(Color(red: 149/255, green: 97/255, blue: 52/255))
+                        }
+                }
             }
         }
         .onTapGesture {

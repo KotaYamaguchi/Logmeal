@@ -6,9 +6,12 @@ struct NewHomeView: View {
     @State private var showWritingView = false
     @EnvironmentObject var user: UserData
     @Environment(\.modelContext) private var context
-    @Query private var allData: [AjiwaiCardData]
+    @Query(sort: \AjiwaiCardData.saveDay) private var allData: [AjiwaiCardData]
     @Query private var characters: [Character]
-    @State var selectedIndex: Int? = nil
+    private var reversedAjiwaiCardData: [AjiwaiCardData] {
+        return allData.reversed()
+    }
+    @State var selectedData: AjiwaiCardData? = nil
     @State var showDetailView:Bool = false
     private var displayContentColor:Color{
         switch characters.first(where: {$0.isSelected})!.name {
@@ -160,19 +163,11 @@ struct NewHomeView: View {
             .onAppear(){
                 print("ーーーーーーーーーーーーアプリを起動しました！ーーーーーーーーーーーー")
             }
-            .onChange(of: selectedIndex) { _, newValue in
-                showDetailView = (newValue != nil)
-            }
             .fullScreenCover(isPresented: $showWritingView) {
                 NewWritingView(showWritingView: $showWritingView)
             }
-            .fullScreenCover(isPresented: $showDetailView) {
-                if let index = selectedIndex {
-                    LogCardlView(dataIndex: index)
-                        .onDisappear(){
-                            selectedIndex = nil
-                        }
-                }
+            .fullScreenCover(item: $selectedData) { data in
+                LogCardlView(selectedData: data)
             }
         }
     }
@@ -239,34 +234,12 @@ struct NewHomeView: View {
     
     private func logGrid(geometry: GeometryProxy) -> some View {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: geometry.size.width * 0.005) {
-                ForEach(0..<allData.count, id: \.self) { index in
+                ForEach(reversedAjiwaiCardData, id: \.self) { data in
                     Button {
-                        selectedIndex = nil
-                        DispatchQueue.main.async {
-                            selectedIndex = index
-                        }
+                        selectedData = data
                     } label: {
-//                        AsyncImage(url: allData[index].imagePath) { phase in
-//                            switch phase {
-//                            case .empty:
-//                                ProgressView()
-//                            case .success(let image):
-//                                image
-//                                    .resizable()
-//                                    .scaledToFill()
-//                                    .frame(width: (geometry.size.width * 0.8) / 3,height:(geometry.size.width * 0.8) / 3)
-//                                    .clipped()
-//                            case .failure(_):
-//                                Rectangle()
-//                                    .frame(width: (geometry.size.width * 0.8) / 3, height: (geometry.size.width * 0.8) / 3)
-//                                    .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
-//                            @unknown default:
-//                                Rectangle()
-//                                    .frame(width: (geometry.size.width * 0.8) / 3, height:(geometry.size.width * 0.8) / 3)
-//                                    .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
-//                            }
-//                        }
-                        if let image = loadImageSafely(from: allData[index]) {
+
+                        if let image = loadImageSafely(from: data) {
                             Image(uiImage: image)
                                 .resizable()
                                 .scaledToFill()
@@ -277,9 +250,6 @@ struct NewHomeView: View {
                                 .frame(width: (geometry.size.width * 0.8) / 3, height: (geometry.size.width * 0.8) / 3)
                                 .foregroundStyle(Color(red: 206/255, green: 206/255, blue: 206/255))
                         }
-                    }
-                    .onAppear(){
-                        print(allData[index].imagePath)
                     }
                 }
             }

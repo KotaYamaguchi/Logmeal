@@ -5,6 +5,7 @@ import PhotosUI
 
 
 struct LogDetailView:View {
+    @Binding var isEditing:Bool
     @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -25,7 +26,7 @@ struct LogDetailView:View {
         formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: date)
     }
-    let dataIndex :Int
+    var selectedData:AjiwaiCardData
     @State private var detailUIImage: UIImage? = nil   // ←追加
     
     // ① UIImage の URL から読み込むユーティリティ
@@ -93,6 +94,9 @@ struct LogDetailView:View {
         // loadImageFromDocumentDirectory を使って画像を読み込む
         return loadImageFromDocumentDirectory(fileName: finalFileName)
     }
+    
+    @State private var showDeleteAlert = false   // 削除確認アラート表示用
+    
     var body: some View {
         GeometryReader{ geometry in
             ZStack{
@@ -101,6 +105,7 @@ struct LogDetailView:View {
                     .scaledToFill()
                     .blur(radius: 3)
                     .position(x:geometry.size.width*0.5,y:geometry.size.height*0.5)
+                
                 VStack{
                     HStack{
                         Button{
@@ -125,7 +130,7 @@ struct LogDetailView:View {
                                     Text("ごはんの写真を撮ろう！")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 20))
                                         .foregroundStyle(.secondary)
-                                    if let image = loadImageSafely(from: allData[dataIndex]) { // ここで修正したloadImageSafelyを使用
+                                    if let image = loadImageSafely(from: selectedData) { // ここで修正したloadImageSafelyを使用
                                         let size = frameSize(for: image)
                                         Image(uiImage: image)
                                             .resizable()
@@ -149,8 +154,8 @@ struct LogDetailView:View {
                                     Text("今日のメニュー")
                                         .font(.custom("GenJyuuGothicX-Bold", size: 25))
                                     List{
-                                        ForEach(0..<allData[dataIndex].menu.count,id:\.self){ index in
-                                            Text(allData[dataIndex].menu[index])
+                                        ForEach(0..<selectedData.menu.count,id:\.self){ index in
+                                            Text(selectedData.menu[index])
                                                 .frame(width: geometry.size.width*0.4)
                                         }
                                     }
@@ -175,7 +180,7 @@ struct LogDetailView:View {
                                                 .scaledToFit()
                                                 .frame(width:geometry.size.width*0.04)
                                             VStack(alignment:.leading){
-                                                Text(allData[dataIndex].sight)
+                                                Text(selectedData.sight)
                                                     .frame(width:geometry.size.width*0.4)
                                                 Rectangle()
                                                     .frame(width:geometry.size.width*0.4,height:1)
@@ -191,7 +196,7 @@ struct LogDetailView:View {
                                                 .scaledToFit()
                                                 .frame(width:geometry.size.width*0.04)
                                             VStack(alignment:.leading){
-                                                Text(allData[dataIndex].hearing)
+                                                Text(selectedData.hearing)
                                                     .frame(width:geometry.size.width*0.4)
                                                 Rectangle()
                                                     .frame(width:geometry.size.width*0.4,height:1)
@@ -207,7 +212,7 @@ struct LogDetailView:View {
                                                 .scaledToFit()
                                                 .frame(width:geometry.size.width*0.04)
                                             VStack(alignment:.leading){
-                                                Text(allData[dataIndex].smell)
+                                                Text(selectedData.smell)
                                                     .frame(width:geometry.size.width*0.4)
                                                 Rectangle()
                                                     .frame(width:geometry.size.width*0.4,height:1)
@@ -223,7 +228,7 @@ struct LogDetailView:View {
                                                 .scaledToFit()
                                                 .frame(width:geometry.size.width*0.04)
                                             VStack(alignment:.leading){
-                                                Text(allData[dataIndex].taste)
+                                                Text(selectedData.taste)
                                                     .frame(width:geometry.size.width*0.4)
                                                 Rectangle()
                                                     .frame(width:geometry.size.width*0.4,height:1)
@@ -239,7 +244,7 @@ struct LogDetailView:View {
                                                 .scaledToFit()
                                                 .frame(width:geometry.size.width*0.04)
                                             VStack(alignment:.leading){
-                                                Text(allData[dataIndex].tactile)
+                                                Text(selectedData.tactile)
                                                     .frame(width:geometry.size.width*0.4)
                                                 Rectangle()
                                                     .frame(width:geometry.size.width*0.4,height:1)
@@ -260,12 +265,104 @@ struct LogDetailView:View {
                         .padding()
                     }
                 }
+                VStack{
+                    Spacer()
+                    HStack{
+                        Spacer()
+                        if !isEditing{
+                            Button{
+                                showDeleteAlert = true   // アラート表示
+                               
+                            }label: {
+                                Text("消す")
+                                    .font(.custom("GenJyuuGothicX-Bold",size:15))
+                                    .frame(width: 180, height: 50)
+                                    .background(Color.white)
+                                    .foregroundStyle(Color.red)
+                                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                                    .overlay{
+                                        RoundedRectangle(cornerRadius: 15)
+                                            .stroke(Color.red ,lineWidth: 4)
+                                    }
+                            }
+                            Button{
+                                isEditing.toggle()
+                            }label: {
+                                Text("書き直す")
+                                    .font(.custom("GenJyuuGothicX-Bold",size:15))
+                                    .frame(width: 180, height: 50)
+                                    .background(Color.white)
+                                    .foregroundStyle(Color.cyan)
+                                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                                    .overlay{
+                                        RoundedRectangle(cornerRadius: 15)
+                                            .stroke(Color.cyan ,lineWidth: 4)
+                                    }
+                            }
+                            .padding()
+                        }
+                    }
+                }
+                
+                // 自作アラートオーバーレイ
+                if showDeleteAlert {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                    VStack(spacing: 24){
+                        Text("本当に消してもいいですか？")
+                            .font(.custom("GenJyuuGothicX-Bold", size: 22))
+                            .foregroundColor(.red)
+                        Text("一度消すと、元に戻すことはできません。")
+                            .font(.custom("GenJyuuGothicX-Regular", size: 17))
+                            .foregroundColor(.black)
+                            .multilineTextAlignment(.center)
+                        HStack(spacing: 32){
+                            Button{
+                                showDeleteAlert = false
+                            }label: {
+                                Text("やっぱりやめる")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 16))
+                                    .frame(width: 120, height: 44)
+                                    .background(Color.white)
+                                    .foregroundStyle(Color.gray)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay{
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.gray, lineWidth: 3)
+                                    }
+                            }
+                            Button{
+                                context.delete(selectedData)
+                                showDeleteAlert = false
+                                dismiss()
+                            }label: {
+                                Text("消す")
+                                    .font(.custom("GenJyuuGothicX-Bold", size: 16))
+                                    .frame(width: 120, height: 44)
+                                    .background(Color.red.opacity(0.9))
+                                    .foregroundStyle(Color.white)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay{
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.red, lineWidth: 3)
+                                    }
+                            }
+                        }
+                    }
+                    .padding(.vertical, 40)
+                    .padding(.horizontal, 36)
+                    .background(Color.white)
+                    .cornerRadius(24)
+                    .shadow(radius: 16)
+                    // アラートを中央表示
+                    .frame(maxWidth: 340)
+                }
             }
             .onAppear {
                 // 非同期化せず同期的にロードしていますが、
                 // サイズ計算だけなら問題ありません
                 detailUIImage = getImageByUrl(
-                    url: allData[dataIndex].imagePath
+                    url: selectedData.imagePath
                 )
             }
         }
@@ -335,9 +432,9 @@ struct LogDetailView:View {
                 .shadow(radius: 3,y:10)
                 .overlay {
                     HStack {
-                        Text(dateFormatter(date: allData[dataIndex].saveDay))
+                        Text(dateFormatter(date: selectedData.saveDay))
                         Text("：")
-                        if let time = allData[dataIndex].time{
+                        if let time = selectedData.time{
                             Text(changeTimeStamp(timeStamp: time))
                         }else{
                             Text("-")

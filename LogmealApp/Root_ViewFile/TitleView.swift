@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct TitleView: View {
+    @StateObject var debugContentsManager = DebugContentsManager.shared
     @State private var textScaleEffectValue:Double = 1.0
     @State private var showMenu:Bool = false
     @EnvironmentObject var user: UserData
@@ -114,6 +115,16 @@ struct TitleView: View {
                         
                     }label:{
                     Text("マイグレーションリセット")
+                    }
+                    Button{
+                        debugContentsManager.isShowingDebugContents.toggle()
+                    }label: {
+                        HStack{
+                            Text("デバッグコンテンツを表示")
+                            Spacer()
+                            Image(systemName: debugContentsManager.isShowingDebugContents ? "checkmark.circle.fill" : "circle")
+                                
+                        }
                     }
                 }
             }
