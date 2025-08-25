@@ -665,7 +665,6 @@ struct LogEditView: View {
                             uiImage: uiImage!,
                             menu: editedMenu
                         )
-                        user.showAnimation = true
                         withAnimation {
                             showSaveConfirmOverlay = false
                         }
