@@ -158,10 +158,6 @@ struct LogEditView: View {
         selectedData.menu = menu
         
         // 画像が変更された場合のみ再保存
-        if let currentUIImage = self.uiImage, currentUIImage == uiImage {
-            // 画像は変更されていないので何もしない
-            print("画像は変更されていません。")
-        } else {
             // 画像が変更されたか、または新規設定された場合
             let fileName = generateUniqueImageFileName(saveDay: saveDay, timeStamp: times)
             if let savedFileNameWithExtension = saveImageToDocumentDirectory(image: uiImage, fileName: fileName) {
@@ -172,7 +168,7 @@ struct LogEditView: View {
                 showSaveResultOverlay = true
                 return
             }
-        }
+//        }
         
         do {
             try context.save()
@@ -455,6 +451,7 @@ struct LogEditView: View {
                 Task {
                     if let data = try? await newItem?.loadTransferable(type: Data.self),
                        let uiImage = UIImage(data: data) {
+                        print("新しい画像が選択されました")
                         self.uiImage = uiImage
                     }
                 }
