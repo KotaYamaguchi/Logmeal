@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct NewCharacterView: View {
+    @StateObject var debugContentsManager = DebugContentsManager.shared
     @Binding var showCharacterView: Bool
     @EnvironmentObject var userData: UserData
     @Query private var characters: [Character]
@@ -73,14 +74,15 @@ struct NewCharacterView: View {
                     )
                     // ─────────────────────────────────────────
                     // debug
-                    DebugOverlay()
-                        .environmentObject(userData)
-                        .position(
-                            x: geo.size.width * 0.5,
-                            y: geo.size.height * 0.5
-                        )
-                    // ─────────────────────────────────────────
-
+                    if debugContentsManager.isShowingDebugContents{
+                        DebugOverlay()
+                            .environmentObject(userData)
+                            .position(
+                                x: geo.size.width * 0.5,
+                                y: geo.size.height * 0.5
+                            )
+                        // ─────────────────────────────────────────
+                    }
                 }
                 .onAppear {
                     switch characters.first(where: {$0.isSelected})!.name{

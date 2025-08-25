@@ -3,6 +3,7 @@ import PhotosUI
 import SwiftData
 
 struct NewWritingView: View {
+    @StateObject var debugContentsManager = DebugContentsManager.shared
     @EnvironmentObject var user: UserData
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
@@ -313,13 +314,15 @@ struct NewWritingView: View {
                                 .frame(width:geometry.size.width*0.05)
                         }
                         .padding(.horizontal)
-                        Button{
-                            createSampleData(textLength: 300) // 例として100文字のサンプルを生成
-                        }label: {
-                            Text("サンプル記録を生成")
+                        if debugContentsManager.isShowingDebugContents{
+                            Button{
+                                createSampleData(textLength: 300) // 例として100文字のサンプルを生成
+                            }label: {
+                                Text("サンプル記録を生成")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .padding()
                         }
-                        .buttonStyle(.borderedProminent)
-                        .padding()
                         Spacer()
                         dateBar(geometry: geometry)
                     }
