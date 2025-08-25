@@ -94,7 +94,7 @@ struct NewWritingView: View {
             }
             
             // 合計文字数に基づいて基本経験値を計算 (例: 3文字で1EXP)
-            let baseExp = totalCharacterCount / 3 // 調整可能
+            let baseExp = totalCharacterCount / 10 // 調整可能
             
             // 最も近い5の倍数に丸める
             // (baseExp + 2) / 5 * 5 は、整数演算で最も近い5の倍数に丸める一般的な方法
