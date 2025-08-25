@@ -19,10 +19,11 @@ struct NewWritingView: View {
     @State private var editedSenseText: [String] = ["","","","",""]
     @State private var editedMenu: [String] = ["","","",""]
     @State private var showCameraPicker = false
-    @State private var showingSaveAlert = false
     @State private var showDatePicker:Bool = false
-    @State private var saveResultMessage: String? = nil
-    @State private var showSaveResultAlert: Bool = false
+
+    @State private var showSaveConfirmOverlay = false
+    @State private var showSaveResultOverlay = false
+    @State private var saveResultMessage: String = ""
     private let senseIcons = ["mt_Eye_icon", "mt_Ear_icon", "mt_Nose_icon", "mt_Tongue_icon", "mt_Hand_Icon"]
     private let senseTitles = ["みため", "おと", "におい", "あじ", "さわりごこち"]
     private let sensePlaceholders = [
@@ -63,7 +64,6 @@ struct NewWritingView: View {
         // 新しい関数を使って画像を保存し、ファイル名を取得
         guard let savedFileName = saveImageToDocumentDirectory(image: uiImage, fileName: fileName) else {
             saveResultMessage = "画像の保存に失敗しました"
-            showSaveResultAlert = true
             return
         }
 
@@ -82,7 +82,7 @@ struct NewWritingView: View {
         context.insert(newData)
         do {
             try context.save()
-            saveResultMessage = "保存に成功しました！"
+            saveResultMessage = "きろくが保存できました！"
             print("メニュー = \(newData.menu)")
             print("五感(聴覚) = \(newData.hearing)")
             
@@ -115,13 +115,11 @@ struct NewWritingView: View {
                 user.showGrowthAnimation = true
                 user.isGrowthed = true
             }
+            showSaveResultOverlay = true
         } catch {
             print("保存に失敗しました: \(error)")
             saveResultMessage = "保存に失敗しました…"
         }
-        
-        
-        showSaveResultAlert = true
     }
     // ユーザー経験値の更新処理
     private func updateUserExperience(by gainedExp: Int) {
@@ -486,21 +484,9 @@ struct NewWritingView: View {
                         Button {
                             let missing = missingFields
                             if missing.isEmpty {
-                                // 必須項目がそろっていれば、もともとの保存処理を実行
-                                saveCurrentData(
-                                    saveDay: currentDate,
-                                    times: timeStanp!,
-                                    sight: editedSenseText[0],
-                                    taste: editedSenseText[3],
-                                    smell: editedSenseText[2],
-                                    tactile: editedSenseText[4],
-                                    hearing: editedSenseText[1],
-                                    uiImage: uiImage!,
-                                    menu: editedMenu
-                                )
-                                user.showAnimation = true
+                                // 必須項目がそろっていれば、自作確認アラート表示
+                                showSaveConfirmOverlay = true
                             } else {
-                                // 足りない項目があれば、改行区切りでメッセージを作ってアラート表示
                                 validationMessage = missing.joined(separator: "\n")
                                 showValidationOverlay = true
                             }
@@ -516,17 +502,6 @@ struct NewWritingView: View {
                                         .stroke(Color.buttonColor ,lineWidth: 4)
                                 }
                         }
-                        .alert(isPresented: $showSaveResultAlert) {
-                            Alert(
-                                title: Text(saveResultMessage ?? ""),
-                                dismissButton: .default(Text("OK")) {
-                                    if saveResultMessage == "保存に成功しました！"{
-                                        dismiss()
-                                    }
-                                }
-                            )
-                        }
-                        
                     }
                 }
                 .padding()
@@ -553,6 +528,8 @@ struct NewWritingView: View {
                 }
             }
             .overlay(validationOverlay)
+            .overlay(saveConfirmOverlay)
+            .overlay(saveResultOverlay)
             .animation(.easeInOut, value: showValidationOverlay)
         }
     }
@@ -714,6 +691,116 @@ struct NewWritingView: View {
             .transition(.opacity)
         }
     }
+    /// 保存確認用の自作オーバーレイ
+      @ViewBuilder
+      private var saveConfirmOverlay: some View {
+          if showSaveConfirmOverlay {
+              Color.black.opacity(0.5)
+                  .ignoresSafeArea()
+              VStack(spacing: 24){
+                  Text("このきろくを保存しますか？")
+                      .font(.custom("GenJyuuGothicX-Bold", size: 24))
+                      .foregroundColor(.black)
+                      .multilineTextAlignment(.center)
+                  Text("あとから書き直すこともできます")
+                      .font(.custom("GenJyuuGothicX-Regular", size: 18))
+                      .foregroundColor(.secondary)
+                      .multilineTextAlignment(.center)
+                  HStack(spacing: 32){
+                      Button {
+                          withAnimation {
+                              showSaveConfirmOverlay = false
+                          }
+                      } label: {
+                          Text("やめる")
+                              .font(.custom("GenJyuuGothicX-Bold", size: 18))
+                              .frame(width: 120, height: 44)
+                              .background(Color.white)
+                              .foregroundStyle(Color.gray)
+                              .clipShape(RoundedRectangle(cornerRadius: 12))
+                              .overlay{
+                                  RoundedRectangle(cornerRadius: 12)
+                                      .stroke(Color.gray, lineWidth: 3)
+                              }
+                      }
+                      Button {
+                          // 保存処理
+                          saveCurrentData(
+                              saveDay: currentDate,
+                              times: timeStanp!,
+                              sight: editedSenseText[0],
+                              taste: editedSenseText[3],
+                              smell: editedSenseText[2],
+                              tactile: editedSenseText[4],
+                              hearing: editedSenseText[1],
+                              uiImage: uiImage!,
+                              menu: editedMenu
+                          )
+                          user.showAnimation = true
+                          withAnimation {
+                              showSaveConfirmOverlay = false
+                          }
+                      } label: {
+                          Text("ほぞんする")
+                              .font(.custom("GenJyuuGothicX-Bold", size: 18))
+                              .frame(width: 120, height: 44)
+                              .background(Color.buttonColor)
+                              .foregroundStyle(Color.white)
+                              .clipShape(RoundedRectangle(cornerRadius: 12))
+                              .overlay{
+                                  RoundedRectangle(cornerRadius: 12)
+                                      .stroke(Color.buttonColor, lineWidth: 3)
+                              }
+                      }
+                  }
+              }
+              .padding(.vertical, 40)
+              .padding(.horizontal, 36)
+              .background(Color.white)
+              .cornerRadius(24)
+              .shadow(radius: 16)
+              .frame(maxWidth: 340)
+              .transition(.opacity)
+          }
+      }
+      /// 保存結果表示用の自作オーバーレイ
+      @ViewBuilder
+      private var saveResultOverlay: some View {
+          if showSaveResultOverlay {
+              Color.black.opacity(0.5)
+                  .ignoresSafeArea()
+              VStack(spacing: 24){
+                  Text(saveResultMessage)
+                      .font(.custom("GenJyuuGothicX-Bold", size: 26))
+                      .foregroundColor(.black)
+                      .multilineTextAlignment(.center)
+                  Button("OK") {
+                      withAnimation {
+                          showSaveResultOverlay = false
+                          if saveResultMessage == "記録が保存できました！" {
+                              dismiss()
+                          }
+                      }
+                  }
+                  .font(.custom("GenJyuuGothicX-Bold", size: 20))
+                  .frame(width: 120, height: 44)
+                  .background(Color.buttonColor)
+                  .foregroundStyle(Color.white)
+                  .clipShape(RoundedRectangle(cornerRadius: 12))
+                  .overlay{
+                      RoundedRectangle(cornerRadius: 12)
+                          .stroke(Color.buttonColor, lineWidth: 3)
+                  }
+              }
+              .padding(.vertical, 40)
+              .padding(.horizontal, 36)
+              .background(Color.white)
+              .cornerRadius(24)
+              .shadow(radius: 16)
+              .frame(minWidth: 340)
+              .transition(.opacity)
+          }
+      }
 }
 
 
